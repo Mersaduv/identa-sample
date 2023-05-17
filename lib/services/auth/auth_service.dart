@@ -3,9 +3,13 @@ import 'dart:io' show Platform;
 import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_appauth/flutter_appauth.dart';
+import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 
 class AuthService with ChangeNotifier, DiagnosticableTreeMixin {
   bool _isBusy = false;
+
+  bool get isBusy => _isBusy;
   final FlutterAppAuth _appAuth = const FlutterAppAuth();
   String? _codeVerifier;
   String? _nonce;
@@ -13,14 +17,42 @@ class AuthService with ChangeNotifier, DiagnosticableTreeMixin {
   String? _refreshToken;
   String? _accessToken;
   String? _idToken;
-
   String? _userInfo;
+  String? get userInfo => _userInfo;
+  set userInfo(String? value) {
+    _userInfo = value;
+    notifyListeners();
+  }
 
-  final String _clientId = 'flutter-dev';
-  final String _redirectUrl = 'de.icod.authskel:/oauthredirect';
-  final String _issuer = 'https://connect.icod.de/auth/realms/bicki';
+  late TextEditingController _authorizationCodeTextController =
+      TextEditingController();
+  TextEditingController get authorizationCodeTextController =>
+      _authorizationCodeTextController;
+
+  late TextEditingController _accessTokenTextController =
+      TextEditingController();
+  TextEditingController get accessTokenTextController =>
+      _accessTokenTextController;
+
+  late TextEditingController _accessTokenExpirationTextController =
+      TextEditingController();
+  TextEditingController get accessTokenExpirationTextController =>
+      _accessTokenExpirationTextController;
+
+  late TextEditingController _idTokenTextController = TextEditingController();
+  TextEditingController get idTokenTextController => _idTokenTextController;
+
+  late TextEditingController _refreshTokenTextController =
+      TextEditingController();
+  TextEditingController get refreshTokenTextController =>
+      _refreshTokenTextController;
+
+  final String _clientId = 'chat-api';
+  final String _clientSecret = 'dkDkIt9APGFWtI7fFq7aVp5I1U1rCAWE';
+  final String _redirectUrl = 'mycoolapp://auth';
+  final String _issuer = 'https://auth.tooskatech.com/realms/identa';
   final String _discoveryUrl =
-      'https://connect.icod.de/auth/realms/bicki/.well-known/openid-configuration';
+      'https://auth.tooskatech.com/realms/identa/.well-known/openid-configuration';
   final String _postLogoutRedirectUrl = 'de.icod.bicki:/';
   final List<String> _scopes = <String>[
     'openid',
@@ -96,7 +128,7 @@ class AuthService with ChangeNotifier, DiagnosticableTreeMixin {
       // use the discovery endpoint to find the configuration
       final AuthorizationResponse? result = await _appAuth.authorize(
         AuthorizationRequest(_clientId, _redirectUrl,
-            discoveryUrl: _discoveryUrl, scopes: _scopes, loginHint: 'bob'),
+            discoveryUrl: _discoveryUrl, scopes: _scopes, loginHint: 'user'),
       );
 
       // or just use the issuer
@@ -149,7 +181,7 @@ class AuthService with ChangeNotifier, DiagnosticableTreeMixin {
           _redirectUrl,
           serviceConfiguration: _serviceConfiguration,
           scopes: _scopes,
-          clientSecret: 'your_client_secret',
+          clientSecret: _clientSecret,
           preferEphemeralSession: preferEphemeralSession,
         ),
       );
@@ -200,6 +232,17 @@ class AuthService with ChangeNotifier, DiagnosticableTreeMixin {
     _idToken = response.idToken!;
     _refreshToken = response.refreshToken!;
     notifyListeners();
+  }
+
+  Future<void> _testApi(TokenResponse? response) async {
+    final http.Response httpResponse = await http.get(
+        Uri.parse('https://demo.duendesoftware.com/api/test'),
+        headers: <String, String>{'Authorization': 'Bearer $_accessToken'});
+    void _setBusyState() {
+      _userInfo = httpResponse.statusCode == 200 ? httpResponse.body : '';
+      _isBusy = true;
+      notifyListeners();
+    }
   }
 
   String? get accessToken => _accessToken;

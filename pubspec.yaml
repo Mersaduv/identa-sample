@@ -39,6 +39,9 @@ dependencies:
   provider: ^6.0.5
   flutter_secure_storage: ^8.0.0
   pointycastle: ^3.7.3
+  google_sign_in: ^6.1.0
+  sign_in_with_apple: ^4.3.0
+  platform: ^3.1.0
 
 dev_dependencies:
   flutter_test:
