@@ -4,6 +4,8 @@ import 'package:identa_app/widgets/app_bar.dart';
 import 'package:identa_app/widgets/chat_bubble.dart';
 import 'package:identa_app/models/user.dart';
 import 'package:identa_app/models/bot.dart';
+import 'package:identa_app/services/apis/api.dart';
+import 'package:identa_app/services/apis/config.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:http/http.dart' as http;
 import 'package:identa_app/widgets/text_field.dart';
@@ -26,27 +28,13 @@ class _ChatScreenState extends State<ChatScreen> {
     setState(() {
       messages.add(Message(sender: user.name, content: content));
     });
-
-    _fetchBotResponse(content);
-  }
-
-  Future<void> _fetchBotResponse(String content) async {
-    final response = await http.post(
-      Uri.parse('https://jsonplaceholder.typicode.com/posts'),
-      body: jsonEncode({'content': content}),
-      headers: {
-        'Content-type': 'application/json; charset=UTF-8',
-      },
-    );
-
-    if (response.statusCode == 201) {
-      final botResponse = response.body;
-      setState(() {
-        messages.add(Message(sender: bot.name, content: botResponse));
-      });
-    } else {
-      print('API request failed with status code ${response.statusCode}');
-    }
+    ServiceApis.aiResponse(content).then((botResponse) {
+      if (botResponse != null) {
+        setState(() {
+          messages.add(Message(sender: bot.name, content: botResponse));
+        });
+      }
+    });
   }
 
   @override
