@@ -1,4 +1,4 @@
-package com.example.identa_app
+package com.tooskatech.identa
 
 import io.flutter.embedding.android.FlutterActivity
 

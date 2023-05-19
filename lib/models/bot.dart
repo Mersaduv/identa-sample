@@ -4,6 +4,6 @@ class Bot {
   Bot({this.name = 'identa'});
 
   String respondToMessage(String message) {
-    return '$message';
+    return message;
   }
 }

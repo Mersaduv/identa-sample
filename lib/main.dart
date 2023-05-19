@@ -1,126 +1,126 @@
-import 'dart:convert';
-import 'package:flutter/foundation.dart' show kIsWeb;
-// import 'package:platform/platform.dart';
-import 'dart:io' show Platform;
-import 'dart:math';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'package:identa_app/screens/chat.dart';
-import 'package:flutter_appauth/flutter_appauth.dart';
-import 'package:identa_app/services/auth/auth_service.dart';
-import 'package:provider/provider.dart';
+import 'package:identa/screens/chat.dart';
 
 void main() {
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider<AuthService>(
-      create: (_) => AuthService(),
-      child: MaterialApp(
-        title: 'My App',
-        home: LoginPage(),
+    return MaterialApp(
+      title: 'Flutter Demo',
+      theme: ThemeData(
+        // This is the theme of your application.
+        //
+        // TRY THIS: Try running your application with "flutter run". You'll see
+        // the application has a blue toolbar. Then, without quitting the app,
+        // try changing the seedColor in the colorScheme below to Colors.green
+        // and then invoke "hot reload" (save your changes or press the "hot
+        // reload" button in a Flutter-supported IDE, or press "r" if you used
+        // the command line to start the app).
+        //
+        // Notice that the counter didn't reset back to zero; the application
+        // state is not lost during the reload. To reset the state, use hot
+        // restart instead.
+        //
+        // This works for code too, not just values: Most code changes can be
+        // tested with just a hot reload.
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        useMaterial3: true,
       ),
+      home: const ChatScreen(),
     );
   }
 }
 
-// In this code, first an instance of AuthService is created using Provider.of<AuthService>(context). Then, by checking the existence of the login token in authService.accessToken, if the user was logged in, a text "Logged in!" is displayed. Otherwise, a login button with the text "Login" is displayed, which by pressing it, the user is directed to the login page.
+class MyHomePage extends StatefulWidget {
+  const MyHomePage({super.key, required this.title});
 
-class LoginPage extends StatelessWidget {
+  // This widget is the home page of your application. It is stateful, meaning
+  // that it has a State object (defined below) that contains fields that affect
+  // how it looks.
+
+  // This class is the configuration for the state. It holds the values (in this
+  // case the title) provided by the parent (in this case the App widget) and
+  // used by the build method of the State. Fields in a Widget subclass are
+  // always marked "final".
+
+  final String title;
+
+  @override
+  State<MyHomePage> createState() => _MyHomePageState();
+}
+
+class _MyHomePageState extends State<MyHomePage> {
+  int _counter = 0;
+
+  void _incrementCounter() {
+    setState(() {
+      // This call to setState tells the Flutter framework that something has
+      // changed in this State, which causes it to rerun the build method below
+      // so that the display can reflect the updated values. If we changed
+      // _counter without calling setState(), then the build method would not be
+      // called again, and so nothing would appear to happen.
+      _counter++;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    final authService = Provider.of<AuthService>(context);
-
-    return MaterialApp(
-      home: Scaffold(
-        appBar: AppBar(
-          title: const Text('Plugin example app'),
-        ),
-        body: SafeArea(
-          child: SingleChildScrollView(
-            child: Column(
-              children: <Widget>[
-                Visibility(
-                  visible: authService.isBusy,
-                  child: const LinearProgressIndicator(),
-                ),
-                const SizedBox(height: 8),
-                ElevatedButton(
-                  child: const Text('Sign in with no code exchange'),
-                  onPressed: () => authService.signInWithNoCodeExchange(),
-                ),
-                ElevatedButton(
-                  child: const Text(
-                      'Sign in with no code exchange and generated nonce'),
-                  onPressed: () =>
-                      authService.signInWithNoCodeExchangeAndGeneratedNonce(),
-                ),
-                const SizedBox(height: 8),
-                ElevatedButton(
-                  child: const Text('Sign in with auto code exchange'),
-                  onPressed: () => authService.signInWithAutoCodeExchange(),
-                ),
-                if (Platform.isIOS || Platform.isMacOS)
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: ElevatedButton(
-                      child: const Text(
-                        'Sign in with auto code exchange using ephemeral '
-                        'session',
-                        textAlign: TextAlign.center,
-                      ),
-                      onPressed: () => authService.signInWithAutoCodeExchange(
-                          preferEphemeralSession: true),
-                    ),
-                  ),
-                ElevatedButton(
-                  child: const Text('Refresh token'),
-                  onPressed: authService.refreshToken != null
-                      ? authService.refresh
-                      : null,
-                ),
-                const SizedBox(height: 8),
-                ElevatedButton(
-                  child: const Text('End session'),
-                  onPressed: authService.idToken != null
-                      ? () async {
-                          await authService.endSession();
-                        }
-                      : null,
-                ),
-                const SizedBox(height: 8),
-                const Text('authorization code'),
-                TextField(
-                  controller: authService.authorizationCodeTextController,
-                ),
-                const Text('access token'),
-                TextField(
-                  controller: authService.accessTokenTextController,
-                ),
-                const Text('access token expiration'),
-                TextField(
-                  controller: authService.accessTokenExpirationTextController,
-                ),
-                const Text('id token'),
-                TextField(
-                  controller: authService.idTokenTextController,
-                ),
-                const Text('refresh token'),
-                TextField(
-                  controller: authService.refreshTokenTextController,
-                ),
-                const Text('test api results'),
-                Text(authService.userInfo ?? ''),
-                if (!kIsWeb) const Text('Operating system:'),
-                if (!kIsWeb) Text(Platform.operatingSystem),
-              ],
+    // This method is rerun every time setState is called, for instance as done
+    // by the _incrementCounter method above.
+    //
+    // The Flutter framework has been optimized to make rerunning build methods
+    // fast, so that you can just rebuild anything that needs updating rather
+    // than having to individually change instances of widgets.
+    return Scaffold(
+      appBar: AppBar(
+        // TRY THIS: Try changing the color here to a specific color (to
+        // Colors.amber, perhaps?) and trigger a hot reload to see the AppBar
+        // change color while the other colors stay the same.
+        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        // Here we take the value from the MyHomePage object that was created by
+        // the App.build method, and use it to set our appbar title.
+        title: Text(widget.title),
+      ),
+      body: Center(
+        // Center is a layout widget. It takes a single child and positions it
+        // in the middle of the parent.
+        child: Column(
+          // Column is also a layout widget. It takes a list of children and
+          // arranges them vertically. By default, it sizes itself to fit its
+          // children horizontally, and tries to be as tall as its parent.
+          //
+          // Column has various properties to control how it sizes itself and
+          // how it positions its children. Here we use mainAxisAlignment to
+          // center the children vertically; the main axis here is the vertical
+          // axis because Columns are vertical (the cross axis would be
+          // horizontal).
+          //
+          // TRY THIS: Invoke "debug painting" (choose the "Toggle Debug Paint"
+          // action in the IDE, or press "p" in the console), to see the
+          // wireframe for each widget.
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            const Text(
+              'You have pushed the button this many times:',
             ),
-          ),
+            Text(
+              '$_counter',
+              style: Theme.of(context).textTheme.headlineMedium,
+            ),
+          ],
         ),
       ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _incrementCounter,
+        tooltip: 'Increment',
+        child: const Icon(Icons.add),
+      ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 }

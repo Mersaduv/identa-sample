@@ -42,38 +42,3 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
-
-# Flutter/Dart specific files
-**/build/
-**/ios/Pods/
-**/android/.gradle/
-**/android/build/
-
-# IDE and editor specific files
-**/.idea/
-**/.vscode/
-**/.android/
-**/.ios/
-
-# Generated files
-**/lib/generated/
-
-# Dependencies
-**/pubspec.lock
-**/pubspec.yaml.lock
-**/.packages
-
-# Android specific files
-**/android/app/google-services.json
-**/android/app/debug.keystore
-
-# iOS specific files
-**/ios/Runner/GoogleService-Info.plist
-**/ios/Runner/Runner.xcworkspace/
-**/ios/Runner/xcshareddata/
-
-# Flutter tooling
-.flutter-plugins
-.flutter-plugins-dependencies
-.flutter-plugins-version
-

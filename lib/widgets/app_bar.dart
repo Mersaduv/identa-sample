@@ -1,20 +1,22 @@
 import 'package:flutter/material.dart';
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
+  const CustomAppBar({super.key});
+
   @override
-  Size get preferredSize => Size.fromHeight(kToolbarHeight);
+  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
 
   @override
   Widget build(BuildContext context) {
     return AppBar(
       leading: IconButton(
-        icon: Icon(Icons.menu,
+        icon: const Icon(Icons.menu,
             color: Color(0xFF2D9CDB)), // Set the color of the burger menu icon
         onPressed: () {
           // Open the menu
         },
       ),
-      title: Text(
+      title: const Text(
         'identa',
         style: TextStyle(
             fontWeight: FontWeight.bold,
