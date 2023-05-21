@@ -35,48 +35,6 @@ class AuthService {
     return result;
   }
 
-<<<<<<< HEAD
-  Future<void> signOut() async {
-    try {
-      await _appAuth.endSession(EndSessionRequest(
-        idTokenHint: _idToken,
-        // postLogoutRedirectUrl: _redirectUrl,
-        serviceConfiguration: const AuthorizationServiceConfiguration(
-          authorizationEndpoint:
-              'https://auth.tooskatech.com/realms/identa/protocol/openid-connect/logout',
-          tokenEndpoint:
-              'https://auth.tooskatech.com/realms/identa/protocol/openid-connect/logout',
-          endSessionEndpoint:
-              'https://auth.tooskatech.com/realms/identa/protocol/openid-connect/logout',
-        ),
-      ));
-    } catch (e) {
-      print(e);
-    }
-  }
-}
-
-
-
-
-  // Future<void> logOut() async {
-  //   try {
-  //     await _appAuth.endSession(EndSessionRequest(
-  //         idTokenHint: _idToken ?? "",
-  //         postLogoutRedirectUrl: _redirectUrl,
-  //         serviceConfiguration: const AuthorizationServiceConfiguration(
-  //             authorizationEndpoint:
-  //                 'https://auth.tooskatech.com/realms/identa/protocol/openid-connect/logout',
-  //             tokenEndpoint:
-  //                 'https://auth.tooskatech.com/realms/identa/protocol/openid-connect/logout',
-  //             endSessionEndpoint:
-  //                 'https://auth.tooskatech.com/realms/identa/protocol/openid-connect/logout')));
-  //   } catch (e) {
-  //     print(e);
-  //   }
-  //   _idToken = null;
-  // }
-=======
   // void _processAuthTokenResponse(TokenResponse? response) {
   //   var accessToken = response!.accessToken!;
   //   var idToken = response.idToken!;
@@ -84,4 +42,3 @@ class AuthService {
   //   var tokeExpiry = response.accessTokenExpirationDateTime!.toIso8601String();
   // }
 }
->>>>>>> parent of 63930ab (-add setting)
