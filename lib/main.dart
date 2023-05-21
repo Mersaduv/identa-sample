@@ -1,17 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:identa/screens/chat.dart';
+import 'package:identa/screens/settings/view.dart';
+import 'constants/config.dart';
+import 'package:identa/screens/ChatPage.dart';
 
 void main() {
   runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  const MyApp({Key? key}) : super(key: key);
 
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return GetMaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(
         // This is the theme of your application.
@@ -32,7 +36,12 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: const ChatScreen(),
+      initialRoute: PageRoutes.chat,
+      getPages: [
+        GetPage(name: PageRoutes.chat, page: () => const ChatScreen()),
+        GetPage(name: PageRoutes.messages, page: () => ChatPage()),
+        GetPage(name: PageRoutes.settings, page: () => Settings())
+      ],
     );
   }
 }
