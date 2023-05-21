@@ -16,13 +16,13 @@ class ChatItem extends StatelessWidget {
             child: Container(
               height: 50.0,
               width: 50.0,
-              color: Color.fromARGB(255, 22, 144, 250),
+              color: Color(0xFF2D9CDB),
               child: Icon(chatModel.icon, color: Colors.white, size: 35.0),
             ),
           ),
           title: Text(
             chatModel.title,
-            style: TextStyle(fontWeight: FontWeight.bold),
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
           ),
           subtitle: Row(
             children: [

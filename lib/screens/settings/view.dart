@@ -16,20 +16,6 @@ class Settings extends StatefulWidget {
 
 class _SettingsState extends State<Settings> {
   AuthService _authService = AuthService();
-  String? accessToken;
-
-  @override
-  void initState() {
-    super.initState();
-    var future = _authService.signInWithAutoCodeExchange();
-    future.then((result) {
-      if (result != null) {
-        setState(() {
-          accessToken = result.accessToken!;
-        });
-      }
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -58,7 +44,7 @@ class _SettingsState extends State<Settings> {
             SettingItemWidget(
               onPressed: () async {
                 try {
-                  await _authService.logOut();
+                  await _authService.signOut();
                 } catch (e) {
                   print(e.toString()); // print the error message to console
                 }
