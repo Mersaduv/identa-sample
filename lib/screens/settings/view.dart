@@ -45,6 +45,7 @@ class _SettingsState extends State<Settings> {
               onPressed: () async {
                 try {
                   await _authService.signOut();
+                  Get.offAllNamed(PageRoutes.chat);
                 } catch (e) {
                   print(e.toString()); // print the error message to console
                 }
