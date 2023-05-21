@@ -7,13 +7,32 @@ import 'package:identa/services/auth/auth_service.dart';
 
 import 'setting_item.widget.dart';
 
-class Settings extends StatelessWidget {
+class Settings extends StatefulWidget {
   Settings({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
-    AuthService _authService = AuthService();
+  _SettingsState createState() => _SettingsState();
+}
 
+class _SettingsState extends State<Settings> {
+  AuthService _authService = AuthService();
+  String? accessToken;
+
+  @override
+  void initState() {
+    super.initState();
+    var future = _authService.signInWithAutoCodeExchange();
+    future.then((result) {
+      if (result != null) {
+        setState(() {
+          accessToken = result.accessToken!;
+        });
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Settings'),
