@@ -12,16 +12,16 @@ class ChatScreen extends StatefulWidget {
   const ChatScreen({super.key});
 
   @override
-  ChatScreenState createState() => ChatScreenState();
+  _ChatScreenState createState() => _ChatScreenState();
 }
 
-class ChatScreenState extends State<ChatScreen> {
+class _ChatScreenState extends State<ChatScreen> {
   // final FlutterAppAuth _appAuth = const FlutterAppAuth();
 
   User user = User(name: 'John');
   Bot bot = Bot();
   List<Message> messages = [];
-  bool isLoggedIn = false;
+  String accessToken = '';
 
   final AuthService _authService = AuthService();
   final TextEditingController _messageController = TextEditingController();
@@ -31,7 +31,7 @@ class ChatScreenState extends State<ChatScreen> {
     setState(() {
       messages.add(Message(sender: user.name, message: message));
     });
-    ServiceApis.chatResponse(message).then((botResponse) {
+    ServiceApis.chatResponse(accessToken, message).then((botResponse) {
       if (botResponse != null) {
         setState(() {
           messages.add(Message(sender: bot.name, message: botResponse));
@@ -46,9 +46,11 @@ class ChatScreenState extends State<ChatScreen> {
 
     var future = _authService.signInWithAutoCodeExchange();
     future.then((result) {
-      setState(() {
-        isLoggedIn = result;
-      });
+      if (result != null) {
+        setState(() {
+          accessToken = result.accessToken!;
+        });
+      }
     });
   }
 

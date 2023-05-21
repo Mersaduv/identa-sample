@@ -11,10 +11,10 @@ class ChatTextField extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  ChatTextFieldState createState() => ChatTextFieldState();
+  _ChatTextFieldState createState() => _ChatTextFieldState();
 }
 
-class ChatTextFieldState extends State<ChatTextField> {
+class _ChatTextFieldState extends State<ChatTextField> {
   @override
   Widget build(BuildContext context) {
     return Container(

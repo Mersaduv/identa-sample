@@ -1,9 +1,6 @@
 import 'package:flutter_appauth/flutter_appauth.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class AuthService {
-  static var _refreshToken = '';
-  static var _accessToken = '';
   final String _clientId = 'chat-api';
   final String _redirectUrl = 'com.tooskatech.identa:/oauthredirect';
   final String _discoveryUrl =
@@ -16,34 +13,13 @@ class AuthService {
     'offline_access'
   ];
   final FlutterAppAuth _appAuth = const FlutterAppAuth();
-  final FlutterSecureStorage _secureStorage = const FlutterSecureStorage();
+  // constructor
+  AuthService() {
+    // initialize the authorization service configuration
+  }
 
-  Future<bool> signInWithAutoCodeExchange(
+  Future<AuthorizationTokenResponse?> signInWithAutoCodeExchange(
       {bool preferEphemeralSession = false}) async {
-    // get refresh token from secure storage
-    _secureStorage.read(key: 'refresh_token').then((value) {
-      if (value != null) {
-        _refreshToken = value;
-      }
-    });
-
-    // try to refresh token
-    if (_refreshToken.isNotEmpty) {
-      var refreshTokenResult = await _appAuth.token(TokenRequest(
-        _clientId,
-        _redirectUrl,
-        refreshToken: _refreshToken,
-        discoveryUrl: _discoveryUrl,
-        scopes: _scopes,
-      ));
-
-      if (refreshTokenResult != null) {
-        _setTokens(refreshTokenResult);
-
-        return true;
-      }
-    }
-
     final AuthorizationTokenResponse? result =
         await _appAuth.authorizeAndExchangeCode(
       AuthorizationTokenRequest(
@@ -55,24 +31,14 @@ class AuthService {
         preferEphemeralSession: preferEphemeralSession,
       ),
     );
-    if (result != null) {
-      _setTokens(result);
 
-      return true;
-    }
-
-    return false;
+    return result;
   }
 
-  void _setTokens(TokenResponse result) {
-    _refreshToken = result.refreshToken!;
-    _accessToken = result.accessToken!;
-
-    // save refresh token to secure storage
-    _secureStorage.write(key: 'refresh_token', value: _refreshToken);
-  }
-
-  String getAuthHeader() {
-    return "Bearer $_accessToken";
-  }
+  // void _processAuthTokenResponse(TokenResponse? response) {
+  //   var accessToken = response!.accessToken!;
+  //   var idToken = response.idToken!;
+  //   var refreshToken = response.refreshToken!;
+  //   var tokeExpiry = response.accessTokenExpirationDateTime!.toIso8601String();
+  // }
 }
