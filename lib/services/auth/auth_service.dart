@@ -5,7 +5,7 @@ class AuthService {
   final String _redirectUrl = 'com.tooskatech.identa:/oauthredirect';
   final String _discoveryUrl =
       'https://auth.tooskatech.com/realms/identa/.well-known/openid-configuration';
-  String? _idToken;
+
   final List<String> _scopes = <String>[
     'openid',
     'profile',
@@ -13,6 +13,10 @@ class AuthService {
     'offline_access'
   ];
   final FlutterAppAuth _appAuth = const FlutterAppAuth();
+  // constructor
+  AuthService() {
+    // initialize the authorization service configuration
+  }
 
   Future<AuthorizationTokenResponse?> signInWithAutoCodeExchange(
       {bool preferEphemeralSession = false}) async {
@@ -27,10 +31,11 @@ class AuthService {
         preferEphemeralSession: preferEphemeralSession,
       ),
     );
-    _idToken = result?.idToken;
+
     return result;
   }
 
+<<<<<<< HEAD
   Future<void> signOut() async {
     try {
       await _appAuth.endSession(EndSessionRequest(
@@ -71,3 +76,12 @@ class AuthService {
   //   }
   //   _idToken = null;
   // }
+=======
+  // void _processAuthTokenResponse(TokenResponse? response) {
+  //   var accessToken = response!.accessToken!;
+  //   var idToken = response.idToken!;
+  //   var refreshToken = response.refreshToken!;
+  //   var tokeExpiry = response.accessTokenExpirationDateTime!.toIso8601String();
+  // }
+}
+>>>>>>> parent of 63930ab (-add setting)

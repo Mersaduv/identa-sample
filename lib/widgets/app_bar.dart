@@ -1,8 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:get/get.dart';
-import 'package:identa/constants/config.dart';
-import 'package:identa/screens/settings/view.dart';
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   const CustomAppBar({super.key});
@@ -16,7 +12,9 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
       leading: IconButton(
         icon: const Icon(Icons.menu,
             color: Color(0xFF2D9CDB)), // Set the color of the burger menu icon
-        onPressed: () => Get.to(Settings()),
+        onPressed: () {
+          // Open the menu
+        },
       ),
       title: const Text(
         'identa',
