@@ -9,32 +9,48 @@ import 'package:identa/services/apis/api.dart';
 import 'package:identa/widgets/text_field.dart';
 
 class ChatScreen extends StatefulWidget {
-  const ChatScreen({super.key});
+  const ChatScreen({Key? key}) : super(key: key);
 
   @override
   ChatScreenState createState() => ChatScreenState();
 }
 
 class ChatScreenState extends State<ChatScreen> {
-  // final FlutterAppAuth _appAuth = const FlutterAppAuth();
-
-  User user = User(name: 'John');
+  User user = User(name: '');
   Bot bot = Bot();
   List<Message> messages = [];
   bool isLoggedIn = false;
+  bool isBotTyping = false;
 
   final AuthService _authService = AuthService();
   final TextEditingController _messageController = TextEditingController();
+  final ScrollController _scrollController = ScrollController();
   final FocusNode _messageFocusNode = FocusNode();
 
   void sendMessage(String message) {
     setState(() {
       messages.add(Message(sender: user.name, message: message));
+      isBotTyping = true;
+    });
+    WidgetsBinding.instance!.addPostFrameCallback((_) {
+      _scrollController.animateTo(
+        _scrollController.position.maxScrollExtent,
+        duration: const Duration(milliseconds: 100),
+        curve: Curves.easeOut,
+      );
     });
     ServiceApis.chatResponse(message).then((botResponse) {
       if (botResponse != null) {
         setState(() {
           messages.add(Message(sender: bot.name, message: botResponse));
+          isBotTyping = false;
+        });
+        WidgetsBinding.instance!.addPostFrameCallback((_) {
+          _scrollController.animateTo(
+            _scrollController.position.maxScrollExtent,
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeOut,
+          );
         });
       }
     });
@@ -55,6 +71,7 @@ class ChatScreenState extends State<ChatScreen> {
   @override
   void dispose() {
     _messageController.dispose();
+    _scrollController.dispose();
     _messageFocusNode.dispose();
     super.dispose();
   }
@@ -67,11 +84,12 @@ class ChatScreenState extends State<ChatScreen> {
       },
       child: Scaffold(
         appBar: const CustomAppBar(),
-        backgroundColor: const Color.fromARGB(255, 216, 227, 253),
+        backgroundColor: Color.fromARGB(255, 241, 245, 255),
         body: Column(
           children: [
             Expanded(
               child: ListView.builder(
+                controller: _scrollController,
                 itemCount: messages.length,
                 itemBuilder: (BuildContext context, int index) {
                   final message = messages[index];
@@ -85,15 +103,23 @@ class ChatScreenState extends State<ChatScreen> {
             ),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8.0),
-              child: ChatTextField(
-                controller: _messageController,
-                onSubmitted: (value) {
-                  String messageContent = value.trim();
-                  if (messageContent.isNotEmpty) {
-                    sendMessage(messageContent);
-                    _messageController.clear();
-                  }
-                },
+              child: Row(
+                children: [
+                  Expanded(
+                    child: ChatTextField(
+                      controller: _messageController,
+                      isEnabled: !isBotTyping,
+                      hint: isBotTyping ? 'is typing...' : 'Type a message',
+                      onSubmitted: (value) {
+                        String messageContent = value.trim();
+                        if (messageContent.isNotEmpty) {
+                          sendMessage(messageContent);
+                          _messageController.clear();
+                        }
+                      },
+                    ),
+                  ),
+                ],
               ),
             ),
           ],
