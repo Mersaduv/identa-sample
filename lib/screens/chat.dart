@@ -59,7 +59,6 @@ class ChatScreenState extends State<ChatScreen> {
   @override
   void initState() {
     super.initState();
-
     var future = _authService.signInWithAutoCodeExchange();
     future.then((result) {
       setState(() {
@@ -88,37 +87,55 @@ class ChatScreenState extends State<ChatScreen> {
         body: Column(
           children: [
             Expanded(
-              child: ListView.builder(
-                controller: _scrollController,
-                itemCount: messages.length,
-                itemBuilder: (BuildContext context, int index) {
-                  final message = messages[index];
-                  return ChatBubble(
-                    sender: message.sender,
-                    content: message.message,
-                    isMe: message.sender == user.name,
-                  );
-                },
+              child: SingleChildScrollView(
+                reverse: true,
+                child: Column(
+                  children: messages
+                      .map((message) => ChatBubble(
+                            content: message.message,
+                            isMe: message.sender == user.name,
+                          ))
+                      .toList(),
+                ),
               ),
             ),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8.0),
-              child: Row(
+            Padding(
+              padding: const EdgeInsets.only(top: 4.0), // Add padding here
+              child: Column(
                 children: [
-                  Expanded(
-                    child: ChatTextField(
-                      controller: _messageController,
-                      isEnabled: !isBotTyping,
-                      hint: isBotTyping ? 'is typing...' : 'Type a message',
-                      onSubmitted: (value) {
-                        String messageContent = value.trim();
-                        if (messageContent.isNotEmpty) {
-                          sendMessage(messageContent);
-                          _messageController.clear();
-                        }
-                      },
-                    ),
-                  ),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: ChatTextField(
+                          controller: _messageController,
+                          isEnabled: !isBotTyping,
+                          hint: isBotTyping ? 'is typing...' : 'Type a message',
+                          onSubmitted: (value) {
+                            String messageContent = value.trim();
+                            if (messageContent.isNotEmpty) {
+                              sendMessage(messageContent);
+                              _messageController.clear();
+                            }
+                          },
+                        ),
+                      ),
+                      Container(
+                        margin: const EdgeInsets.fromLTRB(0.0, 0.0, 4.0, 4.0),
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Colors.blue,
+                        ),
+                        child: IconButton(
+                          icon: Icon(
+                            Icons.mic,
+                            color: Colors.white,
+                          ),
+                          onPressed: () async {},
+                        ),
+                      ),
+                    ],
+                  )
                 ],
               ),
             ),

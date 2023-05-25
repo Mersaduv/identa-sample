@@ -67,91 +67,107 @@ class ChatTextFieldState extends State<ChatTextField>
     return Container(
       margin: const EdgeInsets.fromLTRB(8.0, 0.0, 8.0, 16.0),
       decoration: BoxDecoration(
-        color: Colors.white,
         borderRadius: BorderRadius.circular(30.0),
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: TextField(
-              controller: widget.controller,
-              enabled: widget.isEnabled,
-              decoration: InputDecoration(
-                hintText: widget.hint,
-                border: InputBorder.none,
-                contentPadding: const EdgeInsets.symmetric(horizontal: 16.0),
-              ),
-              onSubmitted: widget.onSubmitted,
-              autofocus: true,
-            ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.3),
+            spreadRadius: 2,
+            blurRadius: 4,
+            offset: const Offset(
+                0, 0), // Offset the shadow to be above the TextField
           ),
-          if (!widget.isEnabled)
-            SizedBox(
-              width: 30,
-              child: Row(
-                children: [
-                  AnimatedBuilder(
-                    animation: _animationController,
-                    builder: (context, child) {
-                      return Transform.translate(
-                        offset: Offset(0.0, _animation1.value),
-                        child: Container(
-                          width: 4,
-                          height: 4,
-                          margin: const EdgeInsets.only(right: 2.0),
-                          decoration: BoxDecoration(
-                            color: Colors.grey,
-                            shape: BoxShape.circle,
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                  AnimatedBuilder(
-                    animation: _animationController,
-                    builder: (context, child) {
-                      return Transform.translate(
-                        offset: Offset(0.0, _animation2.value),
-                        child: Container(
-                          width: 4,
-                          height: 4,
-                          margin: const EdgeInsets.only(right: 2.0),
-                          decoration: BoxDecoration(
-                            color: Colors.grey,
-                            shape: BoxShape.circle,
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                  AnimatedBuilder(
-                    animation: _animationController,
-                    builder: (context, child) {
-                      return Transform.translate(
-                        offset: Offset(0.0, _animation3.value),
-                        child: Container(
-                          width: 4,
-                          height: 4,
-                          decoration: BoxDecoration(
-                            color: Colors.grey,
-                            shape: BoxShape.circle,
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                ],
-              ),
-            ),
-          if (widget.isEnabled)
-            IconButton(
-              icon: const Icon(Icons.send),
-              onPressed: () {
-                widget.onSubmitted(widget.controller.text.trim());
-                widget.controller.clear();
-              },
-            ),
         ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(30.0),
+        child: Container(
+          color: Colors.white,
+          child: Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: widget.controller,
+                  enabled: widget.isEnabled,
+                  maxLines: null,
+                  decoration: InputDecoration(
+                    hintText: widget.hint,
+                    border: InputBorder.none,
+                    contentPadding:
+                        const EdgeInsets.symmetric(horizontal: 16.0),
+                  ),
+                  onSubmitted: widget.onSubmitted,
+                  autofocus: true,
+                ),
+              ),
+              if (!widget.isEnabled)
+                SizedBox(
+                  width: 30,
+                  child: Row(
+                    children: [
+                      AnimatedBuilder(
+                        animation: _animationController,
+                        builder: (context, child) {
+                          return Transform.translate(
+                            offset: Offset(0.0, _animation1.value),
+                            child: Container(
+                              width: 4,
+                              height: 4,
+                              margin: const EdgeInsets.only(right: 2.0),
+                              decoration: BoxDecoration(
+                                color: Colors.grey,
+                                shape: BoxShape.circle,
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                      AnimatedBuilder(
+                        animation: _animationController,
+                        builder: (context, child) {
+                          return Transform.translate(
+                            offset: Offset(0.0, _animation2.value),
+                            child: Container(
+                              width: 4,
+                              height: 4,
+                              margin: const EdgeInsets.only(right: 2.0),
+                              decoration: BoxDecoration(
+                                color: Colors.grey,
+                                shape: BoxShape.circle,
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                      AnimatedBuilder(
+                        animation: _animationController,
+                        builder: (context, child) {
+                          return Transform.translate(
+                            offset: Offset(0.0, _animation3.value),
+                            child: Container(
+                              width: 4,
+                              height: 4,
+                              decoration: BoxDecoration(
+                                color: Colors.grey,
+                                shape: BoxShape.circle,
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+              if (widget.isEnabled)
+                IconButton(
+                  icon: const Icon(Icons.send),
+                  onPressed: () {
+                    widget.onSubmitted(widget.controller.text.trim());
+                    widget.controller.clear();
+                  },
+                ),
+            ],
+          ),
+        ),
       ),
     );
   }
