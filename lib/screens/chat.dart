@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:identa/models/message.dart';
 import 'package:identa/services/auth/auth_service.dart';
-import 'package:identa/widgets/app_bar.dart';
 import 'package:identa/widgets/chat_bubble.dart';
 import 'package:identa/models/user.dart';
 import 'package:identa/models/bot.dart';
@@ -9,13 +8,12 @@ import 'package:identa/services/apis/api.dart';
 import 'package:identa/widgets/text_field.dart';
 
 class ChatScreen extends StatefulWidget {
-  const ChatScreen({Key? key}) : super(key: key);
-
   @override
-  ChatScreenState createState() => ChatScreenState();
+  _ChatScreenState createState() => _ChatScreenState();
 }
 
-class ChatScreenState extends State<ChatScreen> {
+class _ChatScreenState extends State<ChatScreen>
+    with SingleTickerProviderStateMixin {
   User user = User(name: '');
   Bot bot = Bot();
   List<Message> messages = [];
@@ -59,7 +57,6 @@ class ChatScreenState extends State<ChatScreen> {
   @override
   void initState() {
     super.initState();
-
     var future = _authService.signInWithAutoCodeExchange();
     future.then((result) {
       setState(() {
@@ -83,42 +80,59 @@ class ChatScreenState extends State<ChatScreen> {
         FocusScope.of(context).unfocus();
       },
       child: Scaffold(
-        appBar: const CustomAppBar(),
         backgroundColor: Color.fromARGB(255, 241, 245, 255),
         body: Column(
           children: [
             Expanded(
-              child: ListView.builder(
-                controller: _scrollController,
-                itemCount: messages.length,
-                itemBuilder: (BuildContext context, int index) {
-                  final message = messages[index];
-                  return ChatBubble(
-                    sender: message.sender,
-                    content: message.message,
-                    isMe: message.sender == user.name,
-                  );
-                },
+              child: SingleChildScrollView(
+                reverse: true,
+                child: Column(
+                  children: messages
+                      .map((message) => ChatBubble(
+                            content: message.message,
+                            isMe: message.sender == user.name,
+                          ))
+                      .toList(),
+                ),
               ),
             ),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8.0),
-              child: Row(
+            Padding(
+              padding: const EdgeInsets.only(top: 4.0),
+              child: Column(
                 children: [
-                  Expanded(
-                    child: ChatTextField(
-                      controller: _messageController,
-                      isEnabled: !isBotTyping,
-                      hint: isBotTyping ? 'is typing...' : 'Type a message',
-                      onSubmitted: (value) {
-                        String messageContent = value.trim();
-                        if (messageContent.isNotEmpty) {
-                          sendMessage(messageContent);
-                          _messageController.clear();
-                        }
-                      },
-                    ),
-                  ),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: ChatTextField(
+                          controller: _messageController,
+                          isEnabled: !isBotTyping,
+                          hint: isBotTyping ? 'is typing...' : 'Type a message',
+                          onSubmitted: (value) {
+                            String messageContent = value.trim();
+                            if (messageContent.isNotEmpty) {
+                              sendMessage(messageContent);
+                              _messageController.clear();
+                            }
+                          },
+                        ),
+                      ),
+                      Container(
+                        margin: const EdgeInsets.fromLTRB(0.0, 0.0, 4.0, 4.0),
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Color(0xFF2993CF),
+                        ),
+                        child: IconButton(
+                          icon: Icon(
+                            Icons.mic,
+                            color: Colors.white,
+                          ),
+                          onPressed: () async {},
+                        ),
+                      ),
+                    ],
+                  )
                 ],
               ),
             ),
