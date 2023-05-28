@@ -3,7 +3,9 @@ import 'package:flutter_svg/svg.dart';
 import 'package:identa/widgets/tab_item.dart';
 
 class CustomAppBar extends StatefulWidget implements PreferredSizeWidget {
-  const CustomAppBar({Key? key}) : super(key: key);
+  const CustomAppBar({Key? key, required this.tabController}) : super(key: key);
+
+  final TabController tabController;
 
   @override
   Size get preferredSize => const Size.fromHeight(kToolbarHeight + 40.0);
@@ -14,6 +16,16 @@ class CustomAppBar extends StatefulWidget implements PreferredSizeWidget {
 
 class _CustomAppBarState extends State<CustomAppBar> {
   int _selectedTab = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    widget.tabController.addListener(() {
+      setState(() {
+        _selectedTab = widget.tabController.index;
+      });
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -54,25 +66,29 @@ class _CustomAppBarState extends State<CustomAppBar> {
         child: Container(
           padding: EdgeInsets.symmetric(horizontal: 16.0),
           alignment: Alignment.bottomCenter,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
+          child: TabBar(
+            controller: widget.tabController,
+            indicator: BoxDecoration(),
+            tabs: [
               TabItem(
                 title: 'Chat',
                 isSelected: _selectedTab == 0,
                 onTap: () {
-                  setState(() {
-                    _selectedTab = 0;
-                  });
+                  widget.tabController.index = 0;
+                },
+              ),
+              TabItem(
+                title: 'Insights',
+                isSelected: _selectedTab == 1,
+                onTap: () {
+                  widget.tabController.index = 1;
                 },
               ),
               TabItem(
                 title: 'Notes',
-                isSelected: _selectedTab == 1,
+                isSelected: _selectedTab == 2,
                 onTap: () {
-                  setState(() {
-                    _selectedTab = 1;
-                  });
+                  widget.tabController.index = 2;
                 },
               ),
             ],

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:identa/models/message.dart';
 import 'package:identa/services/auth/auth_service.dart';
-import 'package:identa/widgets/app_bar.dart';
 import 'package:identa/widgets/chat_bubble.dart';
 import 'package:identa/models/user.dart';
 import 'package:identa/models/bot.dart';
@@ -9,13 +8,12 @@ import 'package:identa/services/apis/api.dart';
 import 'package:identa/widgets/text_field.dart';
 
 class ChatScreen extends StatefulWidget {
-  const ChatScreen({Key? key}) : super(key: key);
-
   @override
-  ChatScreenState createState() => ChatScreenState();
+  _ChatScreenState createState() => _ChatScreenState();
 }
 
-class ChatScreenState extends State<ChatScreen> {
+class _ChatScreenState extends State<ChatScreen>
+    with SingleTickerProviderStateMixin {
   User user = User(name: '');
   Bot bot = Bot();
   List<Message> messages = [];
@@ -82,7 +80,6 @@ class ChatScreenState extends State<ChatScreen> {
         FocusScope.of(context).unfocus();
       },
       child: Scaffold(
-        appBar: const CustomAppBar(),
         backgroundColor: Color.fromARGB(255, 241, 245, 255),
         body: Column(
           children: [
@@ -100,7 +97,7 @@ class ChatScreenState extends State<ChatScreen> {
               ),
             ),
             Padding(
-              padding: const EdgeInsets.only(top: 4.0), // Add padding here
+              padding: const EdgeInsets.only(top: 4.0),
               child: Column(
                 children: [
                   Row(
@@ -124,7 +121,7 @@ class ChatScreenState extends State<ChatScreen> {
                         margin: const EdgeInsets.fromLTRB(0.0, 0.0, 4.0, 4.0),
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          color: Colors.blue,
+                          color: Color(0xFF2993CF),
                         ),
                         child: IconButton(
                           icon: Icon(
