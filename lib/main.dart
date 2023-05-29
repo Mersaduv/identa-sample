@@ -59,7 +59,7 @@ class _MyHomePageState extends State<MyHomePage>
         children: [
           ChatScreen(),
           ChatScreen(),
-          NotesScreen(),
+          const NotesScreen(),
         ],
       ),
     );
