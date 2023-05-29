@@ -4,16 +4,19 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'note_model.dart';
 
+typedef LoadConversationsCallback = Future<void> Function();
+
 class NotesContent extends StatefulWidget {
   final NoteModel? note;
-  const NotesContent({Key? key, this.note}) : super(key: key);
+  final LoadConversationsCallback? loadConversations;
+  const NotesContent({Key? key, this.note, required this.loadConversations})
+      : super(key: key);
   @override
   _NotesContentState createState() => _NotesContentState();
 }
 
 class _NotesContentState extends State<NotesContent> {
   late TextEditingController _titleController;
-
   // String conversationId = uuid.v4();
   @override
   void initState() {
@@ -22,11 +25,12 @@ class _NotesContentState extends State<NotesContent> {
   }
 
   @override
-  void dispose() {
+  Future<void> dispose() async {
     saveConversation(NoteModel(
       title: _titleController.text,
       date: DateTime.now().toString(),
     ));
+    widget.loadConversations!();
     _titleController.dispose();
     super.dispose();
   }
@@ -121,5 +125,6 @@ class _NotesContentState extends State<NotesContent> {
     notes.add(noteJson);
     print(notes);
     await prefs.setStringList('notes', notes);
+    widget.loadConversations!();
   }
 }

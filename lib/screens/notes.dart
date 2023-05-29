@@ -13,7 +13,6 @@ class NotesScreen extends StatefulWidget {
 
 class _NotesScreenState extends State<NotesScreen> {
   List<NoteModel> notes = [];
-
   @override
   void initState() {
     super.initState();
@@ -21,10 +20,6 @@ class _NotesScreenState extends State<NotesScreen> {
   }
 
   void deleteNote(int index) async {
-    setState(() {
-      notes.removeAt(index);
-    });
-
     SharedPreferences prefs = await SharedPreferences.getInstance();
     List<String>? noteJsonList = prefs.getStringList('notes');
 
@@ -32,21 +27,30 @@ class _NotesScreenState extends State<NotesScreen> {
       noteJsonList.removeAt(index);
       await prefs.setStringList('notes', noteJsonList);
     }
+
+    setState(() {
+      notes.removeAt(index);
+    });
+
+    loadConversations();
   }
 
   Future<void> loadConversations() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     List<String>? noteJsonList = prefs.getStringList('notes');
+    List<NoteModel> loadedConversations = [];
 
     if (noteJsonList != null) {
       for (String noteJson in noteJsonList) {
         Map<String, dynamic> noteMap = jsonDecode(noteJson);
         NoteModel note = NoteModel.fromJson(noteMap);
-        notes.add(note);
+        loadedConversations.add(note);
       }
     }
 
-    setState(() {});
+    setState(() {
+      notes = loadedConversations;
+    });
   }
 
   @override
@@ -63,7 +67,8 @@ class _NotesScreenState extends State<NotesScreen> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => const NotesContent(),
+                      builder: (context) =>
+                          NotesContent(loadConversations: loadConversations),
                     ),
                   );
                 },
@@ -155,7 +160,8 @@ class _NotesScreenState extends State<NotesScreen> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => NotesContent(note: note),
+                    builder: (context) => NotesContent(
+                        note: note, loadConversations: loadConversations),
                   ),
                 );
               },
