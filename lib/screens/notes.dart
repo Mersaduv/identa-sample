@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:identa/widgets/note_content.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../widgets/note_model.dart';
+import 'package:intl/intl.dart';
 
 class NotesScreen extends StatefulWidget {
   const NotesScreen({Key? key}) : super(key: key);
@@ -38,8 +39,11 @@ class _NotesScreenState extends State<NotesScreen> {
   Future<void> loadConversations() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     List<String>? noteJsonList = prefs.getStringList('notes');
-    List<NoteModel> loadedConversations = [];
 
+    //! To clear the entire local memory in case of problem storing data
+    // prefs.clear();
+
+    List<NoteModel> loadedConversations = [];
     if (noteJsonList != null) {
       for (String noteJson in noteJsonList) {
         Map<String, dynamic> noteMap = jsonDecode(noteJson);
@@ -61,7 +65,7 @@ class _NotesScreenState extends State<NotesScreen> {
         itemBuilder: (context, index) {
           if (index == 0) {
             return Padding(
-              padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 8.0),
+              padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 1.0),
               child: GestureDetector(
                 onTap: () {
                   Navigator.push(
@@ -156,53 +160,79 @@ class _NotesScreenState extends State<NotesScreen> {
             },
             onDismissed: (_) => deleteNote(index - 1),
             child: GestureDetector(
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => NotesContent(
-                        note: note, loadConversations: loadConversations),
-                  ),
-                );
-              },
-              child: Column(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                    child: Column(
-                      children: [
-                        Row(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => NotesContent(
+                          note: note, loadConversations: loadConversations),
+                    ),
+                  );
+                },
+                child: Column(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(top: 5),
+                      child: ListTile(
+                        leading: ClipRRect(
+                          borderRadius: BorderRadius.circular(13.0), //or 15.0
+                          child: Container(
+                            height: 50.0,
+                            width: 50.0,
+                            color: const Color(0xFF2D9CDB),
+                            child: Center(
+                                child: Text(
+                              note.title.split(" ").length == 1
+                                  ? note.title.substring(0, 2).toUpperCase()
+                                  : note.title
+                                      .split(" ")
+                                      .take(2)
+                                      .map((w) => w[0].toUpperCase())
+                                      .join(),
+                              style: const TextStyle(
+                                  color: Colors.white, fontSize: 20),
+                            )),
+                          ),
+                        ),
+                        title: Text(
+                          note.title,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w500,
+                            fontSize: 20,
+                          ),
+                        ),
+                        subtitle: Row(
                           children: [
                             Expanded(
                               child: Text(
-                                note.title,
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 16.0,
-                                  color: Color(0xFF4B5563),
-                                ),
-                              ),
-                            ),
-                            Text(
-                              note.date,
-                              style: const TextStyle(
-                                color: Colors.grey,
-                                fontSize: 14.0,
+                                note.details,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(color: Colors.grey.shade500),
                               ),
                             ),
                           ],
                         ),
-                        const SizedBox(height: 8.0),
-                        Divider(
-                          color: Colors.grey[300],
-                          thickness: 1.0,
-                        ),
-                      ],
+                      ),
                     ),
-                  ),
-                ],
-              ),
-            ),
+                    Align(
+                      alignment: Alignment.bottomRight,
+                      child: Padding(
+                        padding: const EdgeInsets.only(right: 8.0),
+                        child: Text(
+                          note.date,
+                          style: TextStyle(
+                              color: Colors.grey.shade600, fontSize: 12),
+                        ),
+                      ),
+                    ),
+                    const Divider(
+                      height: 10,
+                    ),
+                  ],
+                )),
           );
         },
       ),

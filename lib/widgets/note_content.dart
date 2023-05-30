@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'note_model.dart';
 
@@ -17,21 +18,28 @@ class NotesContent extends StatefulWidget {
 
 class _NotesContentState extends State<NotesContent> {
   late TextEditingController _titleController;
-  // String conversationId = uuid.v4();
+  late TextEditingController _detailsController;
+  late FocusNode _detailsFocusNode;
+
   @override
   void initState() {
     super.initState();
     _titleController = TextEditingController(text: widget.note?.title);
+    _detailsController = TextEditingController(text: widget.note?.details);
+    _detailsFocusNode = FocusNode();
   }
 
   @override
   Future<void> dispose() async {
     saveConversation(NoteModel(
       title: _titleController.text,
-      date: DateTime.now().toString(),
+      details: _detailsController.text,
+      date: DateFormat('dd MMM, hh:mm a').format(DateTime.now()),
     ));
     widget.loadConversations!();
     _titleController.dispose();
+    _detailsController.dispose();
+
     super.dispose();
   }
 
@@ -73,19 +81,24 @@ class _NotesContentState extends State<NotesContent> {
                     hintStyle: TextStyle(color: Colors.grey),
                     border: InputBorder.none,
                   ),
+                  // maxLines: null,
                   style: const TextStyle(
                     fontSize: 24.0,
                     fontWeight: FontWeight.bold,
-                    color: Colors.grey,
+                    color: Colors.black,
                   ),
                   onTap: () {
                     // Activate the text field or hide the keyboard
                   },
+                  onSubmitted: (value) {
+                    FocusScope.of(context).requestFocus(_detailsFocusNode);
+                  },
                 ),
                 const SizedBox(height: 8.0),
                 TextField(
+                  controller: _detailsController,
                   decoration: const InputDecoration(
-                    hintText: 'Start typing or recording ...',
+                    hintText: 'Details note , Start typing or recording ... ',
                     hintStyle: TextStyle(color: Colors.grey),
                     border: InputBorder.none, // Remove the bottom line
                   ),
@@ -93,11 +106,12 @@ class _NotesContentState extends State<NotesContent> {
                   onTap: () {
                     // Activate the text field or hide the keyboard
                   },
+                  focusNode: _detailsFocusNode,
                   style: const TextStyle(
-                    color: Colors.grey,
+                    color: Colors.black,
                   ),
                 ),
-                const SizedBox(height: 16.0),
+                const SizedBox(height: 8.0),
               ],
             ),
           ),
