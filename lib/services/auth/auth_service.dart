@@ -8,6 +8,7 @@ class AuthService {
   final String _redirectUrl = 'com.tooskatech.identa:/oauthredirect';
   final String _discoveryUrl =
       'https://auth.tooskatech.com/realms/identa/.well-known/openid-configuration';
+  String? _idToken;
 
   final List<String> _scopes = <String>[
     'openid',
@@ -56,12 +57,33 @@ class AuthService {
       ),
     );
     if (result != null) {
+      _idToken = result.idToken;
       _setTokens(result);
 
       return true;
     }
 
     return false;
+  }
+
+  Future<void> signOut() async {
+    try {
+      await _appAuth.endSession(EndSessionRequest(
+        idTokenHint: _idToken,
+        serviceConfiguration: const AuthorizationServiceConfiguration(
+          authorizationEndpoint:
+              'https://auth.tooskatech.com/realms/identa/protocol/openid-connect/logout',
+          tokenEndpoint:
+              'https://auth.tooskatech.com/realms/identa/protocol/openid-connect/logout',
+          endSessionEndpoint:
+              'https://auth.tooskatech.com/realms/identa/protocol/openid-connect/logout',
+        ),
+      ));
+      _accessToken = "";
+      _refreshToken = "";
+    } catch (e) {
+      print(e);
+    }
   }
 
   void _setTokens(TokenResponse result) {
