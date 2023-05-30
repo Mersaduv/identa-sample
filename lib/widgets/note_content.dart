@@ -132,13 +132,15 @@ class _NotesContentState extends State<NotesContent> {
   }
 
   void saveConversation(NoteModel note) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    List<String> notes = prefs.getStringList('notes') ?? [];
+    if (_titleController.text.isNotEmpty) {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      List<String> notes = prefs.getStringList('notes') ?? [];
 
-    String noteJson = jsonEncode(note.toJson());
-    notes.add(noteJson);
-    print(notes);
-    await prefs.setStringList('notes', notes);
-    widget.loadConversations!();
+      String noteJson = jsonEncode(note.toJson());
+      notes.add(noteJson);
+      print(notes);
+      await prefs.setStringList('notes', notes);
+      widget.loadConversations!();
+    }
   }
 }
