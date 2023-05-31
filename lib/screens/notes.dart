@@ -160,14 +160,17 @@ class _NotesScreenState extends State<NotesScreen> {
             },
             onDismissed: (_) => deleteNote(index - 1),
             child: GestureDetector(
-                onTap: () {
-                  Navigator.push(
+                onTap: () async {
+                  await Navigator.push(
                     context,
                     MaterialPageRoute(
                       builder: (context) => NotesContent(
-                          note: note, loadConversations: loadConversations),
+                        note: note,
+                        loadConversations: loadConversations,
+                      ),
                     ),
                   );
+                  loadConversations();
                 },
                 child: Column(
                   children: [
@@ -182,8 +185,9 @@ class _NotesScreenState extends State<NotesScreen> {
                             color: const Color(0xFF2D9CDB),
                             child: Center(
                                 child: Text(
-                              note.title.split(" ").length == 1
-                                  ? note.title.substring(0, 2).toUpperCase()
+                              note.title.split(" ").length == 1 ||
+                                      note.title.length == 1
+                                  ? note.title.substring(0, 1).toUpperCase()
                                   : note.title
                                       .split(" ")
                                       .take(2)

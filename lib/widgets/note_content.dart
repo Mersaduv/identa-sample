@@ -31,11 +31,13 @@ class _NotesContentState extends State<NotesContent> {
 
   @override
   Future<void> dispose() async {
-    saveConversation(NoteModel(
-      title: _titleController.text,
-      details: _detailsController.text,
-      date: DateFormat('dd MMM, hh:mm a').format(DateTime.now()),
-    ));
+    if (widget.note == null) {
+      saveConversation(NoteModel(
+        title: _titleController.text,
+        details: _detailsController.text,
+        date: DateFormat('dd MMM, hh:mm a').format(DateTime.now()),
+      ));
+    }
     widget.loadConversations!();
     _titleController.dispose();
     _detailsController.dispose();
