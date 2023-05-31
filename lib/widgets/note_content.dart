@@ -1,28 +1,45 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
-import 'package:identa/screens/notes.dart' show NoteModel;
+import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'note_model.dart';
 
+typedef LoadConversationsCallback = Future<void> Function();
+
 class NotesContent extends StatefulWidget {
-  const NotesContent({Key? key, required this.note}) : super(key: key);
-
-  final NoteModel note;
-
+  final NoteModel? note;
+  final LoadConversationsCallback? loadConversations;
+  const NotesContent({Key? key, this.note, required this.loadConversations})
+      : super(key: key);
   @override
   _NotesContentState createState() => _NotesContentState();
 }
 
 class _NotesContentState extends State<NotesContent> {
   late TextEditingController _titleController;
+  late TextEditingController _detailsController;
+  late FocusNode _detailsFocusNode;
 
   @override
   void initState() {
     super.initState();
-    _titleController = TextEditingController(text: widget.note.title);
+    _titleController = TextEditingController(text: widget.note?.title);
+    _detailsController = TextEditingController(text: widget.note?.details);
+    _detailsFocusNode = FocusNode();
   }
 
   @override
-  void dispose() {
+  Future<void> dispose() async {
+    saveConversation(NoteModel(
+      title: _titleController.text,
+      details: _detailsController.text,
+      date: DateFormat('dd MMM, hh:mm a').format(DateTime.now()),
+    ));
+    widget.loadConversations!();
     _titleController.dispose();
+    _detailsController.dispose();
+
     super.dispose();
   }
 
@@ -31,19 +48,19 @@ class _NotesContentState extends State<NotesContent> {
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
-          icon: Icon(Icons.arrow_back),
+          icon: const Icon(Icons.arrow_back),
           color: Colors.white,
           onPressed: () {
             Navigator.of(context).pop();
           },
         ),
-        title: Text(
+        title: const Text(
           'New note',
           style: TextStyle(
             color: Colors.white,
           ),
         ),
-        backgroundColor: Color(0xFF2993CF),
+        backgroundColor: const Color(0xFF2993CF),
       ),
       body: GestureDetector(
         onTap: () {
@@ -56,26 +73,32 @@ class _NotesContentState extends State<NotesContent> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                SizedBox(height: 16.0),
+                const SizedBox(height: 16.0),
                 TextField(
-                  decoration: InputDecoration(
+                  controller: _titleController,
+                  decoration: const InputDecoration(
                     hintText: 'Title',
                     hintStyle: TextStyle(color: Colors.grey),
                     border: InputBorder.none,
                   ),
-                  style: TextStyle(
+                  // maxLines: null,
+                  style: const TextStyle(
                     fontSize: 24.0,
                     fontWeight: FontWeight.bold,
-                    color: Colors.grey,
+                    color: Colors.black,
                   ),
                   onTap: () {
                     // Activate the text field or hide the keyboard
                   },
+                  onSubmitted: (value) {
+                    FocusScope.of(context).requestFocus(_detailsFocusNode);
+                  },
                 ),
-                SizedBox(height: 8.0),
+                const SizedBox(height: 8.0),
                 TextField(
-                  decoration: InputDecoration(
-                    hintText: 'Start typing or recording ...',
+                  controller: _detailsController,
+                  decoration: const InputDecoration(
+                    hintText: 'Details note , Start typing or recording ... ',
                     hintStyle: TextStyle(color: Colors.grey),
                     border: InputBorder.none, // Remove the bottom line
                   ),
@@ -83,19 +106,20 @@ class _NotesContentState extends State<NotesContent> {
                   onTap: () {
                     // Activate the text field or hide the keyboard
                   },
-                  style: TextStyle(
-                    color: Colors.grey,
+                  focusNode: _detailsFocusNode,
+                  style: const TextStyle(
+                    color: Colors.black,
                   ),
                 ),
-                SizedBox(height: 16.0),
+                const SizedBox(height: 8.0),
               ],
             ),
           ),
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        backgroundColor: Color(0xFF2993CF),
-        child: Icon(
+        backgroundColor: const Color(0xFF2993CF),
+        child: const Icon(
           Icons.mic,
           color: Colors.white,
         ),
@@ -105,5 +129,18 @@ class _NotesContentState extends State<NotesContent> {
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
+  }
+
+  void saveConversation(NoteModel note) async {
+    if (_titleController.text.isNotEmpty) {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      List<String> notes = prefs.getStringList('notes') ?? [];
+
+      String noteJson = jsonEncode(note.toJson());
+      notes.add(noteJson);
+      print(notes);
+      await prefs.setStringList('notes', notes);
+      widget.loadConversations!();
+    }
   }
 }
