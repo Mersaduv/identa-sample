@@ -68,19 +68,24 @@ class AuthService {
 
   Future<void> signOut() async {
     try {
+      const AuthorizationServiceConfiguration serviceConfiguration =
+          AuthorizationServiceConfiguration(
+        authorizationEndpoint:
+            'https://auth.tooskatech.com/realms/identa/protocol/openid-connect/logout',
+        tokenEndpoint:
+            'https://auth.tooskatech.com/realms/identa/protocol/openid-connect/logout',
+        endSessionEndpoint:
+            'https://auth.tooskatech.com/realms/identa/protocol/openid-connect/logout',
+      );
       await _appAuth.endSession(EndSessionRequest(
         idTokenHint: _idToken,
-        serviceConfiguration: const AuthorizationServiceConfiguration(
-          authorizationEndpoint:
-              'https://auth.tooskatech.com/realms/identa/protocol/openid-connect/logout',
-          tokenEndpoint:
-              'https://auth.tooskatech.com/realms/identa/protocol/openid-connect/logout',
-          endSessionEndpoint:
-              'https://auth.tooskatech.com/realms/identa/protocol/openid-connect/logout',
-        ),
+        serviceConfiguration: serviceConfiguration,
       ));
-      _accessToken = "";
-      _refreshToken = "";
+      // Clear tokens from secure storage and memory
+      await _secureStorage.delete(key: 'refresh_token');
+      _refreshToken = '';
+      _accessToken = '';
+      _idToken = null;
     } catch (e) {
       print(e);
     }
