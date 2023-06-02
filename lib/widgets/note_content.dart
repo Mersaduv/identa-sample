@@ -24,23 +24,55 @@ class _NotesContentState extends State<NotesContent> {
   @override
   void initState() {
     super.initState();
-    _titleController = TextEditingController(text: widget.note?.title);
-    _detailsController = TextEditingController(text: widget.note?.details);
+
+    _titleController = TextEditingController();
+    _detailsController = TextEditingController();
+
+    if (widget.note != null) {
+      _titleController.text = widget.note!.title;
+      _detailsController.text = widget.note!.details;
+    }
+
     _detailsFocusNode = FocusNode();
   }
 
   @override
-  Future<void> dispose() async {
-    saveConversation(NoteModel(
-      title: _titleController.text,
-      details: _detailsController.text,
-      date: DateFormat('dd MMM, hh:mm a').format(DateTime.now()),
-    ));
+  void dispose() async {
+    if (widget.note == null) {
+      saveConversation(NoteModel(
+        title: _titleController.text,
+        details: _detailsController.text,
+        date: DateFormat('dd MMM, hh:mm a').format(DateTime.now()),
+      ));
+    } else {
+      NoteModel editedNote = NoteModel(
+        title: _titleController.text,
+        details: _detailsController.text,
+        date: widget.note!.date,
+      );
+      await editConversation(widget.note!, editedNote);
+    }
+
     widget.loadConversations!();
+
     _titleController.dispose();
     _detailsController.dispose();
 
     super.dispose();
+  }
+
+  Future<void> editConversation(NoteModel oldNote, NoteModel newNote) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    List<String> notes = prefs.getStringList('notes') ?? [];
+
+    String oldNoteJson = jsonEncode(oldNote.toJson());
+    String newNoteJson = jsonEncode(newNote.toJson());
+
+    int index = notes.indexOf(oldNoteJson);
+    if (index != -1) {
+      notes[index] = newNoteJson;
+      await prefs.setStringList('notes', notes);
+    }
   }
 
   @override
