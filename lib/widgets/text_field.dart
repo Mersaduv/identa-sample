@@ -113,7 +113,7 @@ class ChatTextFieldState extends State<ChatTextField>
                               width: 4,
                               height: 4,
                               margin: const EdgeInsets.only(right: 2.0),
-                              decoration: BoxDecoration(
+                              decoration: const BoxDecoration(
                                 color: Colors.grey,
                                 shape: BoxShape.circle,
                               ),
@@ -130,7 +130,7 @@ class ChatTextFieldState extends State<ChatTextField>
                               width: 4,
                               height: 4,
                               margin: const EdgeInsets.only(right: 2.0),
-                              decoration: BoxDecoration(
+                              decoration: const BoxDecoration(
                                 color: Colors.grey,
                                 shape: BoxShape.circle,
                               ),
@@ -146,7 +146,7 @@ class ChatTextFieldState extends State<ChatTextField>
                             child: Container(
                               width: 4,
                               height: 4,
-                              decoration: BoxDecoration(
+                              decoration: const BoxDecoration(
                                 color: Colors.grey,
                                 shape: BoxShape.circle,
                               ),

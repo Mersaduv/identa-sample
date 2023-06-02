@@ -8,11 +8,13 @@ import 'package:identa/services/apis/api.dart';
 import 'package:identa/widgets/text_field.dart';
 
 class ChatScreen extends StatefulWidget {
+  const ChatScreen({super.key});
+
   @override
-  _ChatScreenState createState() => _ChatScreenState();
+  ChatScreenState createState() => ChatScreenState();
 }
 
-class _ChatScreenState extends State<ChatScreen>
+class ChatScreenState extends State<ChatScreen>
     with SingleTickerProviderStateMixin {
   User user = User(name: '');
   Bot bot = Bot();
@@ -30,7 +32,7 @@ class _ChatScreenState extends State<ChatScreen>
       messages.add(Message(sender: user.name, message: message));
       isBotTyping = true;
     });
-    WidgetsBinding.instance!.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       _scrollController.animateTo(
         _scrollController.position.maxScrollExtent,
         duration: const Duration(milliseconds: 100),
@@ -43,7 +45,7 @@ class _ChatScreenState extends State<ChatScreen>
           messages.add(Message(sender: bot.name, message: botResponse));
           isBotTyping = false;
         });
-        WidgetsBinding.instance!.addPostFrameCallback((_) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
           _scrollController.animateTo(
             _scrollController.position.maxScrollExtent,
             duration: const Duration(milliseconds: 300),
@@ -80,7 +82,7 @@ class _ChatScreenState extends State<ChatScreen>
         FocusScope.of(context).unfocus();
       },
       child: Scaffold(
-        backgroundColor: Color.fromARGB(255, 241, 245, 255),
+        backgroundColor: const Color.fromARGB(255, 241, 245, 255),
         body: Column(
           children: [
             Expanded(
@@ -119,12 +121,12 @@ class _ChatScreenState extends State<ChatScreen>
                       ),
                       Container(
                         margin: const EdgeInsets.fromLTRB(0.0, 0.0, 4.0, 4.0),
-                        decoration: BoxDecoration(
+                        decoration: const BoxDecoration(
                           shape: BoxShape.circle,
                           color: Color(0xFF2993CF),
                         ),
                         child: IconButton(
-                          icon: Icon(
+                          icon: const Icon(
                             Icons.mic,
                             color: Colors.white,
                           ),

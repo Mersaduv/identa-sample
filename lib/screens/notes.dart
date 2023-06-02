@@ -3,16 +3,15 @@ import 'package:flutter/material.dart';
 import 'package:identa/widgets/note_content.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../widgets/note_model.dart';
-import 'package:intl/intl.dart';
 
 class NotesScreen extends StatefulWidget {
   const NotesScreen({Key? key}) : super(key: key);
 
   @override
-  _NotesScreenState createState() => _NotesScreenState();
+  NotesScreenState createState() => NotesScreenState();
 }
 
-class _NotesScreenState extends State<NotesScreen> {
+class NotesScreenState extends State<NotesScreen> {
   List<NoteModel> notes = [];
   @override
   void initState() {

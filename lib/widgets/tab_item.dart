@@ -5,7 +5,7 @@ class TabItem extends StatelessWidget {
   final bool isSelected;
   final VoidCallback onTap;
 
-  const TabItem({
+  const TabItem({super.key, 
     required this.title,
     required this.isSelected,
     required this.onTap,
@@ -18,7 +18,7 @@ class TabItem extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          SizedBox(height: 4.0),
+          const SizedBox(height: 4.0),
           Text(
             title,
             style: TextStyle(
@@ -30,7 +30,7 @@ class TabItem extends StatelessWidget {
           Opacity(
             opacity: isSelected ? 1.0 : 0.0,
             child: Container(
-              margin: EdgeInsets.only(top: 8.0),
+              margin: const EdgeInsets.only(top: 8.0),
               height: 3.0, // Adjust the height of the line here
               width: 120.0, // Adjust the width here
               decoration: BoxDecoration(
@@ -41,12 +41,12 @@ class TabItem extends StatelessWidget {
                           color: Colors.grey.withOpacity(0.5),
                           spreadRadius: 3,
                           blurRadius: 4,
-                          offset: Offset(0, 1), // changes position of shadow
+                          offset: const Offset(0, 1), // changes position of shadow
                         ),
                       ]
                     : [],
                 borderRadius: isSelected
-                    ? BorderRadius.only(
+                    ? const BorderRadius.only(
                         topLeft: Radius.circular(4.0),
                         topRight: Radius.circular(4.0),
                       )

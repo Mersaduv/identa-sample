@@ -4,13 +4,13 @@ import 'package:identa/services/auth/auth_service.dart';
 import 'setting_item.widget.dart';
 
 class Settings extends StatefulWidget {
-  Settings({Key? key}) : super(key: key);
+  const Settings({Key? key}) : super(key: key);
 
   @override
-  _SettingsState createState() => _SettingsState();
+  SettingsState createState() => SettingsState();
 }
 
-class _SettingsState extends State<Settings> {
+class SettingsState extends State<Settings> {
   final AuthService _authService = AuthService();
 
   @override

@@ -13,10 +13,10 @@ class NotesContent extends StatefulWidget {
   const NotesContent({Key? key, this.note, required this.loadConversations})
       : super(key: key);
   @override
-  _NotesContentState createState() => _NotesContentState();
+  NotesContentState createState() => NotesContentState();
 }
 
-class _NotesContentState extends State<NotesContent> {
+class NotesContentState extends State<NotesContent> {
   late TextEditingController _titleController;
   late TextEditingController _detailsController;
   late FocusNode _detailsFocusNode;

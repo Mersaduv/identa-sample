@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:identa/screens/chat.dart'; // import chat screen
-import 'package:identa/screens/insights.dart'; // import insights screen
 import 'package:identa/screens/notes.dart'; // import notes screen
 import 'package:identa/widgets/app_bar.dart';
 import 'package:identa/widgets/settings/view.dart';
@@ -29,13 +28,14 @@ class MyHomePage extends StatefulWidget {
   const MyHomePage({Key? key}) : super(key: key);
 
   @override
-  _MyHomePageState createState() => _MyHomePageState();
+  MyHomePageState createState() => MyHomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage>
+class MyHomePageState extends State<MyHomePage>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   late GlobalKey<ScaffoldState> _scaffoldKey;
+  @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
@@ -61,13 +61,13 @@ class _MyHomePageState extends State<MyHomePage>
           },
         ),
       ),
-      drawer: Settings(),
+      drawer: const Settings(),
       body: TabBarView(
         controller: _tabController,
-        children: [
+        children: const [
           ChatScreen(),
           ChatScreen(),
-          const NotesScreen(),
+          NotesScreen(),
         ],
       ),
     );

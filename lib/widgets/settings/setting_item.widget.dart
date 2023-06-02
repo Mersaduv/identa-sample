@@ -5,7 +5,7 @@ class SettingItemWidget extends StatelessWidget {
   final VoidCallback? onTapped;
   final IconData? prefixIcon;
   final bool isInRed;
-  final Future<Null>? Function() onPressed;
+  final Future<void>? Function() onPressed;
   const SettingItemWidget(
       {Key? key,
       required this.onPressed,
