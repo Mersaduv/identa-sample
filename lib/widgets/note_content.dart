@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../services/apis/api.dart';
 import 'note_model.dart';
 
 typedef LoadConversationsCallback = Future<void> Function();
@@ -40,12 +41,14 @@ class NotesContentState extends State<NotesContent> {
   void dispose() async {
     if (widget.note == null) {
       saveConversation(NoteModel(
+        id: "0",
         title: _titleController.text,
         details: _detailsController.text,
         date: DateFormat('dd MMM, hh:mm a').format(DateTime.now()),
       ));
     } else {
       NoteModel editedNote = NoteModel(
+        id: "0",
         title: _titleController.text,
         details: _detailsController.text,
         date: widget.note!.date,
@@ -165,13 +168,8 @@ class NotesContentState extends State<NotesContent> {
 
   void saveConversation(NoteModel note) async {
     if (_titleController.text.isNotEmpty) {
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      List<String> notes = prefs.getStringList('notes') ?? [];
+      ServiceApis.storeNote(note);
 
-      String noteJson = jsonEncode(note.toJson());
-      notes.add(noteJson);
-      print(notes);
-      await prefs.setStringList('notes', notes);
       widget.loadConversations!();
     }
   }

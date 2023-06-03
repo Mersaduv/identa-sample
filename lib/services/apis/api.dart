@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:ffi';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
@@ -10,6 +11,54 @@ import 'config.dart';
 class ServiceApis {
   ServiceApis._();
   static final AuthService _authService = AuthService();
+
+  static Future<http.Response> sendDeleteRequest(String url) async {
+    final client = RetryClient(http.Client());
+
+    var response = await client.delete(
+      Uri.parse('${ServiceConfig.baseURL}/$url'),
+      headers: {
+        'Authorization': _authService.getAuthHeader(),
+      },
+    );
+
+    if (response.statusCode == 401) {
+      _authService.signInWithAutoCodeExchange();
+
+      response = await client.delete(
+        Uri.parse('${ServiceConfig.baseURL}/$url'),
+        headers: {
+          'Authorization': _authService.getAuthHeader(),
+        },
+      );
+    }
+
+    return response;
+  }
+
+  static Future<http.Response> sendGetRequest(String url) async {
+    final client = RetryClient(http.Client());
+
+    var response = await client.get(
+      Uri.parse('${ServiceConfig.baseURL}/$url'),
+      headers: {
+        'Authorization': _authService.getAuthHeader(),
+      },
+    );
+
+    if (response.statusCode == 401) {
+      _authService.signInWithAutoCodeExchange();
+
+      response = await client.get(
+        Uri.parse('${ServiceConfig.baseURL}/$url'),
+        headers: {
+          'Authorization': _authService.getAuthHeader(),
+        },
+      );
+    }
+
+    return response;
+  }
 
   static Future<http.Response> sendPostRequest(String url, dynamic body) async {
     final client = RetryClient(http.Client());
@@ -40,7 +89,7 @@ class ServiceApis {
   }
 
   static Future<String?> chatResponse(String message) async {
-    final response = await sendPostRequest("/chat", {'message': message});
+    final response = await sendPostRequest("chat", {'message': message});
 
     if (response.statusCode == HttpStatus.ok) {
       var decodedResponse = jsonDecode(response.body);
@@ -50,6 +99,48 @@ class ServiceApis {
         print('API request failed with status code ${response.statusCode}');
       }
       return null;
+    }
+  }
+
+  static Future<bool> storeNote(dynamic note) async {
+    final response = await sendPostRequest("note", note);
+
+    if (response.statusCode == HttpStatus.ok) {
+      return true;
+    } else {
+      if (kDebugMode) {
+        print('API request failed with status code ${response.statusCode}');
+      }
+      return false;
+    }
+  }
+
+  static Future<List<dynamic>> getNotes() async {
+    final response = await sendGetRequest("note");
+
+    if (response.statusCode == HttpStatus.ok) {
+      var decodedResponse = jsonDecode(response.body);
+      return decodedResponse["items"] as List<dynamic>;
+    } else {
+      if (kDebugMode) {
+        print('API request failed with status code ${response.statusCode}');
+      }
+      return [];
+    }
+  }
+
+  static Future<bool> deleteNote(
+    String id,
+  ) async {
+    final response = await sendDeleteRequest("note/$id");
+
+    if (response.statusCode == HttpStatus.ok) {
+      return true;
+    } else {
+      if (kDebugMode) {
+        print('API request failed with status code ${response.statusCode}');
+      }
+      return false;
     }
   }
 }

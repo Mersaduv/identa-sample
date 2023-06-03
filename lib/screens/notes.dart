@@ -1,5 +1,5 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:identa/services/apis/api.dart';
 import 'package:identa/widgets/note_content.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../widgets/note_model.dart';
@@ -20,39 +20,22 @@ class NotesScreenState extends State<NotesScreen> {
   }
 
   void deleteNote(int index) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    List<String>? noteJsonList = prefs.getStringList('notes');
-
-    if (noteJsonList != null) {
-      noteJsonList.removeAt(index);
-      await prefs.setStringList('notes', noteJsonList);
-    }
-
-    setState(() {
-      notes.removeAt(index);
-    });
+    await ServiceApis.deleteNote(notes[index].id);
 
     loadConversations();
   }
 
   Future<void> loadConversations() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    List<String>? noteJsonList = prefs.getStringList('notes');
+    List<NoteModel> noteList = [];
 
-    //! To clear the entire local memory in case of problem storing data
-    // prefs.clear();
-
-    List<NoteModel> loadedConversations = [];
-    if (noteJsonList != null) {
-      for (String noteJson in noteJsonList) {
-        Map<String, dynamic> noteMap = jsonDecode(noteJson);
-        NoteModel note = NoteModel.fromJson(noteMap);
-        loadedConversations.add(note);
-      }
+    var allNotes = await ServiceApis.getNotes();
+    for (var note in allNotes) {
+      NoteModel n = NoteModel.fromDynamic(note);
+      noteList.add(n);
     }
 
     setState(() {
-      notes = loadedConversations;
+      notes = noteList;
     });
   }
 
