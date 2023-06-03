@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:identa/services/apis/api.dart';
 import 'package:identa/widgets/note_content.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import '../widgets/note_model.dart';
 
 class NotesScreen extends StatefulWidget {
