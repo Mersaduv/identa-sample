@@ -35,6 +35,34 @@ class ServiceApis {
     return response;
   }
 
+  static Future<http.Response> sendPutRequest(String url, dynamic body) async {
+    final client = RetryClient(http.Client());
+
+    var response = await client.put(
+      Uri.parse('${ServiceConfig.baseURL}/$url'),
+      headers: {
+        'Authorization': _authService.getAuthHeader(),
+        'Content-type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(body),
+    );
+
+    if (response.statusCode == 401) {
+      _authService.signInWithAutoCodeExchange();
+
+      response = await client.put(
+        Uri.parse('${ServiceConfig.baseURL}/$url'),
+        headers: {
+          'Authorization': _authService.getAuthHeader(),
+          'Content-type': 'application/json; charset=UTF-8',
+        },
+        body: jsonEncode(body),
+      );
+    }
+
+    return response;
+  }
+
   static Future<http.Response> sendGetRequest(String url) async {
     final client = RetryClient(http.Client());
 
@@ -101,8 +129,21 @@ class ServiceApis {
     }
   }
 
-  static Future<bool> storeNote(dynamic note) async {
+  static Future<bool> createNote(dynamic note) async {
     final response = await sendPostRequest("note", note);
+
+    if (response.statusCode == HttpStatus.ok) {
+      return true;
+    } else {
+      if (kDebugMode) {
+        print('API request failed with status code ${response.statusCode}');
+      }
+      return false;
+    }
+  }
+
+  static Future<bool> editNote(dynamic note) async {
+    final response = await sendPutRequest("note", note);
 
     if (response.statusCode == HttpStatus.ok) {
       return true;

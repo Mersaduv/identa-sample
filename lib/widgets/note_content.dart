@@ -39,6 +39,8 @@ class NotesContentState extends State<NotesContent> {
 
   @override
   void dispose() async {
+    super.dispose();
+
     if (widget.note == null) {
       saveConversation(NoteModel(
         id: "0",
@@ -48,34 +50,22 @@ class NotesContentState extends State<NotesContent> {
       ));
     } else {
       NoteModel editedNote = NoteModel(
-        id: "0",
+        id: widget.note!.id,
         title: _titleController.text,
         details: _detailsController.text,
         date: widget.note!.date,
       );
-      await editConversation(widget.note!, editedNote);
+      await editConversation(editedNote);
     }
 
     widget.loadConversations!();
 
     _titleController.dispose();
     _detailsController.dispose();
-
-    super.dispose();
   }
 
-  Future<void> editConversation(NoteModel oldNote, NoteModel newNote) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    List<String> notes = prefs.getStringList('notes') ?? [];
-
-    String oldNoteJson = jsonEncode(oldNote.toJson());
-    String newNoteJson = jsonEncode(newNote.toJson());
-
-    int index = notes.indexOf(oldNoteJson);
-    if (index != -1) {
-      notes[index] = newNoteJson;
-      await prefs.setStringList('notes', notes);
-    }
+  Future<void> editConversation(NoteModel editedNote) async {
+    await ServiceApis.editNote(editedNote);
   }
 
   @override
@@ -168,7 +158,7 @@ class NotesContentState extends State<NotesContent> {
 
   void saveConversation(NoteModel note) async {
     if (_titleController.text.isNotEmpty) {
-      ServiceApis.storeNote(note);
+      ServiceApis.createNote(note);
 
       widget.loadConversations!();
     }

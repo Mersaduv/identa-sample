@@ -33,6 +33,7 @@ class AuthService {
       var refreshTokenResult = await _appAuth.token(TokenRequest(
         _clientId,
         _redirectUrl,
+        clientSecret: "dkDkIt9APGFWtI7fFq7aVp5I1U1rCAWE",
         refreshToken: _refreshToken,
         discoveryUrl: _discoveryUrl,
         scopes: _scopes,

@@ -1,4 +1,3 @@
-
 class NoteModel {
   final String id;
   final String title;
@@ -23,7 +22,7 @@ class NoteModel {
 
   factory NoteModel.fromDynamic(dynamic n) {
     return NoteModel(
-      id: n['timestamp'].toString(),
+      id: n['id'].toString(),
       title: n['title'],
       details: n['details'],
       date: n['date'],
@@ -32,6 +31,7 @@ class NoteModel {
 
   Map<String, dynamic> toJson() {
     return {
+      'id': id,
       'title': title,
       'details': details,
       'date': date,

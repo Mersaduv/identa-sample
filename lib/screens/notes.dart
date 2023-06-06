@@ -166,14 +166,9 @@ class NotesScreenState extends State<NotesScreen> {
                             color: const Color(0xFF2D9CDB),
                             child: Center(
                                 child: Text(
-                              note.title.split(" ").length == 1 ||
-                                      note.title.length == 1
+                              note.title.isNotEmpty
                                   ? note.title.substring(0, 1).toUpperCase()
-                                  : note.title
-                                      .split(" ")
-                                      .take(2)
-                                      .map((w) => w[0].toUpperCase())
-                                      .join(),
+                                  : "N",
                               style: const TextStyle(
                                   color: Colors.white, fontSize: 20),
                             )),
