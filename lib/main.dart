@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:identa/screens/chat.dart'; // import chat screen
+import 'package:identa/screens/insights.dart';
 import 'package:identa/screens/notes.dart'; // import notes screen
 import 'package:identa/widgets/app_bar.dart';
 import 'package:identa/widgets/settings/view.dart';
@@ -66,7 +67,7 @@ class MyHomePageState extends State<MyHomePage>
         controller: _tabController,
         children: const [
           ChatScreen(),
-          ChatScreen(),
+          InsightsScreen(),
           NotesScreen(),
         ],
       ),

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:identa/constants.dart';
 import 'package:identa/services/apis/api.dart';
-import 'package:identa/skeleton.dart';
+import 'package:identa/widgets/loading/cardSkeleton.dart';
+import 'package:identa/widgets/conversation_model.dart';
 import 'package:identa/widgets/insights_content.dart';
-import 'package:identa/widgets/note_content.dart';
 import '../widgets/note_model.dart';
 
 class InsightsScreen extends StatefulWidget {
@@ -15,7 +15,9 @@ class InsightsScreen extends StatefulWidget {
 
 class InsightsScreenState extends State<InsightsScreen> {
   List<NoteModel> notes = [];
+  List<ConversationModel> conversations = [];
   late bool isLoading;
+
   @override
   void initState() {
     super.initState();
@@ -29,149 +31,151 @@ class InsightsScreenState extends State<InsightsScreen> {
   }
 
   void deleteNote(int index) async {
-    await ServiceApis.deleteNote(notes[index].id);
+    await ServiceApis.deleteNote(
+      conversations[index].notes.last.id,
+    );
 
     loadConversations();
   }
 
   Future<void> loadConversations() async {
-    List<NoteModel> noteList = [];
-    var allNotes = await ServiceApis.getNotes();
+    List<ConversationModel> conversationList = [];
+    var todoNotesData = await ServiceApis.getNotes();
+    List<String> conversationName = ['Todo', 'Business', 'Health'];
 
-    for (var note in allNotes) {
-      NoteModel n = NoteModel.fromDynamic(note);
-      noteList.add(n);
+    for (int i = 0; i < conversationName.length; i++) {
+      List<NoteModel> todoNotes = [];
+      for (var note in todoNotesData) {
+        NoteModel n = NoteModel.fromDynamic(note);
+        todoNotes.add(n);
+      }
+
+      ConversationModel conversation = ConversationModel(
+        name: conversationName[i],
+        notes: todoNotes,
+        icon: Icons.pending_actions,
+      );
+      conversationList.add(conversation);
     }
 
     setState(() {
-      notes = noteList;
+      conversations = conversationList;
       isLoading = false;
     });
   }
 
-  Future<void> _navigateToInsightsContent() async {
+  Future<void> _navigateToInsightsContent(int index) async {
     final updatedNotes = await Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) => InsightsContent(
-          notes: notes,
+          notes: conversations[index].notes,
         ),
       ),
     );
     if (updatedNotes != null) {
       setState(() {
-        notes = updatedNotes;
+        conversations[index].notes = updatedNotes;
       });
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    NoteModel lastNote;
-    String lastNoteDetails = "No note available";
-    if (notes.isNotEmpty) {
-      lastNote = notes.last;
-      lastNoteDetails = lastNote.details;
-    }
-
     return Scaffold(
       body: isLoading
           ? Padding(
               padding: const EdgeInsets.all(18),
               child: ListView.separated(
                 itemCount: 5,
-                itemBuilder: (context, index) => const NewsCardSkelton(),
+                itemBuilder: (context, index) => const CardSkelton(),
                 separatorBuilder: (context, index) => const Padding(
                   padding: EdgeInsets.all(10.0),
                   child: SizedBox(height: defaultPadding),
                 ),
               ),
             )
-          : GestureDetector(
-              onTap: _navigateToInsightsContent,
-              child: Column(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.only(top: 5),
-                    child: ListTile(
-                      leading: ClipRRect(
-                        borderRadius: BorderRadius.circular(13.0),
-                        child: Container(
-                          height: 50.0,
-                          width: 50.0,
-                          color: const Color(0xFF2D9CDB),
-                          child: const Icon(Icons.pending_actions,
-                              color: Colors.white, size: 35.0),
+          : ListView.builder(
+              itemCount: conversations.length,
+              itemBuilder: (context, index) {
+                ConversationModel conversation = conversations[index];
+                String lastNote = conversation.notes.isNotEmpty
+                    ? conversation.notes.last.title
+                    : "No note available";
+                return GestureDetector(
+                  onTap: () {
+                    _navigateToInsightsContent(index);
+                  },
+                  child: Column(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(top: 5),
+                        child: ListTile(
+                          leading: ClipRRect(
+                            borderRadius: BorderRadius.circular(13.0),
+                            child: Container(
+                              height: 50.0,
+                              width: 50.0,
+                              color: const Color(0xFF2D9CDB),
+                              child: Icon(
+                                conversation.icon,
+                                color: Colors.white,
+                                size: 35.0,
+                              ),
+                            ),
+                          ),
+                          title: Row(
+                            children: [
+                              Text(
+                                conversation.name,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w500,
+                                  fontSize: 20,
+                                ),
+                              ),
+                              const SizedBox(width: 10),
+                              CircleAvatar(
+                                radius: 10,
+                                backgroundColor: const Color.fromARGB(
+                                  255,
+                                  137,
+                                  215,
+                                  139,
+                                ),
+                                child: Text(
+                                  conversation.notes.length.toString(),
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 14,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          subtitle: Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  lastNote.toString(),
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    color: Colors.grey.shade500,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
-                      title: const Row(
-                        children: [
-                          Text(
-                            "ToDo",
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              fontWeight: FontWeight.w500,
-                              fontSize: 20,
-                            ),
-                          ),
-                          SizedBox(width: 10),
-                          CircleAvatar(
-                            radius: 10,
-                            backgroundColor: Color.fromARGB(255, 137, 215, 139),
-                            child: Text(
-                              "5",
-                              style:
-                                  TextStyle(color: Colors.white, fontSize: 14),
-                            ),
-                          ),
-                        ],
-                      ),
-                      subtitle: Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              lastNoteDetails,
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                              style: TextStyle(color: Colors.grey.shade500),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
+                      const Divider(height: 10),
+                    ],
                   ),
-                  const Divider(height: 10),
-                ],
-              )),
-    );
-  }
-}
-
-class NewsCardSkelton extends StatelessWidget {
-  const NewsCardSkelton({
-    Key? key,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return const Row(
-      children: [
-        Skeleton(height: 90, width: 90),
-        SizedBox(width: defaultPadding),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              SizedBox(height: defaultPadding / 2),
-              Skeleton(),
-              SizedBox(height: defaultPadding / 2),
-              Skeleton(),
-              SizedBox(height: defaultPadding / 2),
-            ],
-          ),
-        )
-      ],
+                );
+              },
+            ),
     );
   }
 }

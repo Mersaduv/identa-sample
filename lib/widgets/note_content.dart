@@ -10,6 +10,7 @@ typedef LoadConversationsCallback = Future<void> Function();
 
 class NotesContent extends StatefulWidget {
   final NoteModel? note;
+  // final bool? isLoading;
   final LoadConversationsCallback? loadConversations;
   const NotesContent({Key? key, this.note, required this.loadConversations})
       : super(key: key);
@@ -46,36 +47,13 @@ class NotesContentState extends State<NotesContent> {
         details: _detailsController.text,
         date: DateFormat('dd MMM, hh:mm a').format(DateTime.now()),
       ));
-    } else {
-      NoteModel editedNote = NoteModel(
-        id: "0",
-        title: _titleController.text,
-        details: _detailsController.text,
-        date: widget.note!.date,
-      );
-      await editConversation(widget.note!, editedNote);
     }
 
     widget.loadConversations!();
 
     _titleController.dispose();
     _detailsController.dispose();
-
     super.dispose();
-  }
-
-  Future<void> editConversation(NoteModel oldNote, NoteModel newNote) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    List<String> notes = prefs.getStringList('notes') ?? [];
-
-    String oldNoteJson = jsonEncode(oldNote.toJson());
-    String newNoteJson = jsonEncode(newNote.toJson());
-
-    int index = notes.indexOf(oldNoteJson);
-    if (index != -1) {
-      notes[index] = newNoteJson;
-      await prefs.setStringList('notes', notes);
-    }
   }
 
   @override
@@ -116,7 +94,7 @@ class NotesContentState extends State<NotesContent> {
                     hintStyle: TextStyle(color: Colors.grey),
                     border: InputBorder.none,
                   ),
-                  // maxLines: null,
+                  maxLines: null,
                   style: const TextStyle(
                     fontSize: 24.0,
                     fontWeight: FontWeight.bold,
@@ -167,6 +145,7 @@ class NotesContentState extends State<NotesContent> {
   }
 
   void saveConversation(NoteModel note) async {
+    widget.loadConversations!();
     if (_titleController.text.isNotEmpty) {
       ServiceApis.storeNote(note);
 

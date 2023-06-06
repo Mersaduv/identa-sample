@@ -1,16 +1,21 @@
-
 class NoteModel {
   final String id;
-  final String title;
-  final String details;
+  String _title;
+  String details;
   final String date;
 
   NoteModel({
     required this.id,
-    required this.title,
+    required String title,
     required this.details,
     required this.date,
-  });
+  }) : _title = title;
+
+  // getter setter
+  String get title => _title;
+  set title(String value) {
+    _title = value;
+  }
 
   factory NoteModel.fromJson(Map<String, dynamic> json) {
     return NoteModel(
