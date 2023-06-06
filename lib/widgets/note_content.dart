@@ -1,8 +1,5 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import '../services/apis/api.dart';
 import 'note_model.dart';
 
@@ -40,6 +37,8 @@ class NotesContentState extends State<NotesContent> {
 
   @override
   void dispose() async {
+    super.dispose();
+
     if (widget.note == null) {
       saveConversation(NoteModel(
         id: "0",
@@ -47,13 +46,24 @@ class NotesContentState extends State<NotesContent> {
         details: _detailsController.text,
         date: DateFormat('dd MMM, hh:mm a').format(DateTime.now()),
       ));
+    } else {
+      NoteModel editedNote = NoteModel(
+        id: widget.note!.id,
+        title: _titleController.text,
+        details: _detailsController.text,
+        date: widget.note!.date,
+      );
+      await editConversation(editedNote);
     }
 
     widget.loadConversations!();
 
     _titleController.dispose();
     _detailsController.dispose();
-    super.dispose();
+  }
+
+  Future<void> editConversation(NoteModel editedNote) async {
+    await ServiceApis.editNote(editedNote);
   }
 
   @override
@@ -147,7 +157,7 @@ class NotesContentState extends State<NotesContent> {
   void saveConversation(NoteModel note) async {
     widget.loadConversations!();
     if (_titleController.text.isNotEmpty) {
-      ServiceApis.storeNote(note);
+      ServiceApis.createNote(note);
 
       widget.loadConversations!();
     }
