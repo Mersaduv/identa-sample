@@ -7,6 +7,7 @@ typedef LoadConversationsCallback = Future<void> Function();
 
 class NotesContent extends StatefulWidget {
   final NoteModel? note;
+  // final bool? isLoading;
   final LoadConversationsCallback? loadConversations;
   const NotesContent({Key? key, this.note, required this.loadConversations})
       : super(key: key);
@@ -103,7 +104,7 @@ class NotesContentState extends State<NotesContent> {
                     hintStyle: TextStyle(color: Colors.grey),
                     border: InputBorder.none,
                   ),
-                  // maxLines: null,
+                  maxLines: null,
                   style: const TextStyle(
                     fontSize: 24.0,
                     fontWeight: FontWeight.bold,
@@ -154,6 +155,7 @@ class NotesContentState extends State<NotesContent> {
   }
 
   void saveConversation(NoteModel note) async {
+    widget.loadConversations!();
     if (_titleController.text.isNotEmpty) {
       ServiceApis.createNote(note);
 
