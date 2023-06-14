@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:identa/constants.dart';
+import 'package:identa/constants/colors.dart';
+import 'package:identa/constants/text_styles.dart';
 import 'package:identa/services/apis/api.dart';
 import 'package:identa/widgets/loading/cardSkeleton.dart';
-import 'package:identa/widgets/conversation_model.dart';
-import 'package:identa/widgets/insights_content.dart';
-import '../widgets/note_model.dart';
+import 'package:identa/models/conversation_model.dart';
+import 'package:identa/widgets/tab_Insights/insights_content.dart';
+import '../models/note_model.dart';
 
 class InsightsScreen extends StatefulWidget {
   const InsightsScreen({Key? key}) : super(key: key);
@@ -116,7 +117,7 @@ class InsightsScreenState extends State<InsightsScreen> {
                             child: Container(
                               height: 50.0,
                               width: 50.0,
-                              color: const Color(0xFF2D9CDB),
+                              color: MyColors.primaryColor,
                               child: Icon(
                                 conversation.icon,
                                 color: Colors.white,
@@ -146,10 +147,7 @@ class InsightsScreenState extends State<InsightsScreen> {
                                 ),
                                 child: Text(
                                   conversation.notes.length.toString(),
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 14,
-                                  ),
+                                  style: MyTextStyles.small,
                                 ),
                               ),
                             ],

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:identa/widgets/note_model.dart';
+import 'package:identa/models/note_model.dart';
 
 class ConversationModel {
   String name;

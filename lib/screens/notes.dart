@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:identa/constants.dart';
+import 'package:identa/constants/colors.dart';
+import 'package:identa/constants/text_styles.dart';
 import 'package:identa/services/apis/api.dart';
 import 'package:identa/widgets/loading/cardSkeleton.dart';
-import 'package:identa/widgets/note_content.dart';
-import '../widgets/note_model.dart';
+import 'package:identa/widgets/tap_notes/note_content.dart';
+import '../models/note_model.dart';
 
 class NotesScreen extends StatefulWidget {
   const NotesScreen({Key? key}) : super(key: key);
@@ -190,7 +191,7 @@ class NotesScreenState extends State<NotesScreen> {
                                 child: Container(
                                   height: 50.0,
                                   width: 50.0,
-                                  color: const Color(0xFF2D9CDB),
+                                  color: MyColors.primaryColor,
                                   child: Center(
                                       child: Text(
                                     note.title.split(" ").length == 1 ||
@@ -224,8 +225,7 @@ class NotesScreenState extends State<NotesScreen> {
                                       note.details,
                                       maxLines: 2,
                                       overflow: TextOverflow.ellipsis,
-                                      style: TextStyle(
-                                          color: Colors.grey.shade500),
+                                      style: MyTextStyles.small,
                                     ),
                                   ),
                                 ],
@@ -238,8 +238,7 @@ class NotesScreenState extends State<NotesScreen> {
                               padding: const EdgeInsets.only(right: 8.0),
                               child: Text(
                                 note.date,
-                                style: TextStyle(
-                                    color: Colors.grey.shade600, fontSize: 12),
+                                style: MyTextStyles.small,
                               ),
                             ),
                           ),

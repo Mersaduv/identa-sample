@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:identa/constants/colors.dart';
+import 'package:identa/constants/text_styles.dart';
+import 'package:identa/models/tap_data.dart';
 import 'package:identa/widgets/tab_item.dart';
 
 class CustomAppBar extends StatefulWidget implements PreferredSizeWidget {
@@ -18,6 +21,11 @@ class CustomAppBar extends StatefulWidget implements PreferredSizeWidget {
 
 class CustomAppBarState extends State<CustomAppBar> {
   int _selectedTab = 0;
+  List<TabData> tabDataList = [
+    TabData(title: 'Chat'),
+    TabData(title: 'Insights'),
+    TabData(title: 'Notes'),
+  ];
 
   @override
   void initState() {
@@ -36,7 +44,7 @@ class CustomAppBarState extends State<CustomAppBar> {
         padding: const EdgeInsets.only(left: 4.0, bottom: 8.0),
         icon: SvgPicture.asset(
           'assets/menu.svg',
-          color: const Color.fromARGB(255, 255, 255, 255),
+          color: Colors.white,
         ),
         onPressed: widget.openDrawer,
       ),
@@ -47,20 +55,13 @@ class CustomAppBarState extends State<CustomAppBar> {
         child: const Row(
           children: [
             SizedBox(width: 8.0),
-            Text(
-              'identa',
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 20.0,
-                color: Colors.white,
-              ),
-            ),
+            Text('identa', style: MyTextStyles.appbar),
           ],
         ),
       ),
       centerTitle: false,
       elevation: 0.0,
-      backgroundColor: const Color(0xFF2D9CDB),
+      backgroundColor: MyColors.primaryColor,
       toolbarHeight: kToolbarHeight + 40.0,
       bottom: PreferredSize(
         preferredSize: const Size.fromHeight(40.0),
@@ -70,29 +71,16 @@ class CustomAppBarState extends State<CustomAppBar> {
           child: TabBar(
             controller: widget.tabController,
             indicator: const BoxDecoration(),
-            tabs: [
-              TabItem(
-                title: 'Chat',
-                isSelected: _selectedTab == 0,
+            tabs: List.generate(
+              tabDataList.length,
+              (index) => TabItem(
+                title: tabDataList[index].title,
+                isSelected: _selectedTab == index,
                 onTap: () {
-                  widget.tabController.index = 0;
+                  widget.tabController.index = index;
                 },
               ),
-              TabItem(
-                title: 'Insights',
-                isSelected: _selectedTab == 1,
-                onTap: () {
-                  widget.tabController.index = 1;
-                },
-              ),
-              TabItem(
-                title: 'Notes',
-                isSelected: _selectedTab == 2,
-                onTap: () {
-                  widget.tabController.index = 2;
-                },
-              ),
-            ],
+            ),
           ),
         ),
       ),
