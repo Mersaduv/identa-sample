@@ -1,0 +1,69 @@
+import 'package:flutter/material.dart';
+import 'package:identa/core/extensions/context_extension.dart';
+import 'package:identa/core/models/audio_recorder/audio_record.dart';
+import 'package:identa/modules/audios/audioRecorder/audio_recorder_logic.dart';
+import 'package:identa/modules/audios/myRecords/my_audio_records_logic.dart';
+
+import 'package:intl/intl.dart' show DateFormat;
+import 'package:provider/provider.dart'
+    show ChangeNotifierProvider, Consumer, ReadContext, WatchContext;
+
+/// To use this widget, we need to instance [AudioRecorderLogicInterface] and
+/// [MyAudioRecordsLogicInterface].
+class AudioRecorderButton extends StatelessWidget {
+  const AudioRecorderButton({super.key});
+
+  Future<void> _start(BuildContext context) async {
+    final audioRecordLogic = context.read<AudioRecorderLogicInterface>();
+    await audioRecordLogic.start();
+  }
+
+  Future<void> _stop(BuildContext context) async {
+    final audioRecordLogic = context.read<AudioRecorderLogicInterface>();
+    final myAudioRecordsLogic = context.read<MyAudioRecordsLogicInterface>();
+
+    final audioPath = await audioRecordLogic.stop();
+    if (audioPath != null) {
+      final now = DateTime.now();
+      final audioRecord = AudioRecord(
+        formattedDate: DateFormat('yyyy-MM-dd – kk:mm:ss').format(now),
+        audioPath: audioPath,
+      );
+      await myAudioRecordsLogic.add(audioRecord);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final notifier = context.watch<AudioRecorderLogicInterface>().stateNotifier;
+
+    return ChangeNotifierProvider<AudioRecorderStateNotifier>.value(
+      value: notifier,
+      child: Consumer<AudioRecorderStateNotifier>(
+        builder: (context, notifier, _) {
+          final audioRecorderState = notifier.value;
+
+          return FloatingActionButton(
+            onPressed: () async {
+              try {
+                await audioRecorderState.maybeWhen<Future<void>>(
+                  start: () => _stop(context),
+                  orElse: () => _start(context),
+                );
+              } catch (e) {
+                final message = e.toString();
+                context.notify = message;
+              }
+            },
+            child: Icon(
+              audioRecorderState.maybeWhen<IconData>(
+                start: () => Icons.stop,
+                orElse: () => Icons.mic,
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
