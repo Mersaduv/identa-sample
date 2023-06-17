@@ -3,7 +3,7 @@ import 'package:identa/constants/colors.dart';
 import 'package:identa/constants/text_styles.dart';
 import 'package:identa/services/apis/api.dart';
 import 'package:identa/widgets/loading/cardSkeleton.dart';
-import 'package:identa/widgets/tap_notes/note_content.dart';
+import 'package:identa/modules/taps_page/notes_tap/note_content.dart';
 import '../models/note_model.dart';
 
 class NotesScreen extends StatefulWidget {
