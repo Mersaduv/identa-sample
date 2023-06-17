@@ -147,7 +147,7 @@ class InsightsScreenState extends State<InsightsScreen> {
                                 ),
                                 child: Text(
                                   conversation.notes.length.toString(),
-                                  style: MyTextStyles.small,
+                                  style: const TextStyle(color: Colors.white),
                                 ),
                               ),
                             ],
