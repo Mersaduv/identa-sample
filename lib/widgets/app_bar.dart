@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:identa/constants/colors.dart';
 import 'package:identa/constants/text_styles.dart';
-import 'package:identa/models/tap_data.dart';
-import 'package:identa/widgets/tab_item.dart';
+import 'package:identa/core/models/model_core/tap_data.dart';
+import 'package:identa/modules/tab_item.dart';
 
 class CustomAppBar extends StatefulWidget implements PreferredSizeWidget {
   const CustomAppBar(
