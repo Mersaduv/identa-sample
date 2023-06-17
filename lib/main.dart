@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:identa/core/repositories/storage_repository.dart';
 import 'package:identa/screens/chat.dart'; // import chat screen
 import 'package:identa/screens/insights.dart';
 import 'package:identa/screens/notes.dart'; // import notes screen
@@ -6,7 +7,8 @@ import 'package:identa/widgets/app_bar.dart';
 import 'package:identa/widgets/settings/view.dart';
 import 'package:provider/provider.dart';
 import 'package:provider/single_child_widget.dart';
-import 'package:identa/_features.dart';
+
+import 'core/repositories/permission_repository.dart';
 
 void main() {
   runApp(const MyApp());

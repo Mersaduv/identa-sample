@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:identa/models/message.dart';
+import 'package:identa/core/models/model_core/bot.dart';
+import 'package:identa/core/models/model_core/message.dart';
+import 'package:identa/core/models/model_core/user.dart';
+import 'package:identa/modules/taps_page/chat/chat_bubble.dart';
 import 'package:identa/services/auth/auth_service.dart';
-import 'package:identa/widgets/chat_bubble.dart';
-import 'package:identa/models/user.dart';
-import 'package:identa/models/bot.dart';
 import 'package:identa/services/apis/api.dart';
 import 'package:identa/widgets/text_field.dart';
 

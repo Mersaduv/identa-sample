@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:identa/constants/colors.dart';
 import 'package:identa/constants/text_styles.dart';
+import 'package:identa/core/models/model_core/conversation_model.dart';
+import 'package:identa/core/models/model_core/note_model.dart';
+import 'package:identa/modules/taps_page/insights_tap/insights_content.dart';
 import 'package:identa/services/apis/api.dart';
 import 'package:identa/widgets/loading/cardSkeleton.dart';
-import 'package:identa/models/conversation_model.dart';
-import 'package:identa/widgets/tab_Insights/insights_content.dart';
-import '../models/note_model.dart';
 
 class InsightsScreen extends StatefulWidget {
   const InsightsScreen({Key? key}) : super(key: key);
