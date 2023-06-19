@@ -54,9 +54,25 @@ class MyAudioRecordsWidget extends StatelessWidget {
                       audioPath: audioRecord.audioPath,
                     ),
                     dispose: (_, logic) => logic.onDispose(),
-                    child: AudioPlayerCard(
-                      audioRecord,
-                      key: Key(audioRecord.audioPath),
+                    child: Row(
+                      children: [
+                        AudioPlayerCard(
+                          audioRecord,
+                          key: Key(audioRecord.audioPath),
+                        ),
+                        IconButton(
+                            onPressed: () {
+                              context
+                                  .read<MyAudioRecordsLogicInterface>()
+                                  .delete(audioRecord);
+                              context.notify = 'Audio record dismissed';
+                            },
+                            icon: const Icon(
+                              Icons.delete,
+                              color: Color.fromARGB(255, 250, 121, 112),
+                              size: 33,
+                            ))
+                      ],
                     ),
                   ),
                 ),
@@ -81,11 +97,11 @@ class _DismissibleBackground extends StatelessWidget {
         borderRadius: BorderRadius.circular(4.0),
         color: Colors.red,
       ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 8.0),
+      child: const Padding(
+        padding: EdgeInsets.symmetric(horizontal: 8.0),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: const <Widget>[
+          children: <Widget>[
             kDeleteIcon,
             kDeleteIcon,
           ],

@@ -10,7 +10,7 @@ import 'package:provider/provider.dart'
 import 'package:provider/single_child_widget.dart' show SingleChildWidget;
 
 class VoiceMessage extends StatelessWidget {
-   const VoiceMessage({
+  const VoiceMessage({
     super.key,
   });
 
@@ -42,8 +42,8 @@ class VoiceMessage extends StatelessWidget {
             ),
           ),
         ),
-        floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
         floatingActionButton: AudioRecorderButton(),
+        floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       ),
     );
   }

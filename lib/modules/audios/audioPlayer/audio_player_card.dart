@@ -23,63 +23,107 @@ class AudioPlayerCard extends StatelessWidget {
         builder: (_, notifier, __) {
           final audioPlayerState = notifier.value;
 
-          return Card(
-            elevation: 4.0,
-            margin: EdgeInsets.zero,
-            child: InkWell(
-              borderRadius: BorderRadius.circular(4.0),
-              onTap: () async {
-                await audioPlayerState.when<Future<void>>(
-                  play: audioPlayerLogic.pause,
-                  pause: audioPlayerLogic.play,
-                );
-              },
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Stack(
-                  alignment: Alignment.bottomRight,
-                  children: <Widget>[
-                    Row(
+          return InkWell(
+            onTap: () async {
+              await audioPlayerState.when<Future<void>>(
+                play: audioPlayerLogic.pause,
+                pause: audioPlayerLogic.play,
+              );
+            },
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Stack(
+                alignment: Alignment.bottomRight,
+                children: <Widget>[
+                  Container(
+                    margin: const EdgeInsets.only(top: 3, bottom: 3),
+                    padding: const EdgeInsets.only(right: 15, left: 15),
+                    height: 70,
+                    width: 280,
+                    decoration: BoxDecoration(
+                      color: const Color.fromARGB(255, 221, 214, 255),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Row(
                       children: <Widget>[
-                        Icon(
-                          audioPlayerState.when<IconData>(
-                            play: () => Icons.pause,
-                            pause: () => Icons.play_arrow,
+                        Container(
+                          padding: const EdgeInsets.all(3.0),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF2993CF),
+                            borderRadius: BorderRadius.circular(25),
                           ),
-                          color: activeColor,
+                          child: Icon(
+                            audioPlayerState.when<IconData>(
+                              play: () => Icons.pause,
+                              pause: () => Icons.play_arrow,
+                            ),
+                            color: Colors.white,
+                            size: 38,
+                          ),
                         ),
+                        const SizedBox(width: 20),
                         Expanded(
-                          child: ColoredBox(
-                            color: Colors.transparent,
-                            child: AudioFileWaveforms(
-                              playerController:
-                                  audioPlayerLogic.playerController,
-                              size: const Size.fromHeight(80.0),
-                              margin: const EdgeInsets.only(right: 8.0),
-                              animationDuration: kThemeAnimationDuration,
-                              enableSeekGesture: false,
-                              waveformType: WaveformType.fitWidth,
-                              playerWaveStyle: PlayerWaveStyle(
-                                fixedWaveColor: Colors.black12,
-                                liveWaveColor: activeColor,
-                              ),
+                          child: Padding(
+                            padding:
+                                const EdgeInsets.only(top: 18.0, bottom: 0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Expanded(
+                                  child: ColoredBox(
+                                    color: Colors.transparent,
+                                    child: AudioFileWaveforms(
+                                      playerController:
+                                          audioPlayerLogic.playerController,
+                                      size: const Size.fromHeight(80.0),
+                                      margin: const EdgeInsets.only(right: 8.0),
+                                      animationDuration:
+                                          kThemeAnimationDuration,
+                                      enableSeekGesture: false,
+                                      waveformType: WaveformType.fitWidth,
+                                      playerWaveStyle: PlayerWaveStyle(
+                                        fixedWaveColor: Colors.black12,
+                                        liveWaveColor: activeColor,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                Expanded(
+                                  child: ColoredBox(
+                                    color: Colors.transparent,
+                                    child: StreamBuilder<int>(
+                                      stream: audioPlayerLogic.playerController
+                                          .onCurrentDurationChanged,
+                                      initialData: 0,
+                                      builder: (context, snapshot) {
+                                        final currentDuration =
+                                            snapshot.data ?? 0;
+                                        final seconds =
+                                            (currentDuration / 1000).round();
+                                        final minutes = (seconds / 60).floor();
+                                        final remainingSeconds = seconds % 60;
+                                        final formattedDuration =
+                                            '${minutes.toString().padLeft(2, '0')}:${remainingSeconds.toString().padLeft(2, '0')}';
+                                        return Text(
+                                          formattedDuration,
+                                          style: const TextStyle(
+                                              fontSize: 10.0,
+                                              color: Colors.blue,
+                                              fontWeight: FontWeight.bold),
+                                        );
+                                      },
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                         ),
                       ],
                     ),
-                    Padding(
-                      padding: const EdgeInsets.only(right: 8.0, bottom: 4.0),
-                      child: Text(
-                        audioRecord.formattedDate,
-                        style: const TextStyle(
-                          fontSize: 8.0,
-                          color: Colors.grey,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
           );

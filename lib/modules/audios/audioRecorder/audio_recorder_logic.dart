@@ -7,6 +7,7 @@ typedef AudioRecorderStateNotifier = ValueNotifier<AudioRecorderState>;
 
 abstract class AudioRecorderLogicInterface {
   AudioRecorderStateNotifier get stateNotifier;
+
   Future<void> start({String? path});
   Future<String?> stop();
   Future<void> onDispose();
@@ -37,7 +38,6 @@ class AudioRecorderLogic implements AudioRecorderLogicInterface {
     _recorder.start(path: path);
     _notify = const AudioRecorderState.start();
   }
-
   /// Stops the voice recording and returns the audio path.
   @override
   Future<String?> stop() async {
