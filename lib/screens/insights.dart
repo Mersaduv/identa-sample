@@ -4,6 +4,7 @@ import 'package:identa/services/apis/api.dart';
 import 'package:identa/widgets/loading/cardSkeleton.dart';
 import 'package:identa/widgets/conversation_model.dart';
 import 'package:identa/widgets/insights_content.dart';
+import 'package:identa/widgets/insights_new.dart';
 import '../widgets/note_model.dart';
 
 class InsightsScreen extends StatefulWidget {
@@ -41,7 +42,7 @@ class InsightsScreenState extends State<InsightsScreen> {
   Future<void> loadConversations() async {
     List<ConversationModel> conversationList = [];
     var todoNotesData = await ServiceApis.getNotes();
-    List<String> conversationName = ['Todo', 'Business', 'Health'];
+    List<String> conversationName = ['To Do', 'Business', 'Health'];
 
     for (int i = 0; i < conversationName.length; i++) {
       List<NoteModel> todoNotes = [];
@@ -80,9 +81,35 @@ class InsightsScreenState extends State<InsightsScreen> {
     }
   }
 
+  void createNewInsights(String insightsName) {
+    setState(() {
+      ConversationModel newInsights = ConversationModel(
+        name: insightsName,
+        notes: [],
+        icon: Icons.lightbulb_outline,
+      );
+      conversations.add(newInsights);
+    });
+  }
+
+  void showNewInsightsDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return NewInsightsDialog(
+          onCreate: createNewInsights,
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      floatingActionButton: FloatingActionButton(
+        onPressed: showNewInsightsDialog, // Show dialog to create new insights
+        child: Icon(Icons.add),
+      ),
       body: isLoading
           ? Padding(
               padding: const EdgeInsets.all(18),
