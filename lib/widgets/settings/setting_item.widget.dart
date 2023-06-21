@@ -23,7 +23,7 @@ class SettingItemWidget extends StatelessWidget {
               bottom: BorderSide(color: Colors.grey.shade300, width: 1))),
       width: double.infinity,
       child: InkWell(
-        onTap: onPressed, // use onPressed as the callback
+        onTap: onTapped,
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
           child: prefixIcon != null

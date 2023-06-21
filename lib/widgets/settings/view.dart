@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:identa/services/auth/auth_service.dart';
-
 import 'setting_item.widget.dart';
+import 'package:identa/screens/profile.dart';
 
 class Settings extends StatefulWidget {
   const Settings({Key? key}) : super(key: key);
@@ -17,8 +17,9 @@ class SettingsState extends State<Settings> {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.background,
-          border: const Border(right: BorderSide(width: .1))),
+        color: Theme.of(context).colorScheme.background,
+        border: const Border(right: BorderSide(width: .1)),
+      ),
       constraints: const BoxConstraints(maxWidth: 300),
       child: Scaffold(
         appBar: AppBar(
@@ -33,12 +34,20 @@ class SettingsState extends State<Settings> {
         ),
         body: SafeArea(
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.end,
-            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              const Padding(
-                padding: EdgeInsets.only(bottom: 30, top: 15),
+              const SizedBox(height: 15), // Add space at the top
+              SettingItemWidget(
+                onTapped: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => ProfilePage()),
+                  );
+                },
+                title: 'Profile',
+                prefixIcon: Icons.person,
+                onPressed: () async {},
               ),
+              const Expanded(child: SizedBox()), // Fill remaining space
               SettingItemWidget(
                 onPressed: () async {
                   try {
