@@ -140,11 +140,10 @@ class NotesScreenState extends State<NotesScreen> {
                   onDismissed: (_) => noteProvider.deleteNote(index - 1),
                   child: GestureDetector(
                       onTap: () async {
-                        noteProvider.setNote(note);
                         await Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => const NotesContent(),
+                            builder: (context) => NotesContent(note: note),
                           ),
                         );
                         noteProvider.setIsLoading(true);

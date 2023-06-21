@@ -8,7 +8,9 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 class NotesContent extends StatefulWidget {
-  const NotesContent({Key? key}) : super(key: key);
+  final NoteModel? note;
+
+  const NotesContent({Key? key, this.note}) : super(key: key);
   @override
   NotesContentState createState() => NotesContentState();
 }
@@ -28,10 +30,9 @@ class NotesContentState extends State<NotesContent>
     noteProvider = context.read<NoteProvider>();
     _titleController = TextEditingController();
     _detailsController = TextEditingController();
-    noteProvider = context.read<NoteProvider>();
-    if (noteProvider.note != null) {
-      _titleController.text = noteProvider.note!.title;
-      _detailsController.text = noteProvider.note!.details;
+    if (widget.note != null) {
+      _titleController.text = widget.note!.title;
+      _detailsController.text = widget.note!.details;
     }
 
     _detailsFocusNode = FocusNode();
@@ -40,7 +41,7 @@ class NotesContentState extends State<NotesContent>
   @override
   void dispose() async {
     super.dispose();
-    if (noteProvider.note == null) {
+    if (widget.note == null) {
       noteProvider.saveConversation(NoteModel(
         id: "0",
         title: _titleController.text,
@@ -49,10 +50,10 @@ class NotesContentState extends State<NotesContent>
       ));
     } else {
       NoteModel editedNote = NoteModel(
-        id: noteProvider.note!.id,
+        id: widget.note!.id,
         title: _titleController.text,
         details: _detailsController.text,
-        date: noteProvider.note!.date,
+        date: widget.note!.date,
       );
       await noteProvider.editConversation(editedNote);
     }
@@ -77,7 +78,7 @@ class NotesContentState extends State<NotesContent>
         title: 'New note',
       ),
       body: Column(
-        children: [
+        children: <Widget>[
           GestureDetector(
             onTap: () {
               // Activate the text field or hide the keyboard

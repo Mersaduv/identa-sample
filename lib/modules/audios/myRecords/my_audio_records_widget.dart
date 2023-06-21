@@ -28,7 +28,7 @@ class MyAudioRecordsWidget extends StatelessWidget {
 
           if (myAudioRecords.isEmpty) {
             return const Center(
-              child: Text('No record'),
+              child: Text(''),
             );
           }
 

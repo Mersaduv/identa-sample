@@ -25,6 +25,8 @@ class AudioRecorderButton extends StatefulWidget {
 
 class _AudioRecorderButtonState extends State<AudioRecorderButton> {
   bool isRecord = false;
+  bool isButtonDisabled = false;
+
   Timer? _timer;
   int _recordDuration = 0;
   double _opacity = 1.0;
@@ -50,7 +52,9 @@ class _AudioRecorderButtonState extends State<AudioRecorderButton> {
     final audioPath = await audioRecordLogic.stop();
     setState(() {
       isRecord = false;
+      isButtonDisabled = true;
     });
+
     if (audioPath != null) {
       final now = DateTime.now();
       final audioRecord = AudioRecord(
@@ -89,7 +93,7 @@ class _AudioRecorderButtonState extends State<AudioRecorderButton> {
             duration: const Duration(milliseconds: 300),
             width: isRecord ? 385 : 56,
             decoration: BoxDecoration(
-              color: MyColors.primaryColor,
+              color: isButtonDisabled ? Colors.grey : MyColors.primaryColor,
               borderRadius: BorderRadius.circular(10),
             ),
             child: isRecord
@@ -183,15 +187,26 @@ class _AudioRecorderButtonState extends State<AudioRecorderButton> {
                                 elevation: 0,
                                 backgroundColor: MyColors.primaryColor,
                                 onPressed: () async {
-                                  try {
-                                    await audioRecorderState
-                                        .maybeWhen<Future<void>>(
-                                      start: () => _stop(context),
-                                      orElse: () => _start(context),
-                                    );
-                                  } catch (e) {
-                                    final message = e.toString();
-                                    context.notify = message;
+                                  if (!isButtonDisabled) {
+                                    try {
+                                      setState(() {
+                                        isButtonDisabled = true;
+                                      });
+                                      await audioRecorderState
+                                          .maybeWhen<Future<void>>(
+                                        start: () => _stop(context),
+                                        orElse: () => _start(context),
+                                      );
+                                    } catch (e) {
+                                      final message = e.toString();
+                                      context.notify = message;
+                                    } finally {
+                                      await Future.delayed(
+                                          const Duration(seconds: 2));
+                                      setState(() {
+                                        isButtonDisabled = false;
+                                      });
+                                    }
                                   }
                                 },
                                 child: Icon(
@@ -210,16 +225,20 @@ class _AudioRecorderButtonState extends State<AudioRecorderButton> {
                 : Expanded(
                     child: FloatingActionButton(
                       elevation: 0,
-                      backgroundColor: MyColors.primaryColor,
+                      backgroundColor: isButtonDisabled
+                          ? Colors.grey
+                          : MyColors.primaryColor,
                       onPressed: () async {
-                        try {
-                          await audioRecorderState.maybeWhen<Future<void>>(
-                            start: () => _stop(context),
-                            orElse: () => _start(context),
-                          );
-                        } catch (e) {
-                          final message = e.toString();
-                          context.notify = message;
+                        if (!isButtonDisabled) {
+                          try {
+                            await audioRecorderState.maybeWhen<Future<void>>(
+                              start: () => _stop(context),
+                              orElse: () => _start(context),
+                            );
+                          } catch (e) {
+                            final message = e.toString();
+                            context.notify = message;
+                          }
                         }
                       },
                       child: Icon(
