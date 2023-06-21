@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:identa/core/repositories/note_provider.dart';
+import 'package:identa/modules/audios/audioRecorder/recorder_button.dart';
 import 'package:identa/core/repositories/storage_repository.dart';
 import 'package:identa/screens/chat.dart'; // import chat screen
 import 'package:identa/screens/insights.dart';
@@ -34,6 +35,9 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider<NoteProvider>(
           create: (_) => NoteProvider(),
         ),
+        ChangeNotifierProvider<RecorderButton>(
+          create: (_) => RecorderButton(),
+        )
       ],
       child: const MaterialApp(
         debugShowCheckedModeBanner: false,
