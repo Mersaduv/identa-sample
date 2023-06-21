@@ -1,15 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:identa/core/repositories/note_provider.dart';
 import 'package:identa/modules/audios/voice_message.dart';
 import 'package:identa/core/models/model_core/note_model.dart';
-import 'package:identa/services/apis/api.dart';
+import 'package:identa/widgets/app_bar_content.dart';
 import 'package:intl/intl.dart';
-import 'dart:async';
-typedef LoadConversationsCallback = Future<void> Function();
+
+import 'package:provider/provider.dart';
+
 class NotesContent extends StatefulWidget {
-  final NoteModel? note;
-  final LoadConversationsCallback? loadConversations;
-  const NotesContent({Key? key, this.note, required this.loadConversations})
-      : super(key: key);
+  const NotesContent({Key? key}) : super(key: key);
   @override
   NotesContentState createState() => NotesContentState();
 }
@@ -18,7 +17,7 @@ class NotesContentState extends State<NotesContent>
     with TickerProviderStateMixin {
   late TextEditingController _titleController;
   late TextEditingController _detailsController;
-
+  late NoteProvider noteProvider;
   late FocusNode _detailsFocusNode;
   late AnimationController animationController;
   late Animation<double> scaleAnimation;
@@ -26,12 +25,13 @@ class NotesContentState extends State<NotesContent>
   @override
   void initState() {
     super.initState();
+    noteProvider = context.read<NoteProvider>();
     _titleController = TextEditingController();
     _detailsController = TextEditingController();
-
-    if (widget.note != null) {
-      _titleController.text = widget.note!.title;
-      _detailsController.text = widget.note!.details;
+    noteProvider = context.read<NoteProvider>();
+    if (noteProvider.note != null) {
+      _titleController.text = noteProvider.note!.title;
+      _detailsController.text = noteProvider.note!.details;
     }
 
     _detailsFocusNode = FocusNode();
@@ -40,9 +40,8 @@ class NotesContentState extends State<NotesContent>
   @override
   void dispose() async {
     super.dispose();
-
-    if (widget.note == null) {
-      saveConversation(NoteModel(
+    if (noteProvider.note == null) {
+      noteProvider.saveConversation(NoteModel(
         id: "0",
         title: _titleController.text,
         details: _detailsController.text,
@@ -50,28 +49,24 @@ class NotesContentState extends State<NotesContent>
       ));
     } else {
       NoteModel editedNote = NoteModel(
-        id: widget.note!.id,
+        id: noteProvider.note!.id,
         title: _titleController.text,
         details: _detailsController.text,
-        date: widget.note!.date,
+        date: noteProvider.note!.date,
       );
-      await editConversation(editedNote);
+      await noteProvider.editConversation(editedNote);
     }
 
-    widget.loadConversations!();
+    noteProvider.loadNotesConversation();
 
     _titleController.dispose();
     _detailsController.dispose();
   }
 
-  Future<void> editConversation(NoteModel editedNote) async {
-    await ServiceApis.editNote(editedNote);
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
+      appBar: CustomAppBar(
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           color: Colors.white,
@@ -79,13 +74,7 @@ class NotesContentState extends State<NotesContent>
             Navigator.of(context).pop();
           },
         ),
-        title: const Text(
-          'New note',
-          style: TextStyle(
-            color: Colors.white,
-          ),
-        ),
-        backgroundColor: const Color(0xFF2993CF),
+        title: 'New note',
       ),
       body: Column(
         children: [
@@ -151,14 +140,5 @@ class NotesContentState extends State<NotesContent>
         ],
       ),
     );
-  }
-
-  void saveConversation(NoteModel note) async {
-    widget.loadConversations!();
-    if (_titleController.text.isNotEmpty) {
-      ServiceApis.createNote(note);
-
-      widget.loadConversations!();
-    }
   }
 }

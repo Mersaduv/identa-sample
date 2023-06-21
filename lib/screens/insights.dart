@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:identa/constants/colors.dart';
-import 'package:identa/constants/text_styles.dart';
-import 'package:identa/core/models/model_core/conversation_model.dart';
-import 'package:identa/core/models/model_core/note_model.dart';
+import 'package:identa/core/models/model_core/insights_conversation_model.dart';
+import 'package:identa/core/repositories/note_provider.dart';
 import 'package:identa/modules/taps_page/insights_tap/insights_content.dart';
-import 'package:identa/services/apis/api.dart';
 import 'package:identa/widgets/loading/cardSkeleton.dart';
+import 'package:provider/provider.dart';
 
 class InsightsScreen extends StatefulWidget {
   const InsightsScreen({Key? key}) : super(key: key);
@@ -15,74 +14,25 @@ class InsightsScreen extends StatefulWidget {
 }
 
 class InsightsScreenState extends State<InsightsScreen> {
-  List<NoteModel> notes = [];
-  List<ConversationModel> conversations = [];
-  late bool isLoading;
-
   @override
   void initState() {
     super.initState();
-    isLoading = true;
-    Future.delayed(const Duration(seconds: 2), () {
-      setState(() {
-        isLoading = false;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      var noteProvider = context.read<NoteProvider>();
+      noteProvider.setIsLoading(true);
+      Future.delayed(const Duration(seconds: 2), () {
+        noteProvider.setIsLoading(false);
       });
+
+      noteProvider.loadInsightsConversation();
     });
-    loadConversations();
-  }
-
-  void deleteNote(int index) async {
-    await ServiceApis.deleteNote(
-      conversations[index].notes.last.id,
-    );
-
-    loadConversations();
-  }
-
-  Future<void> loadConversations() async {
-    List<ConversationModel> conversationList = [];
-    var todoNotesData = await ServiceApis.getNotes();
-    List<String> conversationName = ['Todo', 'Business', 'Health'];
-
-    for (int i = 0; i < conversationName.length; i++) {
-      List<NoteModel> todoNotes = [];
-      for (var note in todoNotesData) {
-        NoteModel n = NoteModel.fromDynamic(note);
-        todoNotes.add(n);
-      }
-
-      ConversationModel conversation = ConversationModel(
-        name: conversationName[i],
-        notes: todoNotes,
-        icon: Icons.pending_actions,
-      );
-      conversationList.add(conversation);
-    }
-
-    setState(() {
-      conversations = conversationList;
-      isLoading = false;
-    });
-  }
-
-  Future<void> _navigateToInsightsContent(int index) async {
-    final updatedNotes = await Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => InsightsContent(
-          notes: conversations[index].notes,
-        ),
-      ),
-    );
-    if (updatedNotes != null) {
-      setState(() {
-        conversations[index].notes = updatedNotes;
-      });
-    }
   }
 
   @override
   Widget build(BuildContext context) {
+    var noteProvider = context.watch<NoteProvider>();
+    var insights = noteProvider.insightsconversation;
+    var isLoading = noteProvider.isLoading;
     return Scaffold(
       body: isLoading
           ? Padding(
@@ -97,15 +47,20 @@ class InsightsScreenState extends State<InsightsScreen> {
               ),
             )
           : ListView.builder(
-              itemCount: conversations.length,
+              itemCount: insights.length,
               itemBuilder: (context, index) {
-                ConversationModel conversation = conversations[index];
+                InsightsConversationModel conversation = insights[index];
                 String lastNote = conversation.notes.isNotEmpty
                     ? conversation.notes.last.title
                     : "No note available";
                 return GestureDetector(
-                  onTap: () {
-                    _navigateToInsightsContent(index);
+                  onTap: () async {
+                    await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const InsightsContent(),
+                        ));
+                    noteProvider.setIsLoading(true);
                   },
                   child: Column(
                     children: [

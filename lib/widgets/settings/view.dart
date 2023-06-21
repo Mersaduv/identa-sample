@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:identa/services/auth/auth_service.dart';
+import 'package:identa/widgets/app_bar_content.dart';
 
 import 'setting_item.widget.dart';
 
@@ -21,8 +22,8 @@ class SettingsState extends State<Settings> {
           border: const Border(right: BorderSide(width: .1))),
       constraints: const BoxConstraints(maxWidth: 300),
       child: Scaffold(
-        appBar: AppBar(
-          title: const Text('Settings'),
+        appBar: CustomAppBar(
+          title: 'Settings',
           leading: IconButton(
             padding: EdgeInsets.zero,
             onPressed: () {

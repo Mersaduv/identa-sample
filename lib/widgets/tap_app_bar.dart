@@ -5,8 +5,8 @@ import 'package:identa/constants/text_styles.dart';
 import 'package:identa/core/models/model_core/tap_data.dart';
 import 'package:identa/modules/tab_item.dart';
 
-class CustomAppBar extends StatefulWidget implements PreferredSizeWidget {
-  const CustomAppBar(
+class CustomTapAppBar extends StatefulWidget implements PreferredSizeWidget {
+  const CustomTapAppBar(
       {Key? key, required this.tabController, required this.openDrawer})
       : super(key: key);
 
@@ -19,7 +19,7 @@ class CustomAppBar extends StatefulWidget implements PreferredSizeWidget {
   CustomAppBarState createState() => CustomAppBarState();
 }
 
-class CustomAppBarState extends State<CustomAppBar> {
+class CustomAppBarState extends State<CustomTapAppBar> {
   int _selectedTab = 0;
   List<TabData> tabDataList = [
     TabData(title: 'Chat'),

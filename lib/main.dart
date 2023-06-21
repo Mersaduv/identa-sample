@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:identa/core/repositories/note_provider.dart';
 import 'package:identa/core/repositories/storage_repository.dart';
 import 'package:identa/screens/chat.dart'; // import chat screen
 import 'package:identa/screens/insights.dart';
 import 'package:identa/screens/notes.dart'; // import notes screen
-import 'package:identa/widgets/app_bar.dart';
+import 'package:identa/widgets/tap_app_bar.dart';
 import 'package:identa/widgets/settings/view.dart';
 import 'package:provider/provider.dart';
 import 'package:provider/single_child_widget.dart';
@@ -29,6 +30,9 @@ class MyApp extends StatelessWidget {
           lazy: true,
           create: (_) => StorageRepository(),
           dispose: (_, repository) => repository.onDispose(),
+        ),
+        ChangeNotifierProvider<NoteProvider>(
+          create: (_) => NoteProvider(),
         ),
       ],
       child: const MaterialApp(
@@ -69,7 +73,7 @@ class AppState extends State<App> with SingleTickerProviderStateMixin {
       key: _scaffoldKey,
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(kToolbarHeight + 40.0),
-        child: CustomAppBar(
+        child: CustomTapAppBar(
           tabController: _tabController,
           openDrawer: () {
             _scaffoldKey.currentState?.openDrawer();
