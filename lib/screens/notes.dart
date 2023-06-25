@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:identa/constants/colors.dart';
 import 'package:identa/constants/text_styles.dart';
+import 'package:identa/core/extensions/context_extension.dart';
 import 'package:identa/core/repositories/note_provider.dart';
 import 'package:identa/widgets/dismissible_background.dart';
 import 'package:identa/widgets/loading/cardSkeleton.dart';
@@ -137,7 +138,10 @@ class NotesScreenState extends State<NotesScreen> {
                       },
                     );
                   },
-                  onDismissed: (_) => noteProvider.deleteNote(index - 1),
+                  onDismissed: (_) {
+                    noteProvider.deleteNote(index - 1);
+                    context.notify = 'note dismissed';
+                  },
                   child: GestureDetector(
                       onTap: () async {
                         await Navigator.push(

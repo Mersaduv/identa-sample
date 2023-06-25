@@ -3,6 +3,7 @@ import 'package:identa/core/extensions/context_extension.dart';
 import 'package:identa/modules/audios/audioPlayer/audio_player_logic.dart';
 import 'package:identa/modules/audios/audioPlayer/audio_player_card.dart';
 import 'package:identa/modules/audios/myRecords/my_audio_records_logic.dart';
+import 'package:identa/widgets/dismissible_background.dart';
 import 'package:provider/provider.dart'
     show ChangeNotifierProvider, Consumer, Provider, ReadContext, WatchContext;
 
@@ -41,7 +42,7 @@ class MyAudioRecordsWidget extends StatelessWidget {
                 padding: const EdgeInsets.only(top: 8.0),
                 child: Dismissible(
                   key: Key(audioRecord.toString()),
-                  background: const _DismissibleBackground(),
+                  background: const DismissibleBackground(),
                   onDismissed: (_) {
                     context
                         .read<MyAudioRecordsLogicInterface>()
@@ -84,28 +85,28 @@ class MyAudioRecordsWidget extends StatelessWidget {
   }
 }
 
-class _DismissibleBackground extends StatelessWidget {
-  const _DismissibleBackground();
+// class _DismissibleBackground extends StatelessWidget {
+//   const _DismissibleBackground();
 
-  @override
-  Widget build(BuildContext context) {
-    const kDeleteIcon = Icon(Icons.delete, color: Colors.white);
+//   @override
+//   Widget build(BuildContext context) {
+//     const kDeleteIcon = Icon(Icons.delete, color: Colors.white);
 
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(4.0),
-        color: Colors.red,
-      ),
-      child: const Padding(
-        padding: EdgeInsets.symmetric(horizontal: 8.0),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: <Widget>[
-            kDeleteIcon,
-            kDeleteIcon,
-          ],
-        ),
-      ),
-    );
-  }
-}
+//     return DecoratedBox(
+//       decoration: BoxDecoration(
+//         borderRadius: BorderRadius.circular(4.0),
+//         color: Colors.red,
+//       ),
+//       child: const Padding(
+//         padding: EdgeInsets.symmetric(horizontal: 8.0),
+//         child: Row(
+//           mainAxisAlignment: MainAxisAlignment.spaceBetween,
+//           children: <Widget>[
+//             kDeleteIcon,
+//             kDeleteIcon,
+//           ],
+//         ),
+//       ),
+//     );
+//   }
+// }
