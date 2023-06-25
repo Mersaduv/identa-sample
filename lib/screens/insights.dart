@@ -3,6 +3,7 @@ import 'package:identa/constants/colors.dart';
 import 'package:identa/core/models/model_core/insights_conversation_model.dart';
 import 'package:identa/core/repositories/note_provider.dart';
 import 'package:identa/modules/taps_page/insights_tap/insights_content.dart';
+import 'package:identa/widgets/insights_new.dart';
 import 'package:identa/widgets/loading/cardSkeleton.dart';
 import 'package:provider/provider.dart';
 
@@ -31,9 +32,16 @@ class InsightsScreenState extends State<InsightsScreen> {
   @override
   Widget build(BuildContext context) {
     var noteProvider = context.watch<NoteProvider>();
+    var noteProviderHandle = context.read<NoteProvider>();
+
     var insights = noteProvider.insightsconversation;
     var isLoading = noteProvider.isLoading;
     return Scaffold(
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => noteProviderHandle.showNewInsightsDialog(
+            context), // Show dialog to create new insights
+        child: Icon(Icons.add),
+      ),
       body: isLoading
           ? Padding(
               padding: const EdgeInsets.all(18),
@@ -60,7 +68,7 @@ class InsightsScreenState extends State<InsightsScreen> {
                         MaterialPageRoute(
                           builder: (context) => const InsightsContent(),
                         ));
-                    noteProvider.setIsLoading(true);
+                    noteProviderHandle.setIsLoading(true);
                   },
                   child: Column(
                     children: [

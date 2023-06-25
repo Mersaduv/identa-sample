@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:identa/core/models/model_core/insights_conversation_model.dart';
 import 'package:identa/core/models/model_core/note_model.dart';
 import 'package:identa/services/apis/api.dart';
+import 'package:identa/widgets/insights_new.dart';
 
 class NoteProvider extends ChangeNotifier {
   NoteModel? _note;
@@ -45,7 +46,6 @@ class NoteProvider extends ChangeNotifier {
 
 // ? insights tap
   Future<void> loadInsightsConversation() async {
-    List<InsightsConversationModel> conversationList = [];
     var todoNotesData = await ServiceApis.getNotes();
     List<String> conversationName = ['Todo', 'Business', 'Health'];
 
@@ -61,11 +61,31 @@ class NoteProvider extends ChangeNotifier {
         notes: todoNotes,
         icon: Icons.pending_actions,
       );
-      conversationList.add(conversation);
+      _insightsconversation.add(conversation);
     }
-
-    _insightsconversation = conversationList;
     _isLoading = false;
+    notifyListeners();
+  }
+
+  void createNewInsights(String insightsName) {
+    InsightsConversationModel newInsights = InsightsConversationModel(
+      name: insightsName,
+      notes: [],
+      icon: Icons.lightbulb_outline,
+    );
+    _insightsconversation.add(newInsights);
+    notifyListeners();
+  }
+
+  void showNewInsightsDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return NewInsightsDialog(
+          onCreate: createNewInsights,
+        );
+      },
+    );
     notifyListeners();
   }
 
