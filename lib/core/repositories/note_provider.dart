@@ -9,7 +9,7 @@ class NoteProvider extends ChangeNotifier {
   NoteModel? _note;
   NoteModel? get note => _note;
 
-  late bool _isLoading;
+  late bool _isLoading = false;
   bool get isLoading => _isLoading;
 
   List<NoteModel> _notes = [];
@@ -46,6 +46,8 @@ class NoteProvider extends ChangeNotifier {
 
 // ? insights tap
   Future<void> loadInsightsConversation() async {
+    List<InsightsConversationModel> conversationList = [];
+
     var todoNotesData = await ServiceApis.getNotes();
     List<String> conversationName = ['Todo', 'Business', 'Health'];
 
@@ -61,8 +63,9 @@ class NoteProvider extends ChangeNotifier {
         notes: todoNotes,
         icon: Icons.pending_actions,
       );
-      _insightsconversation.add(conversation);
+      conversationList.add(conversation);
     }
+    _insightsconversation = conversationList;
     _isLoading = false;
     notifyListeners();
   }
