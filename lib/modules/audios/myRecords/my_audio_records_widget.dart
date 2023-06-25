@@ -84,29 +84,3 @@ class MyAudioRecordsWidget extends StatelessWidget {
     );
   }
 }
-
-// class _DismissibleBackground extends StatelessWidget {
-//   const _DismissibleBackground();
-
-//   @override
-//   Widget build(BuildContext context) {
-//     const kDeleteIcon = Icon(Icons.delete, color: Colors.white);
-
-//     return DecoratedBox(
-//       decoration: BoxDecoration(
-//         borderRadius: BorderRadius.circular(4.0),
-//         color: Colors.red,
-//       ),
-//       child: const Padding(
-//         padding: EdgeInsets.symmetric(horizontal: 8.0),
-//         child: Row(
-//           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-//           children: <Widget>[
-//             kDeleteIcon,
-//             kDeleteIcon,
-//           ],
-//         ),
-//       ),
-//     );
-//   }
-// }
