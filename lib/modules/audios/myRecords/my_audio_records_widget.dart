@@ -19,7 +19,6 @@ class MyAudioRecordsWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final notifier =
         context.watch<MyAudioRecordsLogicInterface>().stateNotifier;
-
     return ChangeNotifierProvider<AudioRecordsNotifier>.value(
       value: notifier,
       child: Consumer<AudioRecordsNotifier>(

@@ -9,6 +9,7 @@ typedef AudioRecordsNotifier = ValueNotifier<List<AudioRecord>>;
 
 abstract class MyAudioRecordsLogicInterface {
   AudioRecordsNotifier get stateNotifier;
+  AudioRecord get path;
   Future<void> add(AudioRecord audioRecord);
   Future<void> delete(AudioRecord audioRecord, {bool needToRemoveFile = true});
 }
@@ -23,6 +24,7 @@ class MyAudioRecordsLogic implements MyAudioRecordsLogicInterface {
   @visibleForTesting
   Completer<void> get completer => _completer;
   final _stateNotifier = AudioRecordsNotifier(List<AudioRecord>.empty());
+  late AudioRecord _path;
 
   static const _kStorageKey = 'records';
   @visibleForTesting
@@ -68,6 +70,7 @@ class MyAudioRecordsLogic implements MyAudioRecordsLogicInterface {
 
   @override
   Future<void> add(AudioRecord audioRecord) async {
+    _path = audioRecord;
     await _waitSetup();
     final updatedAudioRecords = <AudioRecord>[
       ..._stateNotifier.value,
@@ -80,6 +83,8 @@ class MyAudioRecordsLogic implements MyAudioRecordsLogicInterface {
     _notify = updatedAudioRecords;
   }
 
+  @override
+  AudioRecord get path => _path;
   @override
   Future<void> delete(
     AudioRecord audioRecord, {

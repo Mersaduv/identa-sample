@@ -12,7 +12,6 @@ import 'package:identa/modules/audios/myRecords/my_audio_records_logic.dart';
 import 'package:intl/intl.dart' show DateFormat;
 import 'package:provider/provider.dart'
     show ChangeNotifierProvider, Consumer, ReadContext, WatchContext;
-import 'package:record/record.dart';
 
 /// To use this widget, we need to instance [AudioRecorderLogicInterface] and
 /// [MyAudioRecordsLogicInterface].
@@ -42,22 +41,26 @@ class AudioRecorderButton extends StatelessWidget {
     final audioPath = await audioRecordLogic.stop();
     audioRecordbutton.setRecord(false);
     audioRecordbutton.setButtonDisabled(true);
-
+    print(audioPath);
     if (audioPath != null) {
       final now = DateTime.now();
       final audioRecord = AudioRecord(
         formattedDate: DateFormat('yyyy-MM-dd – kk:mm:ss').format(now),
         audioPath: audioPath,
       );
+      // print("voice format ${audioPath}");
       await myAudioRecordsLogic.add(audioRecord);
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final audioDelete = context.read<MyAudioRecordsLogicInterface>();
+    final audioPath = context.watch<MyAudioRecordsLogicInterface>();
     final notifier = context.watch<AudioRecorderLogicInterface>().stateNotifier;
     final audioRecordLogics = context.read<RecorderButton>();
     final audioRecordshow = context.watch<RecorderButton>();
+
     return ChangeNotifierProvider<AudioRecorderStateNotifier>.value(
       value: notifier,
       child: Consumer<AudioRecorderStateNotifier>(
@@ -113,46 +116,30 @@ class AudioRecorderButton extends StatelessWidget {
                                 elevation: 0,
                                 backgroundColor: MyColors.primaryColor,
                                 onPressed: () async {
-                                  try {
-                                    await audioRecorderState
-                                        .maybeWhen<Future<void>>(
-                                      start: () => _stop(context),
-                                      orElse: () => _start(context),
-                                    );
-                                  } catch (e) {
-                                    final message = e.toString();
-                                    context.notify = message;
+                                  if (!audioRecordshow.isButtonDisabled) {
+                                    try {
+                                      await audioRecorderState
+                                          .maybeWhen<Future<void>>(
+                                        start: () => _stop(context),
+                                        orElse: () => _start(context),
+                                      );
+                                      //!
+                                      audioRecordLogics.setButtonDisabled(true);
+                                      audioDelete.delete(audioPath.path);
+                                    } catch (e) {
+                                      final message = e.toString();
+                                      context.notify = message;
+                                    } finally {
+                                      await Future.delayed(
+                                          const Duration(seconds: 2));
+                                      audioRecordLogics
+                                          .setButtonDisabled(false);
+                                    }
                                   }
                                 },
                                 child: Icon(
                                   audioRecorderState.maybeWhen<IconData>(
                                     start: () => Icons.delete,
-                                    orElse: () => Icons.mic,
-                                  ),
-                                ),
-                              ),
-                            ),
-                            // const SizedBox(width: 10),
-                            Expanded(
-                              child: FloatingActionButton(
-                                elevation: 0,
-                                backgroundColor: MyColors.primaryColor,
-                                onPressed: () async {
-                                  try {
-                                    await audioRecorderState
-                                        .maybeWhen<Future<void>>(
-                                      start: () => _stop(context),
-                                      orElse: () => _start(context),
-                                    );
-                                  } catch (e) {
-                                    final message = e.toString();
-                                    context.notify = message;
-                                  }
-                                },
-                                child: Icon(
-                                  size: 28,
-                                  audioRecorderState.maybeWhen<IconData>(
-                                    start: () => Icons.stop,
                                     orElse: () => Icons.mic,
                                   ),
                                 ),

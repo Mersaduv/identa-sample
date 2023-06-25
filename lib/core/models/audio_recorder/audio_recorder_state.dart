@@ -9,4 +9,6 @@ class AudioRecorderState with _$AudioRecorderState {
   const factory AudioRecorderState.idle() = _Idle;
   const factory AudioRecorderState.start() = _Start;
   const factory AudioRecorderState.stop({String? audioPath}) = _Stop;
+  // const factory AudioRecorderState.pause() = _Pause;
+  // const factory AudioRecorderState.resume() = _Resume;
 }
