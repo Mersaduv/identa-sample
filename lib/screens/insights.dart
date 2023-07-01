@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:identa/constants.dart';
-import 'package:identa/services/apis/api.dart';
-import 'package:identa/widgets/loading/cardSkeleton.dart';
-import 'package:identa/widgets/conversation_model.dart';
-import 'package:identa/widgets/insights_content.dart';
+import 'package:identa/constants/colors.dart';
+import 'package:identa/core/models/model_core/insights_conversation_model.dart';
+import 'package:identa/core/repositories/note_provider.dart';
+import 'package:identa/modules/taps_page/insights_tap/insights_content.dart';
 import 'package:identa/widgets/insights_new.dart';
-import '../widgets/note_model.dart';
+import 'package:identa/widgets/loading/cardSkeleton.dart';
+import 'package:provider/provider.dart';
 
 class InsightsScreen extends StatefulWidget {
   const InsightsScreen({Key? key}) : super(key: key);
@@ -15,99 +15,31 @@ class InsightsScreen extends StatefulWidget {
 }
 
 class InsightsScreenState extends State<InsightsScreen> {
-  List<NoteModel> notes = [];
-  List<ConversationModel> conversations = [];
-  late bool isLoading;
-
   @override
   void initState() {
     super.initState();
-    isLoading = true;
-    Future.delayed(const Duration(seconds: 2), () {
-      setState(() {
-        isLoading = false;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      var noteProvider = context.read<NoteProvider>();
+      noteProvider.setIsLoading(true);
+      Future.delayed(const Duration(seconds: 2), () {
+        noteProvider.setIsLoading(false);
       });
+
+      noteProvider.loadInsightsConversation();
     });
-    loadConversations();
-  }
-
-  void deleteNote(int index) async {
-    await ServiceApis.deleteNote(
-      conversations[index].notes.last.id,
-    );
-
-    loadConversations();
-  }
-
-  Future<void> loadConversations() async {
-    List<ConversationModel> conversationList = [];
-    var todoNotesData = await ServiceApis.getNotes();
-    List<String> conversationName = ['To Do', 'Business', 'Health'];
-
-    for (int i = 0; i < conversationName.length; i++) {
-      List<NoteModel> todoNotes = [];
-      for (var note in todoNotesData) {
-        NoteModel n = NoteModel.fromDynamic(note);
-        todoNotes.add(n);
-      }
-
-      ConversationModel conversation = ConversationModel(
-        name: conversationName[i],
-        notes: todoNotes,
-        icon: Icons.pending_actions,
-      );
-      conversationList.add(conversation);
-    }
-
-    setState(() {
-      conversations = conversationList;
-      isLoading = false;
-    });
-  }
-
-  Future<void> _navigateToInsightsContent(int index) async {
-    final updatedNotes = await Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => InsightsContent(
-          notes: conversations[index].notes,
-        ),
-      ),
-    );
-    if (updatedNotes != null) {
-      setState(() {
-        conversations[index].notes = updatedNotes;
-      });
-    }
-  }
-
-  void createNewInsights(String insightsName) {
-    setState(() {
-      ConversationModel newInsights = ConversationModel(
-        name: insightsName,
-        notes: [],
-        icon: Icons.lightbulb_outline,
-      );
-      conversations.add(newInsights);
-    });
-  }
-
-  void showNewInsightsDialog() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return NewInsightsDialog(
-          onCreate: createNewInsights,
-        );
-      },
-    );
   }
 
   @override
   Widget build(BuildContext context) {
+    var noteProvider = context.watch<NoteProvider>();
+    var noteProviderHandle = context.read<NoteProvider>();
+
+    var insights = noteProvider.insightsconversation;
+    var isLoading = noteProvider.isLoading;
     return Scaffold(
       floatingActionButton: FloatingActionButton(
-        onPressed: showNewInsightsDialog, // Show dialog to create new insights
+        onPressed: () => noteProviderHandle.showNewInsightsDialog(
+            context), // Show dialog to create new insights
         child: Icon(Icons.add),
       ),
       body: isLoading
@@ -123,15 +55,20 @@ class InsightsScreenState extends State<InsightsScreen> {
               ),
             )
           : ListView.builder(
-              itemCount: conversations.length,
+              itemCount: insights.length,
               itemBuilder: (context, index) {
-                ConversationModel conversation = conversations[index];
+                InsightsConversationModel conversation = insights[index];
                 String lastNote = conversation.notes.isNotEmpty
                     ? conversation.notes.last.title
                     : "No note available";
                 return GestureDetector(
-                  onTap: () {
-                    _navigateToInsightsContent(index);
+                  onTap: () async {
+                    await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const InsightsContent(),
+                        ));
+                    noteProviderHandle.setIsLoading(true);
                   },
                   child: Column(
                     children: [
@@ -143,7 +80,7 @@ class InsightsScreenState extends State<InsightsScreen> {
                             child: Container(
                               height: 50.0,
                               width: 50.0,
-                              color: const Color(0xFF2D9CDB),
+                              color: MyColors.primaryColor,
                               child: Icon(
                                 conversation.icon,
                                 color: Colors.white,
@@ -173,10 +110,7 @@ class InsightsScreenState extends State<InsightsScreen> {
                                 ),
                                 child: Text(
                                   conversation.notes.length.toString(),
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 14,
-                                  ),
+                                  style: const TextStyle(color: Colors.white),
                                 ),
                               ),
                             ],

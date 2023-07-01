@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:identa/widgets/note_model.dart';
+import 'package:identa/core/models/model_core/note_model.dart';
 
-class ConversationModel {
+class InsightsConversationModel {
   String name;
   List<NoteModel> notes;
   IconData icon;
 
-  ConversationModel({
+  InsightsConversationModel({
     required this.name,
     required this.notes,
     required this.icon,

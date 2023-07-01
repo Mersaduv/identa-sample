@@ -1,77 +1,58 @@
 import 'package:flutter/material.dart';
-import 'package:identa/services/apis/api.dart';
-import 'note_model.dart';
+import 'package:identa/core/repositories/note_provider.dart';
+import 'package:identa/widgets/app_bar_content.dart';
+import 'package:provider/provider.dart';
 import 'package:flutter/rendering.dart';
 
 typedef LoadConversationsCallback = Future<void> Function();
 
 class InsightsContent extends StatefulWidget {
-  final List<NoteModel> notes;
-  const InsightsContent({Key? key, required this.notes}) : super(key: key);
+  const InsightsContent({Key? key}) : super(key: key);
   @override
   InsightsContentState createState() => InsightsContentState();
 }
 
 class InsightsContentState extends State<InsightsContent> {
   late List<TextEditingController> _textControllers;
+  late NoteProvider noteProvider;
 
   @override
   void initState() {
     super.initState();
+    noteProvider = context.read<NoteProvider>();
+
     _textControllers = List.generate(
-      widget.notes.length,
+      noteProvider.notes.length,
       (index) => TextEditingController(
-        text: widget.notes[index].title + widget.notes[index].details,
+        text:
+            noteProvider.notes[index].title + noteProvider.notes[index].details,
       ),
     );
   }
 
   @override
-  void dispose() {
-    for (final controller in _textControllers) {
-      controller.dispose();
-    }
+  void dispose() async {
     super.dispose();
+    await noteProvider.loadInsightsConversation();
   }
-
-  void _goBack() {
-    Navigator.of(context).pop(widget.notes);
-  }
-
-  //! Api edit
-//   void editNote(int index) async {
-//   final note = notes[index];
-
-//   await ServiceApis.editNote(
-//     note.id,
-//     title: note.title,
-//     details: note.details,
-//   );
-// }
 
   @override
   Widget build(BuildContext context) {
+    var notes = context.watch<NoteProvider>().notes;
     return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          color: Colors.white,
-          onPressed: _goBack,
-        ),
-        title: const Text(
-          'ToDo',
-          style: TextStyle(
+      appBar: CustomAppBar(
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
             color: Colors.white,
+            onPressed: () => Navigator.of(context).pop(),
           ),
-        ),
-        backgroundColor: const Color(0xFF2993CF),
-      ),
+          title: 'ToDo'),
       body: Padding(
         padding: const EdgeInsets.all(20.0),
         child: ListView.builder(
-          itemCount: widget.notes.length,
+          itemCount: notes.length,
           itemBuilder: (context, index) {
-            final note = widget.notes[index];
+            final note = notes[index];
             final controller = _textControllers[index];
 
             return Padding(
@@ -109,20 +90,8 @@ class InsightsContentState extends State<InsightsContent> {
                             textAlign: TextAlign.start,
                             textAlignVertical: TextAlignVertical.top,
                             onChanged: (value) {
-                              final RegExp regExp = RegExp(r'^(.*?)([\s\S]*)$');
-                              final RegExpMatch? match =
-                                  regExp.firstMatch(value);
-
-                              if (match != null) {
-                                final title = match.group(1);
-                                final details = match.group(2);
-
-                                setState(() {
-                                  note.title = title ?? '';
-                                  note.details = details ?? '';
-                                });
-                                //! editNote(index);
-                              }
+                              note.title = value;
+                              //! editNote(index);
                             },
                             decoration: const InputDecoration(
                               border: InputBorder.none,
@@ -140,17 +109,6 @@ class InsightsContentState extends State<InsightsContent> {
           },
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: const Color(0xFF2993CF),
-        child: const Icon(
-          Icons.mic,
-          color: Colors.white,
-        ),
-        onPressed: () {
-          // Start audio recording
-        },
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
   }
 }

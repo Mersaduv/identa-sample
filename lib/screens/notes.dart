@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:identa/constants.dart';
-import 'package:identa/services/apis/api.dart';
+import 'package:identa/constants/colors.dart';
+import 'package:identa/constants/text_styles.dart';
+import 'package:identa/core/extensions/context_extension.dart';
+import 'package:identa/core/repositories/note_provider.dart';
+import 'package:identa/widgets/dismissible_background.dart';
 import 'package:identa/widgets/loading/cardSkeleton.dart';
-import 'package:identa/widgets/note_content.dart';
-import '../widgets/note_model.dart';
+import 'package:identa/modules/taps_page/notes_tap/note_content.dart';
+import 'package:provider/provider.dart';
 
 class NotesScreen extends StatefulWidget {
   const NotesScreen({Key? key}) : super(key: key);
@@ -13,43 +16,25 @@ class NotesScreen extends StatefulWidget {
 }
 
 class NotesScreenState extends State<NotesScreen> {
-  List<NoteModel> notes = [];
-  late bool isLoading;
   @override
   void initState() {
     super.initState();
-    isLoading = true;
-    Future.delayed(const Duration(seconds: 2), () {
-      setState(() {
-        isLoading = false;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      var noteProvider = context.read<NoteProvider>();
+      noteProvider.setIsLoading(true);
+      Future.delayed(const Duration(seconds: 2), () {
+        noteProvider.setIsLoading(false);
       });
-    });
-    loadConversations();
-  }
 
-  void deleteNote(int index) async {
-    await ServiceApis.deleteNote(notes[index].id);
-
-    loadConversations();
-  }
-
-  Future<void> loadConversations() async {
-    List<NoteModel> noteList = [];
-    var allNotes = await ServiceApis.getNotes();
-    // print("type 1 ${allNotes}");
-    for (var note in allNotes) {
-      NoteModel n = NoteModel.fromDynamic(note);
-      noteList.add(n);
-    }
-    // print("type 2 ${noteList}");
-    setState(() {
-      notes = noteList;
-      isLoading = false;
+      noteProvider.loadNotesConversation();
     });
   }
 
   @override
   Widget build(BuildContext context) {
+    var noteProvider = context.watch<NoteProvider>();
+    var notes = noteProvider.notes;
+    var isLoading = noteProvider.isLoading;
     return Scaffold(
       body: isLoading
           ? Padding(
@@ -71,15 +56,11 @@ class NotesScreenState extends State<NotesScreen> {
                     padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 1.0),
                     child: GestureDetector(
                       onTap: () {
-                        setState(() {
-                          isLoading = true;
-                        });
+                        noteProvider.setIsLoading(true);
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => NotesContent(
-                              loadConversations: loadConversations,
-                            ),
+                            builder: (context) => const NotesContent(),
                           ),
                         );
                       },
@@ -134,15 +115,7 @@ class NotesScreenState extends State<NotesScreen> {
                 return Dismissible(
                   key: Key(note.title),
                   direction: DismissDirection.endToStart,
-                  background: Container(
-                    color: Colors.red,
-                    alignment: Alignment.centerRight,
-                    padding: const EdgeInsets.only(right: 16.0),
-                    child: const Icon(
-                      Icons.delete,
-                      color: Colors.white,
-                    ),
-                  ),
+                  background: const DismissibleBackground(),
                   confirmDismiss: (_) async {
                     return await showDialog<bool>(
                       context: context,
@@ -165,19 +138,19 @@ class NotesScreenState extends State<NotesScreen> {
                       },
                     );
                   },
-                  onDismissed: (_) => deleteNote(index - 1),
+                  onDismissed: (_) {
+                    noteProvider.deleteNote(index - 1);
+                    context.notify = 'note dismissed';
+                  },
                   child: GestureDetector(
                       onTap: () async {
                         await Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => NotesContent(
-                              note: note,
-                              loadConversations: loadConversations,
-                            ),
+                            builder: (context) => NotesContent(note: note),
                           ),
                         );
-                        loadConversations();
+                        noteProvider.setIsLoading(true);
                       },
                       child: Column(
                         children: [
@@ -190,7 +163,7 @@ class NotesScreenState extends State<NotesScreen> {
                                 child: Container(
                                   height: 50.0,
                                   width: 50.0,
-                                  color: const Color(0xFF2D9CDB),
+                                  color: MyColors.primaryColor,
                                   child: Center(
                                       child: Text(
                                     note.title.split(" ").length == 1 ||
@@ -224,8 +197,7 @@ class NotesScreenState extends State<NotesScreen> {
                                       note.details,
                                       maxLines: 2,
                                       overflow: TextOverflow.ellipsis,
-                                      style: TextStyle(
-                                          color: Colors.grey.shade500),
+                                      style: MyTextStyles.small,
                                     ),
                                   ),
                                 ],
@@ -238,8 +210,7 @@ class NotesScreenState extends State<NotesScreen> {
                               padding: const EdgeInsets.only(right: 8.0),
                               child: Text(
                                 note.date,
-                                style: TextStyle(
-                                    color: Colors.grey.shade600, fontSize: 12),
+                                style: MyTextStyles.small,
                               ),
                             ),
                           ),

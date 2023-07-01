@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:identa/constants.dart';
 import 'package:identa/widgets/loading/skeleton.dart';
+
+const double defaultPadding = 16.0;
 
 class CardSkelton extends StatelessWidget {
   const CardSkelton({
