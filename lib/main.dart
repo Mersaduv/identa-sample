@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:identa/core/repositories/file_picker_privider.dart';
 import 'package:identa/core/repositories/note_provider.dart';
+import 'package:identa/core/repositories/notification_provider.dart';
 import 'package:identa/modules/audios/audioRecorder/recorder_button.dart';
 import 'package:identa/core/repositories/storage_repository.dart';
 import 'package:identa/screens/chat.dart'; // import chat screen
@@ -13,7 +14,8 @@ import 'package:provider/single_child_widget.dart';
 
 import 'core/repositories/permission_repository.dart';
 
-void main() {
+Future<void> main() async {
+  await NotificationController.initializeLocalNotifications();
   runApp(const MyApp());
 }
 
@@ -64,6 +66,7 @@ class AppState extends State<App> with SingleTickerProviderStateMixin {
   late GlobalKey<ScaffoldState> _scaffoldKey;
   @override
   void initState() {
+    NotificationController.startListeningNotificationEvents();
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
     _scaffoldKey = GlobalKey<ScaffoldState>();

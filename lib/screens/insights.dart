@@ -101,7 +101,7 @@ class InsightsScreenState extends State<InsightsScreen> {
                               ),
                               const SizedBox(width: 10),
                               CircleAvatar(
-                                radius: 10,
+                                radius: 13,
                                 backgroundColor: const Color.fromARGB(
                                   255,
                                   137,
@@ -110,7 +110,8 @@ class InsightsScreenState extends State<InsightsScreen> {
                                 ),
                                 child: Text(
                                   conversation.notes.length.toString(),
-                                  style: const TextStyle(color: Colors.white),
+                                  style: const TextStyle(
+                                      color: Colors.white, fontSize: 13),
                                 ),
                               ),
                             ],
