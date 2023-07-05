@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:identa/core/repositories/file_picker_privider.dart';
 import 'package:identa/core/repositories/note_provider.dart';
 import 'package:identa/modules/audios/audioRecorder/recorder_button.dart';
 import 'package:identa/core/repositories/storage_repository.dart';
@@ -37,7 +38,10 @@ class MyApp extends StatelessWidget {
         ),
         ChangeNotifierProvider<RecorderButton>(
           create: (_) => RecorderButton(),
-        )
+        ),
+        ChangeNotifierProvider<FilePickerProvider>(
+          create: (context) => FilePickerProvider(),
+        ),
       ],
       child: const MaterialApp(
         debugShowCheckedModeBanner: false,
