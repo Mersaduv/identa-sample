@@ -70,7 +70,7 @@ class MyAudioRecordsWidget extends StatelessWidget {
                             icon: const Icon(
                               Icons.delete,
                               color: Color.fromARGB(255, 250, 121, 112),
-                              size: 33,
+                              size: 22,
                             ))
                       ],
                     ),

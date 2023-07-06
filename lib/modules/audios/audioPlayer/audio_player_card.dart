@@ -41,7 +41,7 @@ class AudioPlayerCard extends StatelessWidget {
                     height: 70,
                     width: 280,
                     decoration: BoxDecoration(
-                      color: const Color.fromARGB(255, 221, 214, 255),
+                      color: Color.fromARGB(255, 229, 237, 252),
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Row(

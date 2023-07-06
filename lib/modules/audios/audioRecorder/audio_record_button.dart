@@ -8,7 +8,6 @@ import 'package:identa/core/repositories/permission_repository.dart';
 import 'package:identa/modules/audios/audioRecorder/recorder_button.dart';
 import 'package:identa/modules/audios/audioRecorder/audio_recorder_logic.dart';
 import 'package:identa/modules/audios/myRecords/my_audio_records_logic.dart';
-
 import 'package:intl/intl.dart' show DateFormat;
 import 'package:provider/provider.dart'
     show ChangeNotifierProvider, Consumer, ReadContext, WatchContext;
@@ -53,6 +52,33 @@ class AudioRecorderButton extends StatelessWidget {
     }
   }
 
+  Future<void> _showConfirmationDialog(BuildContext context) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Delete Audio'),
+          content: const Text('Are you sure you want to delete this audio?'),
+          actions: [
+            TextButton(
+              child: const Text('No'),
+              onPressed: () => Navigator.of(context).pop(false),
+            ),
+            TextButton(
+              child: const Text('Yes'),
+              onPressed: () => Navigator.of(context).pop(true),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirmed != null && confirmed) {
+      // Delete the audio
+      // ... add your delete logic here ...
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final audioDelete = context.read<MyAudioRecordsLogicInterface>();
@@ -74,7 +100,7 @@ class AudioRecorderButton extends StatelessWidget {
               color: audioRecordshow.isButtonDisabled
                   ? Colors.grey
                   : MyColors.primaryColor,
-              borderRadius: BorderRadius.circular(10),
+              borderRadius: BorderRadius.circular(40),
             ),
             child: audioRecordshow.isRecord
                 ? Row(

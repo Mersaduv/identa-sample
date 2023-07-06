@@ -8,7 +8,7 @@ import 'package:identa/services/apis/api.dart';
 import 'package:identa/widgets/text_field.dart';
 
 class ChatScreen extends StatefulWidget {
-  const ChatScreen({super.key});
+  const ChatScreen({Key? key}) : super(key: key);
 
   @override
   ChatScreenState createState() => ChatScreenState();
@@ -32,7 +32,7 @@ class ChatScreenState extends State<ChatScreen>
       messages.add(Message(sender: user.name, message: message));
       isBotTyping = true;
     });
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance!.addPostFrameCallback((_) {
       _scrollController.animateTo(
         _scrollController.position.maxScrollExtent,
         duration: const Duration(milliseconds: 100),
@@ -45,7 +45,7 @@ class ChatScreenState extends State<ChatScreen>
           messages.add(Message(sender: bot.name, message: botResponse));
           isBotTyping = false;
         });
-        WidgetsBinding.instance.addPostFrameCallback((_) {
+        WidgetsBinding.instance!.addPostFrameCallback((_) {
           _scrollController.animateTo(
             _scrollController.position.maxScrollExtent,
             duration: const Duration(milliseconds: 300),
@@ -106,31 +106,33 @@ class ChatScreenState extends State<ChatScreen>
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Expanded(
-                        child: ChatTextField(
-                          controller: _messageController,
-                          isEnabled: !isBotTyping,
-                          hint: isBotTyping ? 'is typing...' : 'Type a message',
-                          onSubmitted: (value) {
-                            String messageContent = value.trim();
-                            if (messageContent.isNotEmpty) {
-                              sendMessage(messageContent);
-                              _messageController.clear();
-                            }
-                          },
-                        ),
-                      ),
-                      Container(
-                        margin: const EdgeInsets.fromLTRB(0.0, 0.0, 4.0, 4.0),
-                        decoration: const BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: Color(0xFF2993CF),
-                        ),
-                        child: IconButton(
-                          icon: const Icon(
-                            Icons.mic,
-                            color: Colors.white,
+                        child: Padding(
+                          padding: const EdgeInsets.only(
+                              right: 4.0), // Adjust the right padding as needed
+                          child: Theme(
+                            data: Theme.of(context).copyWith(
+                              textTheme: Theme.of(context).textTheme.copyWith(
+                                    subtitle1: TextStyle(
+                                      color: Color(
+                                          0xFF9CA3AF), // Set the hint text color to #9CA3AF
+                                    ),
+                                  ),
+                            ),
+                            child: ChatTextField(
+                              controller: _messageController,
+                              isEnabled: !isBotTyping,
+                              hint: isBotTyping
+                                  ? 'is typing...'
+                                  : 'Type a message',
+                              onSubmitted: (value) {
+                                String messageContent = value.trim();
+                                if (messageContent.isNotEmpty) {
+                                  sendMessage(messageContent);
+                                  _messageController.clear();
+                                }
+                              },
+                            ),
                           ),
-                          onPressed: () async {},
                         ),
                       ),
                     ],

@@ -49,68 +49,9 @@ class NotesScreenState extends State<NotesScreen> {
               ),
             )
           : ListView.builder(
-              itemCount: notes.length + 1,
+              itemCount: notes.length,
               itemBuilder: (context, index) {
-                if (index == 0) {
-                  return Padding(
-                    padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 1.0),
-                    child: GestureDetector(
-                      onTap: () {
-                        noteProvider.setIsLoading(true);
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const NotesContent(),
-                          ),
-                        );
-                      },
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.all(8.0),
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(4.0),
-                            ),
-                            child: Row(
-                              children: [
-                                Container(
-                                  width: 28.0,
-                                  height: 28.0,
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.rectangle,
-                                    color: const Color(0xFF2993CF),
-                                    borderRadius: BorderRadius.circular(8.0),
-                                  ),
-                                  child: const Icon(
-                                    Icons.add,
-                                    color: Colors.white,
-                                  ),
-                                ),
-                                const SizedBox(width: 8.0),
-                                const Text(
-                                  'New note',
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 16.0,
-                                    color: Color(0xFF4B5563),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          const SizedBox(height: 8.0),
-                          Divider(
-                            color: Colors.grey[300],
-                            thickness: 1.0,
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                }
-
-                final note = notes[index - 1];
+                final note = notes[notes.length - index - 1];
 
                 return Dismissible(
                   key: Key(note.title),
@@ -139,33 +80,32 @@ class NotesScreenState extends State<NotesScreen> {
                     );
                   },
                   onDismissed: (_) {
-                    noteProvider.deleteNote(index - 1);
+                    noteProvider.deleteNote(index);
                     context.notify = 'note dismissed';
                   },
                   child: GestureDetector(
-                      onTap: () async {
-                        await Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => NotesContent(note: note),
-                          ),
-                        );
-                        noteProvider.setIsLoading(true);
-                      },
-                      child: Column(
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.only(top: 5),
-                            child: ListTile(
-                              leading: ClipRRect(
-                                borderRadius:
-                                    BorderRadius.circular(13.0), //or 15.0
-                                child: Container(
-                                  height: 50.0,
-                                  width: 50.0,
-                                  color: MyColors.primaryColor,
-                                  child: Center(
-                                      child: Text(
+                    onTap: () async {
+                      await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => NotesContent(note: note),
+                        ),
+                      );
+                      noteProvider.setIsLoading(true);
+                    },
+                    child: Column(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.only(top: 5),
+                          child: ListTile(
+                            leading: ClipRRect(
+                              borderRadius: BorderRadius.circular(13.0),
+                              child: Container(
+                                height: 50.0,
+                                width: 50.0,
+                                color: const Color(0xFF2993CF),
+                                child: Center(
+                                  child: Text(
                                     note.title.split(" ").length == 1 ||
                                             note.title.length == 1
                                         ? note.title
@@ -177,51 +117,80 @@ class NotesScreenState extends State<NotesScreen> {
                                             .map((w) => w[0].toUpperCase())
                                             .join(),
                                     style: const TextStyle(
-                                        color: Colors.white, fontSize: 20),
-                                  )),
+                                      color: Colors.white,
+                                      fontSize: 20,
+                                    ),
+                                  ),
                                 ),
                               ),
-                              title: Text(
-                                note.title,
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.w500,
-                                  fontSize: 20,
-                                ),
+                            ),
+                            title: Text(
+                              note.title,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w500,
+                                fontSize: 20,
+                                color: Color(0xFF4B5563),
                               ),
-                              subtitle: Row(
-                                children: [
-                                  Expanded(
+                            ),
+                            subtitle: Row(
+                              children: [
+                                Expanded(
+                                  child: Opacity(
+                                    opacity: 0.8,
                                     child: Text(
                                       note.details,
                                       maxLines: 2,
                                       overflow: TextOverflow.ellipsis,
-                                      style: MyTextStyles.small,
+                                      style: MyTextStyles.small
+                                          .copyWith(color: Color(0xFF4B5563)),
                                     ),
                                   ),
-                                ],
-                              ),
+                                ),
+                              ],
                             ),
                           ),
-                          Align(
-                            alignment: Alignment.bottomRight,
-                            child: Padding(
-                              padding: const EdgeInsets.only(right: 8.0),
-                              child: Text(
-                                note.date,
-                                style: MyTextStyles.small,
-                              ),
+                        ),
+                        Align(
+                          alignment: Alignment.bottomRight,
+                          child: Padding(
+                            padding: const EdgeInsets.only(right: 8.0),
+                            child: Text(
+                              note.date,
+                              style: MyTextStyles.small,
                             ),
                           ),
-                          const Divider(
-                            height: 10,
-                          ),
-                        ],
-                      )),
+                        ),
+                        const Divider(
+                          height: 10,
+                        ),
+                      ],
+                    ),
+                  ),
                 );
               },
             ),
+      floatingActionButton: Container(
+        margin: const EdgeInsets.only(bottom: 16, right: 16),
+        child: Transform.scale(
+          scale: 1.1, // Adjust the scale value as needed
+          child: FloatingActionButton(
+            onPressed: () {
+              noteProvider.setIsLoading(true);
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const NotesContent(),
+                ),
+              );
+            },
+            child: const Icon(Icons.add),
+            backgroundColor: const Color(0xFF2993CF),
+          ),
+        ),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
   }
 }

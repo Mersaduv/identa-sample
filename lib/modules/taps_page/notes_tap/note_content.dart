@@ -102,7 +102,7 @@ class NotesContentState extends State<NotesContent>
                       style: const TextStyle(
                         fontSize: 24.0,
                         fontWeight: FontWeight.bold,
-                        color: Colors.black,
+                        color: Color(0xFF4B5563),
                       ),
                       onTap: () {
                         // Activate the text field or hide the keyboard
@@ -115,8 +115,7 @@ class NotesContentState extends State<NotesContent>
                     TextField(
                       controller: _detailsController,
                       decoration: const InputDecoration(
-                        hintText:
-                            'Details note , Start typing or recording ...  ',
+                        hintText: 'Start typing or recording ...  ',
                         hintStyle: TextStyle(color: Colors.grey),
                         border: InputBorder.none, // Remove the bottom line
                       ),
@@ -126,7 +125,7 @@ class NotesContentState extends State<NotesContent>
                       },
                       focusNode: _detailsFocusNode,
                       style: const TextStyle(
-                        color: Colors.black,
+                        color: Color(0xFF4B5563),
                       ),
                     ),
                     const SizedBox(height: 8.0),
