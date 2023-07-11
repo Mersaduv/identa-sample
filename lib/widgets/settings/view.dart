@@ -1,6 +1,9 @@
+import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:flutter/material.dart';
+import 'package:identa/core/repositories/notification_provider.dart';
 import 'package:identa/services/auth/auth_service.dart';
 import 'package:identa/widgets/app_bar_content.dart';
+import 'package:open_settings/open_settings.dart';
 
 import 'setting_item.widget.dart';
 import 'package:identa/screens/profile.dart';
@@ -49,6 +52,12 @@ class SettingsState extends State<Settings> {
                 prefixIcon: Icons.person,
                 onPressed: () async {},
               ),
+              const Expanded(child: SizedBox()),
+              ElevatedButton(
+                  onPressed: () async {
+                    await NotificationController.createNewNotification();
+                  },
+                  child: Text("Notification!")),
               const Expanded(child: SizedBox()), // Fill remaining space
               SettingItemWidget(
                 onPressed: () async {
