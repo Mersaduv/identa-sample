@@ -7,6 +7,7 @@ import 'package:identa/widgets/dismissible_background.dart';
 import 'package:identa/widgets/loading/cardSkeleton.dart';
 import 'package:identa/modules/taps_page/notes_tap/note_content.dart';
 import 'package:provider/provider.dart';
+import 'package:identa/core/models/model_core/note_model.dart';
 
 class NotesScreen extends StatefulWidget {
   const NotesScreen({Key? key}) : super(key: key);
@@ -80,17 +81,32 @@ class NotesScreenState extends State<NotesScreen> {
                     );
                   },
                   onDismissed: (_) {
-                    noteProvider.deleteNote(index);
+                    noteProvider.deleteNote(note);
                     context.notify = 'note dismissed';
                   },
                   child: GestureDetector(
                     onTap: () async {
-                      await Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => NotesContent(note: note),
-                        ),
-                      );
+                      if (note.title.isEmpty) {
+                        final defaultNote = NoteModel(
+                          id: note.id,
+                          title: 'New Note',
+                          details: note.details,
+                          date: note.date,
+                        );
+                        await Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => NotesContent(note: note),
+                          ),
+                        );
+                      } else {
+                        await Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => NotesContent(note: note),
+                          ),
+                        );
+                      }
                       noteProvider.setIsLoading(true);
                     },
                     child: Column(

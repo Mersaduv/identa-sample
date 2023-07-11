@@ -4,7 +4,6 @@ import 'package:identa/modules/audios/voice_message.dart';
 import 'package:identa/core/models/model_core/note_model.dart';
 import 'package:identa/widgets/app_bar_content.dart';
 import 'package:intl/intl.dart';
-
 import 'package:provider/provider.dart';
 
 class NotesContent extends StatefulWidget {
@@ -23,6 +22,7 @@ class NotesContentState extends State<NotesContent>
   late FocusNode _detailsFocusNode;
   late AnimationController animationController;
   late Animation<double> scaleAnimation;
+  VoiceMessage? _voiceMessage;
 
   @override
   void initState() {
@@ -30,6 +30,10 @@ class NotesContentState extends State<NotesContent>
     noteProvider = context.read<NoteProvider>();
     _titleController = TextEditingController();
     _detailsController = TextEditingController();
+    _voiceMessage = VoiceMessage();
+    resetVoiceMessage();
+    _titleController.text = '';
+    _detailsController.text = '';
     if (widget.note != null) {
       _titleController.text = widget.note!.title;
       _detailsController.text = widget.note!.details;
@@ -38,10 +42,26 @@ class NotesContentState extends State<NotesContent>
     _detailsFocusNode = FocusNode();
   }
 
+  void resetVoiceMessage() {
+    setState(() {
+      _voiceMessage = const VoiceMessage();
+    });
+  }
+
   @override
   void dispose() async {
     super.dispose();
-    if (widget.note == null) {
+    final String title = _titleController.text.trim();
+    if (title.isEmpty || title.startsWith('New Note')) {
+      final int defaultNoteCount = noteProvider.notes
+          .where((note) => note.title.startsWith('New Note'))
+          .length;
+      if (widget.note == null) {
+        final String defaultTitle = defaultNoteCount > 0
+            ? 'New Note ${defaultNoteCount + 1}'
+            : 'New Note';
+        _titleController.text = defaultTitle;
+      }
       noteProvider.saveConversation(NoteModel(
         id: "0",
         title: _titleController.text,

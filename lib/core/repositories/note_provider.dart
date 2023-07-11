@@ -92,9 +92,10 @@ class NoteProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> deleteNote(int index) async {
-    await ServiceApis.deleteNote(_notes[index].id);
-    loadNotesConversation();
+  Future<void> deleteNote(NoteModel note) async {
+    await ServiceApis.deleteNote(note.id);
+    _notes.removeWhere((n) => n.id == note.id);
+    notifyListeners();
   }
 
   Future<void> saveConversation(NoteModel note) async {
