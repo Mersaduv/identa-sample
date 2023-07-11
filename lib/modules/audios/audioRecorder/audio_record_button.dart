@@ -56,6 +56,33 @@ class AudioRecorderButton extends StatelessWidget {
     }
   }
 
+  Future<void> _showConfirmationDialog(BuildContext context) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Delete Audio'),
+          content: const Text('Are you sure you want to delete this audio?'),
+          actions: [
+            TextButton(
+              child: const Text('No'),
+              onPressed: () => Navigator.of(context).pop(false),
+            ),
+            TextButton(
+              child: const Text('Yes'),
+              onPressed: () => Navigator.of(context).pop(true),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirmed != null && confirmed) {
+      // Delete the audio
+      // ... add your delete logic here ...
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final audioDelete = context.read<MyAudioRecordsLogicInterface>();

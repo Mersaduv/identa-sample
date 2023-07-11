@@ -37,11 +37,18 @@ class InsightsScreenState extends State<InsightsScreen> {
     var insights = noteProvider.insightsconversation;
     var isLoading = noteProvider.isLoading;
     return Scaffold(
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => noteProviderHandle.showNewInsightsDialog(
-            context), // Show dialog to create new insights
-        child: Icon(Icons.add),
+      floatingActionButton: Container(
+        margin: const EdgeInsets.only(bottom: 16, right: 16),
+        child: Transform.scale(
+          scale: 1.1, // Adjust the scale value as needed
+          child: FloatingActionButton(
+            onPressed: () => noteProviderHandle.showNewInsightsDialog(context),
+            child: const Icon(Icons.add),
+            backgroundColor: const Color(0xFF2993CF),
+          ),
+        ),
       ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       body: isLoading
           ? Padding(
               padding: const EdgeInsets.all(18),

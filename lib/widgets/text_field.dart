@@ -88,9 +88,14 @@ class ChatTextFieldState extends State<ChatTextField>
                 child: TextField(
                   controller: widget.controller,
                   enabled: widget.isEnabled,
+                  style: const TextStyle(color: Color(0xFF4B5563)),
                   maxLines: null,
                   decoration: InputDecoration(
                     hintText: widget.hint,
+                    hintStyle: TextStyle(
+                      color: Color(
+                          0xFF9CA3AF), // Set the hint text color to #9CA3AF
+                    ),
                     border: InputBorder.none,
                     contentPadding:
                         const EdgeInsets.symmetric(horizontal: 16.0),
@@ -159,7 +164,10 @@ class ChatTextFieldState extends State<ChatTextField>
                 ),
               if (widget.isEnabled)
                 IconButton(
-                  icon: const Icon(Icons.send),
+                  icon: const Icon(
+                    Icons.send,
+                    color: Color(0xFF4B5563),
+                  ),
                   onPressed: () {
                     widget.onSubmitted(widget.controller.text.trim());
                     widget.controller.clear();
