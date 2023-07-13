@@ -52,11 +52,13 @@ class NotesContentState extends State<NotesContent>
   void dispose() async {
     super.dispose();
     final String title = _titleController.text.trim();
-    if (title.isEmpty || title.startsWith('New Note')) {
+    final String details = _detailsController.text.trim();
+
+    if (widget.note == null) {
       final int defaultNoteCount = noteProvider.notes
           .where((note) => note.title.startsWith('New Note'))
           .length;
-      if (widget.note == null) {
+      if (title.isEmpty && details.isNotEmpty) {
         final String defaultTitle = defaultNoteCount > 0
             ? 'New Note ${defaultNoteCount + 1}'
             : 'New Note';
