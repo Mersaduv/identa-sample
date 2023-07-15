@@ -90,7 +90,6 @@ class AudioRecorderButton extends StatelessWidget {
     final notifier = context.watch<AudioRecorderLogicInterface>().stateNotifier;
     final audioRecordLogics = context.read<RecorderButton>();
     final audioRecordshow = context.watch<RecorderButton>();
-    final attachmentHandler = context.read<FilePickerProvider>();
     return ChangeNotifierProvider<AudioRecorderStateNotifier>.value(
       value: notifier,
       child: Consumer<AudioRecorderStateNotifier>(
@@ -104,7 +103,7 @@ class AudioRecorderButton extends StatelessWidget {
                 children: [
                   AnimatedContainer(
                     duration: const Duration(milliseconds: 300),
-                    width: audioRecordshow.isRecord ? 385 : 56,
+                    width: audioRecordshow.isRecord ? 375 : 56,
                     decoration: BoxDecoration(
                       color: audioRecordshow.isButtonDisabled
                           ? Colors.grey
@@ -255,21 +254,6 @@ class AudioRecorderButton extends StatelessWidget {
                           ),
                   ),
                 ],
-              ),
-              Visibility(
-                visible: !audioRecordshow.isRecord,
-                child: Positioned(
-                  top: 0,
-                  right: 8,
-                  child: FloatingActionButton(
-                    elevation: 0,
-                    backgroundColor: MyColors.primaryColor,
-                    onPressed: () => attachmentHandler.pickFiles(),
-                    child: const Icon(Icons.description),
-                    // label: const Text('Pick file'),
-                    // icon: const Icon(Icons.description)
-                  ),
-                ),
               ),
             ],
           );

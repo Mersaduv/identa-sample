@@ -16,34 +16,15 @@ class VoiceMessage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MultiProvider(
-      providers: <SingleChildWidget>[
-        Provider<AudioRecorderLogicInterface>(
-          lazy: false,
-          create: (context) => AudioRecorderLogic(
-            permissionRepository: context.read<PermissionRepositoryInterface>(),
-          ),
-          dispose: (_, logic) => logic.onDispose(),
-        ),
-        Provider<MyAudioRecordsLogicInterface>(
-          lazy: false,
-          create: (context) => MyAudioRecordsLogic(
-            storageRepository: context.read<StorageRepositoryInterface>(),
+    return const Scaffold(
+      body: SafeArea(
+        child: MyAudioRecordsWidget(
+          padding: EdgeInsets.only(
+            left: 8.0,
+            right: 8.0,
+            bottom: 88.0,
           ),
         ),
-      ],
-      child: const Scaffold(
-        body: SafeArea(
-          child: MyAudioRecordsWidget(
-            padding: EdgeInsets.only(
-              left: 8.0,
-              right: 8.0,
-              bottom: 88.0,
-            ),
-          ),
-        ),
-        floatingActionButton: AudioRecorderButton(),
-        floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       ),
     );
   }

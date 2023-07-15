@@ -1,10 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:identa/core/repositories/note_provider.dart';
+import 'package:identa/core/repositories/permission_repository.dart';
+import 'package:identa/core/repositories/storage_repository.dart';
+import 'package:identa/modules/audios/audioRecorder/audio_recorder_logic.dart';
+import 'package:identa/modules/audios/myRecords/my_audio_records_logic.dart';
 import 'package:identa/modules/audios/voice_message.dart';
 import 'package:identa/core/models/model_core/note_model.dart';
+import 'package:identa/modules/taps_page/notes_tap/bottom_navigation.dart';
 import 'package:identa/widgets/app_bar_content.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:identa/modules/audios/audioRecorder/audio_record_button.dart';
+import 'package:provider/single_child_widget.dart';
 
 class NotesContent extends StatefulWidget {
   final NoteModel? note;
@@ -30,7 +37,7 @@ class NotesContentState extends State<NotesContent>
     noteProvider = context.read<NoteProvider>();
     _titleController = TextEditingController();
     _detailsController = TextEditingController();
-    _voiceMessage = VoiceMessage();
+    _voiceMessage = const VoiceMessage();
     resetVoiceMessage();
     _titleController.text = '';
     _detailsController.text = '';
@@ -88,78 +95,98 @@ class NotesContentState extends State<NotesContent>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: CustomAppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          color: Colors.white,
-          onPressed: () {
-            Navigator.of(context).pop();
-          },
+    return MultiProvider(
+      providers: <SingleChildWidget>[
+        Provider<AudioRecorderLogicInterface>(
+          lazy: false,
+          create: (context) => AudioRecorderLogic(
+            permissionRepository: context.read<PermissionRepositoryInterface>(),
+          ),
+          dispose: (_, logic) => logic.onDispose(),
         ),
-        title: 'New note',
-      ),
-      body: Column(
-        children: <Widget>[
-          GestureDetector(
-            onTap: () {
-              // Activate the text field or hide the keyboard
+        Provider<MyAudioRecordsLogicInterface>(
+          lazy: false,
+          create: (context) => MyAudioRecordsLogic(
+            storageRepository: context.read<StorageRepositoryInterface>(),
+          ),
+        ),
+      ],
+      child: Scaffold(
+        appBar: CustomAppBar(
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            color: Colors.white,
+            onPressed: () {
+              Navigator.of(context).pop();
             },
-            child: SingleChildScrollView(
-              child: Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    const SizedBox(height: 16.0),
-                    TextField(
-                      controller: _titleController,
-                      decoration: const InputDecoration(
-                        hintText: 'Title',
-                        hintStyle: TextStyle(color: Colors.grey),
-                        border: InputBorder.none,
+          ),
+          title: 'New note',
+        ),
+        body: Column(
+          children: <Widget>[
+            GestureDetector(
+              onTap: () {
+                // Activate the text field or hide the keyboard
+              },
+              child: SingleChildScrollView(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 16.0, vertical: 8.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      const SizedBox(height: 16.0),
+                      TextField(
+                        controller: _titleController,
+                        decoration: const InputDecoration(
+                          hintText: 'Title',
+                          hintStyle: TextStyle(color: Colors.grey),
+                          border: InputBorder.none,
+                        ),
+                        maxLines: null,
+                        style: const TextStyle(
+                          fontSize: 24.0,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF4B5563),
+                        ),
+                        onTap: () {
+                          // Activate the text field or hide the keyboard
+                        },
+                        onSubmitted: (value) {
+                          FocusScope.of(context)
+                              .requestFocus(_detailsFocusNode);
+                        },
                       ),
-                      maxLines: null,
-                      style: const TextStyle(
-                        fontSize: 24.0,
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xFF4B5563),
+                      const SizedBox(height: 8.0),
+                      TextField(
+                        controller: _detailsController,
+                        decoration: const InputDecoration(
+                          hintText: 'Start typing or recording ...  ',
+                          hintStyle: TextStyle(color: Colors.grey),
+                          border: InputBorder.none, // Remove the bottom line
+                        ),
+                        maxLines: null,
+                        onTap: () {
+                          // Activate the text field or hide the keyboard
+                        },
+                        focusNode: _detailsFocusNode,
+                        style: const TextStyle(
+                          color: Color(0xFF4B5563),
+                        ),
                       ),
-                      onTap: () {
-                        // Activate the text field or hide the keyboard
-                      },
-                      onSubmitted: (value) {
-                        FocusScope.of(context).requestFocus(_detailsFocusNode);
-                      },
-                    ),
-                    const SizedBox(height: 8.0),
-                    TextField(
-                      controller: _detailsController,
-                      decoration: const InputDecoration(
-                        hintText: 'Start typing or recording ...  ',
-                        hintStyle: TextStyle(color: Colors.grey),
-                        border: InputBorder.none, // Remove the bottom line
-                      ),
-                      maxLines: null,
-                      onTap: () {
-                        // Activate the text field or hide the keyboard
-                      },
-                      focusNode: _detailsFocusNode,
-                      style: const TextStyle(
-                        color: Color(0xFF4B5563),
-                      ),
-                    ),
-                    const SizedBox(height: 8.0),
-                  ],
+                      const SizedBox(height: 8.0),
+                    ],
+                  ),
                 ),
               ),
             ),
-          ),
-          const Expanded(
-            child: VoiceMessage(),
-          ),
-        ],
+            const Expanded(
+              child: VoiceMessage(),
+            ),
+          ],
+        ),
+        floatingActionButton: const BottomNavigation(),
+        floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       ),
     );
   }
