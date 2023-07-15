@@ -70,6 +70,7 @@ class NotesContentState extends State<NotesContent>
         details: _detailsController.text,
         date: DateFormat('dd MMM, hh:mm a').format(DateTime.now()),
       ));
+      noteProvider.setIsLoading(false);
     } else {
       NoteModel editedNote = NoteModel(
         id: widget.note!.id,
@@ -79,6 +80,7 @@ class NotesContentState extends State<NotesContent>
       );
       await noteProvider.editConversation(editedNote);
     }
+    noteProvider.setIsLoadBack(true);
 
     noteProvider.loadNotesConversation();
 
@@ -94,6 +96,7 @@ class NotesContentState extends State<NotesContent>
           icon: const Icon(Icons.arrow_back),
           color: Colors.white,
           onPressed: () {
+            noteProvider.setIsLoadBack(false);
             Navigator.of(context).pop();
           },
         ),
