@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:identa/core/models/model_core/insights_conversation_model.dart';
@@ -10,8 +12,9 @@ class NoteProvider extends ChangeNotifier {
   NoteModel? get note => _note;
 
   late bool _isLoading = false;
+  late bool _isLoadBack = false;
   bool get isLoading => _isLoading;
-
+  bool get isLoadBack => _isLoadBack;
   List<NoteModel> _notes = [];
   List<NoteModel> get notes => _notes;
 
@@ -24,8 +27,13 @@ class NoteProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void setIsLoading(bool bool) {
-    _isLoading = bool;
+  void setIsLoading(bool isLoading) {
+    _isLoading = isLoading;
+    notifyListeners();
+  }
+
+  void setIsLoadBack(bool isLoadBack) {
+    _isLoadBack = isLoadBack;
     notifyListeners();
   }
 
@@ -40,7 +48,7 @@ class NoteProvider extends ChangeNotifier {
     }
 // print("type 2 ${noteList}");
     _notes = noteList;
-    _isLoading = false;
+    // _isLoading = false;
     notifyListeners();
   }
 
@@ -66,7 +74,7 @@ class NoteProvider extends ChangeNotifier {
       conversationList.add(conversation);
     }
     _insightsconversation = conversationList;
-    _isLoading = false;
+    //  _isLoading = false;
     notifyListeners();
   }
 

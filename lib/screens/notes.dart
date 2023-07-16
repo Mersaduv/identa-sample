@@ -22,8 +22,10 @@ class NotesScreenState extends State<NotesScreen> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       var noteProvider = context.read<NoteProvider>();
-      noteProvider.setIsLoading(true);
-      Future.delayed(const Duration(seconds: 2), () {
+      noteProvider.setIsLoading(true); // Check the value of isLoadBack here
+      int delay = noteProvider.isLoadBack ? 0 : 600;
+      Future.delayed(Duration(milliseconds: delay), () {
+        noteProvider.setIsLoadBack(false);
         noteProvider.setIsLoading(false);
       });
 
@@ -35,9 +37,9 @@ class NotesScreenState extends State<NotesScreen> {
   Widget build(BuildContext context) {
     var noteProvider = context.watch<NoteProvider>();
     var notes = noteProvider.notes;
-    var isLoading = noteProvider.isLoading;
+    var loading = noteProvider;
     return Scaffold(
-      body: isLoading
+      body: loading.isLoading
           ? Padding(
               padding: const EdgeInsets.all(18),
               child: ListView.separated(
@@ -107,7 +109,7 @@ class NotesScreenState extends State<NotesScreen> {
                           ),
                         );
                       }
-                      noteProvider.setIsLoading(true);
+                      noteProvider.setIsLoadBack(true);
                     },
                     child: Column(
                       children: [
@@ -193,7 +195,7 @@ class NotesScreenState extends State<NotesScreen> {
           scale: 1.1, // Adjust the scale value as needed
           child: FloatingActionButton(
             onPressed: () {
-              noteProvider.setIsLoading(true);
+              // noteProvider.setIsLoadBack(true);
               Navigator.push(
                 context,
                 MaterialPageRoute(

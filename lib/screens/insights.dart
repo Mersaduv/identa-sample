@@ -21,7 +21,7 @@ class InsightsScreenState extends State<InsightsScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       var noteProvider = context.read<NoteProvider>();
       noteProvider.setIsLoading(true);
-      Future.delayed(const Duration(seconds: 2), () {
+      Future.delayed(const Duration(milliseconds: 600), () {
         noteProvider.setIsLoading(false);
       });
 
