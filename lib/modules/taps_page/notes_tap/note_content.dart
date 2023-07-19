@@ -1,21 +1,22 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:identa/core/models/audio_recorder/audio_files.dart';
+import 'package:identa/core/models/audio_recorder/audio_record.dart';
 import 'package:identa/core/repositories/note_provider.dart';
 import 'package:identa/core/repositories/permission_repository.dart';
-import 'package:identa/core/repositories/storage_repository.dart';
 import 'package:identa/modules/audios/audioRecorder/audio_recorder_logic.dart';
-import 'package:identa/modules/audios/myRecords/my_audio_records_logic.dart';
 import 'package:identa/modules/audios/voice_message.dart';
 import 'package:identa/core/models/model_core/note_model.dart';
 import 'package:identa/modules/taps_page/notes_tap/bottom_navigation.dart';
+import 'package:identa/services/apis/api.dart';
 import 'package:identa/widgets/app_bar_content.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-import 'package:identa/modules/audios/audioRecorder/audio_record_button.dart';
 import 'package:provider/single_child_widget.dart';
 
 class NotesContent extends StatefulWidget {
   final NoteModel? note;
-
   const NotesContent({Key? key, this.note}) : super(key: key);
   @override
   NotesContentState createState() => NotesContentState();
@@ -29,37 +30,71 @@ class NotesContentState extends State<NotesContent>
   late FocusNode _detailsFocusNode;
   late AnimationController animationController;
   late Animation<double> scaleAnimation;
-  VoiceMessage? _voiceMessage;
+  Completer<void>? _downloadCompleter;
 
+  final updatedAudioRecords = <AudioRecord>[];
   @override
   void initState() {
     super.initState();
     noteProvider = context.read<NoteProvider>();
     _titleController = TextEditingController();
     _detailsController = TextEditingController();
-    _voiceMessage = const VoiceMessage();
-    resetVoiceMessage();
+
     _titleController.text = '';
     _detailsController.text = '';
     if (widget.note != null) {
       _titleController.text = widget.note!.title;
       _detailsController.text = widget.note!.details;
+      loadFilesContent();
     }
 
     _detailsFocusNode = FocusNode();
   }
 
-  void resetVoiceMessage() {
-    setState(() {
-      _voiceMessage = const VoiceMessage();
-    });
+  void loadFilesContent() {
+    final audioRecordsProvider =
+        Provider.of<NoteProvider>(context, listen: false);
+
+    const kFormattedDateKey = 'formatted_date';
+    const kAudioPathKey = 'audio_path';
+
+    Map<String, String> toJson(AudioRecord value) {
+      return <String, String>{
+        kFormattedDateKey: value.formattedDate,
+        kAudioPathKey: value.audioPath,
+      };
+    }
+
+    for (var n in widget.note!.files) {
+      final completer = Completer<void>();
+
+      ServiceApis.downloadAudio(n.fileId).then((response) {
+        final audioRecord = AudioRecord(
+          formattedDate: DateTime.now().toString(),
+          audioPath: response.toString(),
+        );
+        audioRecordsProvider.addAudioRecord(audioRecord);
+        print("audios ${n.fileId}");
+
+        completer.complete();
+      }).catchError((error) {
+        completer.completeError(error);
+      });
+      _downloadCompleter = completer;
+    }
   }
 
   @override
-  void dispose() async {
-    super.dispose();
+  void dispose() {
     final String title = _titleController.text.trim();
     final String details = _detailsController.text.trim();
+    List<AudioFile> audioFiles = [];
+    for (var audio in noteProvider.audioList) {
+      audioFiles.add(AudioFile(fileId: audio.fileId));
+    }
+    for (var audio in noteProvider.audioList) {
+      print("Response voice: ${audio.fileId} SECEND");
+    }
 
     if (widget.note == null) {
       final int defaultNoteCount = noteProvider.notes
@@ -76,21 +111,37 @@ class NotesContentState extends State<NotesContent>
         title: _titleController.text,
         details: _detailsController.text,
         date: DateFormat('dd MMM, hh:mm a').format(DateTime.now()),
+        files: audioFiles,
       ));
+      noteProvider.updatedAudioRecords.clear();
+      noteProvider.loadNotesConversation();
+      audioFiles.clear();
+      _titleController.dispose();
+      _detailsController.dispose();
+      super.dispose();
     } else {
+      for (var audio in noteProvider.audioList) {
+        widget.note!.files.add(AudioFile(fileId: audio.fileId));
+      }
+      for (var audio in noteProvider.audioList) {
+        print("Response voice: ${audio.fileId} SECEND");
+      }
       NoteModel editedNote = NoteModel(
         id: widget.note!.id,
         title: _titleController.text,
         details: _detailsController.text,
         date: widget.note!.date,
+        files: widget.note!.files,
       );
-      await noteProvider.editConversation(editedNote);
+      noteProvider.editConversation(editedNote);
+
+      noteProvider.updatedAudioRecords.clear();
+      noteProvider.loadNotesConversation();
+      audioFiles.clear();
+      _titleController.dispose();
+      _detailsController.dispose();
+      super.dispose();
     }
-
-    noteProvider.loadNotesConversation();
-
-    _titleController.dispose();
-    _detailsController.dispose();
   }
 
   @override
@@ -98,17 +149,10 @@ class NotesContentState extends State<NotesContent>
     return MultiProvider(
       providers: <SingleChildWidget>[
         Provider<AudioRecorderLogicInterface>(
-          lazy: false,
           create: (context) => AudioRecorderLogic(
             permissionRepository: context.read<PermissionRepositoryInterface>(),
           ),
           dispose: (_, logic) => logic.onDispose(),
-        ),
-        Provider<MyAudioRecordsLogicInterface>(
-          lazy: false,
-          create: (context) => MyAudioRecordsLogic(
-            storageRepository: context.read<StorageRepositoryInterface>(),
-          ),
         ),
       ],
       child: Scaffold(
