@@ -1,86 +1,72 @@
 import 'package:flutter/material.dart';
 import 'package:identa/core/extensions/context_extension.dart';
+import 'package:identa/core/models/audio_recorder/audio_record.dart';
 import 'package:identa/modules/audios/audioPlayer/audio_player_logic.dart';
 import 'package:identa/modules/audios/audioPlayer/audio_player_card.dart';
-import 'package:identa/modules/audios/myRecords/my_audio_records_logic.dart';
 import 'package:identa/widgets/dismissible_background.dart';
 import 'package:provider/provider.dart'
-    show ChangeNotifierProvider, Consumer, Provider, ReadContext, WatchContext;
+    show Provider;
 
-/// To use this widget, we need to instance [MyAudioRecordsLogicInterface].
-class MyAudioRecordsWidget extends StatelessWidget {
+class MyAudioRecordsWidget extends StatefulWidget {
   const MyAudioRecordsWidget({
     super.key,
     this.padding,
+    required this.updatedAudioRecords,
   });
-
+  final List<AudioRecord> updatedAudioRecords;
   final EdgeInsets? padding;
 
   @override
+  State<MyAudioRecordsWidget> createState() => _MyAudioRecordsWidgetState();
+}
+
+class _MyAudioRecordsWidgetState extends State<MyAudioRecordsWidget> {
+  @override
   Widget build(BuildContext context) {
-    final notifier =
-        context.watch<MyAudioRecordsLogicInterface>().stateNotifier;
-    return ChangeNotifierProvider<AudioRecordsNotifier>.value(
-      value: notifier,
-      child: Consumer<AudioRecordsNotifier>(
-        builder: (_, notifier, __) {
-          final myAudioRecords = notifier.value;
-
-          if (myAudioRecords.isEmpty) {
-            return const Center(
-              child: Text(''),
-            );
-          }
-
-          return ListView.builder(
-            physics: const BouncingScrollPhysics(),
-            padding: padding,
-            itemCount: myAudioRecords.length,
-            itemBuilder: (context, index) {
-              final audioRecord = myAudioRecords[index];
-              return Padding(
-                padding: const EdgeInsets.only(top: 8.0),
-                child: Dismissible(
-                  key: Key(audioRecord.toString()),
-                  background: const DismissibleBackground(),
-                  onDismissed: (_) {
-                    context
-                        .read<MyAudioRecordsLogicInterface>()
-                        .delete(audioRecord);
-                    context.notify = 'Audio record dismissed';
-                  },
-                  child: Provider<AudioPlayerLogicInterface>(
-                    create: (_) => AudioPlayerLogic(
-                      audioPath: audioRecord.audioPath,
-                    ),
-                    dispose: (_, logic) => logic.onDispose(),
-                    child: Row(
-                      children: [
-                        AudioPlayerCard(
-                          audioRecord,
-                          key: Key(audioRecord.audioPath),
-                        ),
-                        IconButton(
-                            onPressed: () {
-                              context
-                                  .read<MyAudioRecordsLogicInterface>()
-                                  .delete(audioRecord);
-                              context.notify = 'Audio record dismissed';
-                            },
-                            icon: const Icon(
-                              Icons.delete,
-                              color: Color.fromARGB(255, 250, 121, 112),
-                              size: 22,
-                            ))
-                      ],
-                    ),
-                  ),
-                ),
-              );
+    return ListView.builder(
+      physics: const BouncingScrollPhysics(),
+      padding: widget.padding,
+      itemCount: widget.updatedAudioRecords.length,
+      itemBuilder: (context, index) {
+        final audioRecord = widget.updatedAudioRecords[index];
+        return Padding(
+          padding: const EdgeInsets.only(top: 8.0),
+          child: Dismissible(
+            key: Key(audioRecord.toString()),
+            background: const DismissibleBackground(),
+            onDismissed: (_) {
+              //context.read<MyAudioRecordsLogicInterface>().delete(audioRecord);
+              context.notify = 'Audio record dismissed';
             },
-          );
-        },
-      ),
+            child: Provider<AudioPlayerLogicInterface>(
+              create: (_) => AudioPlayerLogic(
+                audioPath: audioRecord.audioPath,
+              ),
+              dispose: (_, logic) => logic.onDispose(),
+              child: Row(
+                children: [
+                  AudioPlayerCard(
+                    audioRecord,
+                    key: Key(audioRecord.audioPath),
+                  ),
+                  IconButton(
+                      onPressed: () {
+                        // context
+                        //     .read<MyAudioRecordsLogicInterface>()
+                        //     .delete(audioRecord);
+                        context.notify = 'Audio record dismissed';
+                      },
+                      icon: const Icon(
+                        Icons.delete,
+                        color: Color.fromARGB(255, 250, 121, 112),
+                        size: 22,
+                      ))
+                ],
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 }

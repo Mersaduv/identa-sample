@@ -1,24 +1,21 @@
 import 'dart:async';
+import 'dart:convert';
 
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:identa/constants/colors.dart';
 import 'package:identa/core/extensions/context_extension.dart';
+import 'package:identa/core/models/audio_recorder/audio_files.dart';
 import 'package:identa/core/models/audio_recorder/audio_record.dart';
-import 'package:identa/core/repositories/file_picker_privider.dart';
+import 'package:identa/core/repositories/note_provider.dart';
 import 'package:identa/core/repositories/permission_repository.dart';
 import 'package:identa/modules/audios/audioRecorder/recorder_button.dart';
 import 'package:identa/modules/audios/audioRecorder/audio_recorder_logic.dart';
-import 'package:identa/modules/audios/myRecords/my_audio_records_logic.dart';
 import 'package:identa/services/apis/api.dart';
 
 import 'package:intl/intl.dart' show DateFormat;
 import 'package:provider/provider.dart'
-    show ChangeNotifierProvider, Consumer, ReadContext, WatchContext;
+    show ChangeNotifierProvider, Consumer, Provider, ReadContext, WatchContext;
 
-/// To use this widget, we need to instance [AudioRecorderLogicInterface] and
-/// [MyAudioRecordsLogicInterface].
-///
 class AudioRecorderButton extends StatelessWidget {
   const AudioRecorderButton({super.key});
 
@@ -36,8 +33,10 @@ class AudioRecorderButton extends StatelessWidget {
   }
 
   Future<void> _stop(BuildContext context) async {
+    final audioRecordsProvider =
+        Provider.of<NoteProvider>(context, listen: false);
+    final noteProvider = context.read<NoteProvider>();
     final audioRecordLogic = context.read<AudioRecorderLogicInterface>();
-    final myAudioRecordsLogic = context.read<MyAudioRecordsLogicInterface>();
     final audioRecordbutton = context.read<RecorderButton>();
 
     audioRecordbutton.stopTimer();
@@ -51,8 +50,18 @@ class AudioRecorderButton extends StatelessWidget {
         formattedDate: DateFormat('yyyy-MM-dd – kk:mm:ss').format(now),
         audioPath: audioPath,
       );
-      // print("voice format ${audioPath}");
-      await myAudioRecordsLogic.add(audioRecord);
+      //  await myAudioRecordsLogic.add(audioRecord);
+      final response = await ServiceApis.sendAudioFile(audioRecord.audioPath);
+      String fileId = jsonDecode(response.body)['fileId'];
+      print('Response voice: ${fileId} FIRST');
+      noteProvider.setAudioFile(AudioFile(fileId: fileId));
+
+      final responseDownlaod = await ServiceApis.downloadAudio(fileId);
+      final audioRecordResponse = AudioRecord(
+        formattedDate: DateFormat('yyyy-MM-dd – kk:mm:ss').format(now),
+        audioPath: responseDownlaod.toString(),
+      );
+      audioRecordsProvider.addAudioRecord(audioRecordResponse);
     }
   }
 
@@ -85,8 +94,6 @@ class AudioRecorderButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final audioDelete = context.read<MyAudioRecordsLogicInterface>();
-    final audioPath = context.watch<MyAudioRecordsLogicInterface>();
     final notifier = context.watch<AudioRecorderLogicInterface>().stateNotifier;
     final audioRecordLogics = context.read<RecorderButton>();
     final audioRecordshow = context.watch<RecorderButton>();
@@ -162,8 +169,8 @@ class AudioRecorderButton extends StatelessWidget {
                                               //!
                                               audioRecordLogics
                                                   .setButtonDisabled(true);
-                                              audioDelete
-                                                  .delete(audioPath.path);
+                                              // audioDelete
+                                              //     .delete(audioPath.path);
                                             } catch (e) {
                                               final message = e.toString();
                                               context.notify = message;
