@@ -104,12 +104,12 @@ class NotesContentState extends State<NotesContent>
         final String defaultTitle = defaultNoteCount > 0
             ? 'New Note ${defaultNoteCount + 1}'
             : 'New Note';
-        _titleController.text = defaultTitle;
+        _titleController.text = defaultTitle.trim();
       }
       noteProvider.saveConversation(NoteModel(
         id: "0",
-        title: _titleController.text,
-        details: _detailsController.text,
+        title: _titleController.text.trim(),
+        details: _detailsController.text.trim(),
         date: DateFormat('dd MMM, hh:mm a').format(DateTime.now()),
         files: audioFiles,
       ));

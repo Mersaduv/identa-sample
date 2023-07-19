@@ -129,6 +129,7 @@ class NotesScreenState extends State<NotesScreen> {
                                             .substring(0, 1)
                                             .toUpperCase()
                                         : note.title
+                                            .trim()
                                             .split(" ")
                                             .take(2)
                                             .map((w) => w[0].toUpperCase())
