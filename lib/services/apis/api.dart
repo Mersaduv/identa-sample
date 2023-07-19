@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/retry.dart';
 import 'package:identa/services/auth/auth_service.dart';
+import 'package:path_provider/path_provider.dart';
 import 'config.dart';
 
 class ServiceApis {
@@ -181,6 +182,54 @@ class ServiceApis {
         print('API request failed with status code ${response.statusCode}');
       }
       return false;
+    }
+  }
+
+  static Future<http.Response> sendAudioFile(String filePath) async {
+    final client = RetryClient(http.Client());
+    const url = 'insights/transcribe';
+
+    final file = File(filePath);
+    final bytes = await file.readAsBytes();
+    final response = await client.post(
+      Uri.parse('${ServiceConfig.baseURL}/$url'),
+      headers: {
+        'Content-Type': 'audio/mpeg',
+        'Authorization': _authService.getAuthHeader(),
+      },
+      body: bytes,
+    );
+
+    return response;
+  }
+
+  static Future<String?> downloadAudio(String fileId) async {
+    final client = RetryClient(http.Client());
+
+    String url = 'insights/download-audio/';
+
+    var response = await client.get(
+      Uri.parse('${ServiceConfig.baseURL}/$url/$fileId'),
+      headers: {
+        'Authorization': _authService.getAuthHeader(),
+      },
+    );
+
+    if (response.statusCode == 200) {
+      Directory directory = await getApplicationDocumentsDirectory();
+
+      String fileName = '$fileId.m4a';
+
+      String filePath = '${directory.path}/$fileName';
+
+      File file = File(filePath);
+      await file.writeAsBytes(response.bodyBytes);
+      print('Audio file downloaded successfully! Path: $filePath');
+
+      return filePath;
+    } else {
+      print('Failed to download audio file. Error: ${response.statusCode}');
+      return response.toString();
     }
   }
 }
