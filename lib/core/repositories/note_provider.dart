@@ -11,8 +11,8 @@ import 'package:identa/widgets/insights_new.dart';
 import 'dart:async';
 
 class NoteProvider extends ChangeNotifier {
-  NoteModel? _note;
-  NoteModel? get note => _note;
+  String _note = "";
+  String get note => _note;
 
   late bool _isLoading = false;
   late bool _isLoadBack = false;
@@ -24,7 +24,7 @@ class NoteProvider extends ChangeNotifier {
   List<AudioFile> _audioList = [];
   List<AudioFile> get audioList => _audioList;
 
-    List<AudioRecord> _updatedAudioRecords = [];
+  List<AudioRecord> _updatedAudioRecords = [];
 
   List<AudioRecord> get updatedAudioRecords => _updatedAudioRecords;
 
@@ -88,10 +88,13 @@ class NoteProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-
   void addAudioRecord(AudioRecord audioRecord) {
     _updatedAudioRecords.add(audioRecord);
     notifyListeners();
+  }
+
+  void addAudioText(String? textBody) {
+    _note = textBody ?? "";
   }
 
   void createNewInsights(String insightsName) {

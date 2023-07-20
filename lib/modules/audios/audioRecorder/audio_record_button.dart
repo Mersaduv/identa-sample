@@ -35,6 +35,7 @@ class AudioRecorderButton extends StatelessWidget {
   Future<void> _stop(BuildContext context) async {
     final audioRecordsProvider =
         Provider.of<NoteProvider>(context, listen: false);
+    final setTextBody = Provider.of<NoteProvider>(context, listen: false);
     final noteProvider = context.read<NoteProvider>();
     final audioRecordLogic = context.read<AudioRecorderLogicInterface>();
     final audioRecordbutton = context.read<RecorderButton>();
@@ -53,14 +54,16 @@ class AudioRecorderButton extends StatelessWidget {
       //  await myAudioRecordsLogic.add(audioRecord);
       final response = await ServiceApis.sendAudioFile(audioRecord.audioPath);
       String fileId = jsonDecode(response.body)['fileId'];
+      String textBody = jsonDecode(response.body)["text"];
       print('Response voice: ${fileId} FIRST');
       noteProvider.setAudioFile(AudioFile(fileId: fileId));
-
+      setTextBody.addAudioText(textBody);
       final responseDownlaod = await ServiceApis.downloadAudio(fileId);
       final audioRecordResponse = AudioRecord(
         formattedDate: DateFormat('yyyy-MM-dd – kk:mm:ss').format(now),
         audioPath: responseDownlaod.toString(),
       );
+      print('text voice: ${textBody} FIRST');
       audioRecordsProvider.addAudioRecord(audioRecordResponse);
     }
   }
@@ -155,6 +158,7 @@ class AudioRecorderButton extends StatelessWidget {
                                   children: [
                                     Expanded(
                                       child: FloatingActionButton(
+                                        heroTag: "btn2",
                                         elevation: 0,
                                         backgroundColor: MyColors.primaryColor,
                                         onPressed: () async {
@@ -194,6 +198,7 @@ class AudioRecorderButton extends StatelessWidget {
                                     // const SizedBox(width: 10),
                                     Expanded(
                                       child: FloatingActionButton(
+                                        heroTag: "btn3",
                                         elevation: 0,
                                         backgroundColor: MyColors.primaryColor,
                                         onPressed: () async {
@@ -234,6 +239,7 @@ class AudioRecorderButton extends StatelessWidget {
                             ],
                           )
                         : FloatingActionButton(
+                            heroTag: "btn1",
                             elevation: 0,
                             backgroundColor: audioRecordshow.isButtonDisabled
                                 ? Colors.grey
