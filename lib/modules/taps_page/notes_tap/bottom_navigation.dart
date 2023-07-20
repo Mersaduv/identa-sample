@@ -42,14 +42,6 @@ class BottomNavigation extends StatelessWidget {
               ),
             ),
           ),
-          // FloatingActionButton(
-          //   elevation: 0,
-          //   backgroundColor: MyColors.primaryColor,
-          //   onPressed: () => attachmentHandler.pickFiles(),
-          //   child: const Icon(Icons.description),
-          //   // label: const Text('Pick file'),
-          //   // icon: const Icon(Icons.description)
-          // ),
         ],
       ),
     );
