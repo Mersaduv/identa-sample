@@ -1,24 +1,21 @@
 import 'dart:async';
+import 'dart:convert';
 
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:identa/constants/colors.dart';
 import 'package:identa/core/extensions/context_extension.dart';
+import 'package:identa/core/models/audio_recorder/audio_files.dart';
 import 'package:identa/core/models/audio_recorder/audio_record.dart';
-import 'package:identa/core/repositories/file_picker_privider.dart';
+import 'package:identa/core/repositories/note_provider.dart';
 import 'package:identa/core/repositories/permission_repository.dart';
 import 'package:identa/modules/audios/audioRecorder/recorder_button.dart';
 import 'package:identa/modules/audios/audioRecorder/audio_recorder_logic.dart';
-import 'package:identa/modules/audios/myRecords/my_audio_records_logic.dart';
 import 'package:identa/services/apis/api.dart';
 
 import 'package:intl/intl.dart' show DateFormat;
 import 'package:provider/provider.dart'
-    show ChangeNotifierProvider, Consumer, ReadContext, WatchContext;
+    show ChangeNotifierProvider, Consumer, Provider, ReadContext, WatchContext;
 
-/// To use this widget, we need to instance [AudioRecorderLogicInterface] and
-/// [MyAudioRecordsLogicInterface].
-///
 class AudioRecorderButton extends StatelessWidget {
   const AudioRecorderButton({super.key});
 
@@ -36,8 +33,11 @@ class AudioRecorderButton extends StatelessWidget {
   }
 
   Future<void> _stop(BuildContext context) async {
+    final audioRecordsProvider =
+        Provider.of<NoteProvider>(context, listen: false);
+    final setTextBody = Provider.of<NoteProvider>(context, listen: false);
+    final noteProvider = context.read<NoteProvider>();
     final audioRecordLogic = context.read<AudioRecorderLogicInterface>();
-    final myAudioRecordsLogic = context.read<MyAudioRecordsLogicInterface>();
     final audioRecordbutton = context.read<RecorderButton>();
 
     audioRecordbutton.stopTimer();
@@ -51,8 +51,20 @@ class AudioRecorderButton extends StatelessWidget {
         formattedDate: DateFormat('yyyy-MM-dd – kk:mm:ss').format(now),
         audioPath: audioPath,
       );
-      // print("voice format ${audioPath}");
-      await myAudioRecordsLogic.add(audioRecord);
+      //  await myAudioRecordsLogic.add(audioRecord);
+      final response = await ServiceApis.sendAudioFile(audioRecord.audioPath);
+      String fileId = jsonDecode(response.body)['fileId'];
+      String textBody = jsonDecode(response.body)["text"];
+      print('Response voice: ${fileId} FIRST');
+      noteProvider.setAudioFile(AudioFile(fileId: fileId));
+      setTextBody.addAudioText(textBody);
+      final responseDownlaod = await ServiceApis.downloadAudio(fileId);
+      final audioRecordResponse = AudioRecord(
+        formattedDate: DateFormat('yyyy-MM-dd – kk:mm:ss').format(now),
+        audioPath: responseDownlaod.toString(),
+      );
+      print('text voice: ${textBody} FIRST');
+      audioRecordsProvider.addAudioRecord(audioRecordResponse);
     }
   }
 
@@ -85,12 +97,9 @@ class AudioRecorderButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final audioDelete = context.read<MyAudioRecordsLogicInterface>();
-    final audioPath = context.watch<MyAudioRecordsLogicInterface>();
     final notifier = context.watch<AudioRecorderLogicInterface>().stateNotifier;
     final audioRecordLogics = context.read<RecorderButton>();
     final audioRecordshow = context.watch<RecorderButton>();
-    final attachmentHandler = context.read<FilePickerProvider>();
     return ChangeNotifierProvider<AudioRecorderStateNotifier>.value(
       value: notifier,
       child: Consumer<AudioRecorderStateNotifier>(
@@ -104,7 +113,7 @@ class AudioRecorderButton extends StatelessWidget {
                 children: [
                   AnimatedContainer(
                     duration: const Duration(milliseconds: 300),
-                    width: audioRecordshow.isRecord ? 385 : 56,
+                    width: audioRecordshow.isRecord ? 375 : 56,
                     decoration: BoxDecoration(
                       color: audioRecordshow.isButtonDisabled
                           ? Colors.grey
@@ -149,6 +158,7 @@ class AudioRecorderButton extends StatelessWidget {
                                   children: [
                                     Expanded(
                                       child: FloatingActionButton(
+                                        heroTag: "btn2",
                                         elevation: 0,
                                         backgroundColor: MyColors.primaryColor,
                                         onPressed: () async {
@@ -163,8 +173,8 @@ class AudioRecorderButton extends StatelessWidget {
                                               //!
                                               audioRecordLogics
                                                   .setButtonDisabled(true);
-                                              audioDelete
-                                                  .delete(audioPath.path);
+                                              // audioDelete
+                                              //     .delete(audioPath.path);
                                             } catch (e) {
                                               final message = e.toString();
                                               context.notify = message;
@@ -188,6 +198,7 @@ class AudioRecorderButton extends StatelessWidget {
                                     // const SizedBox(width: 10),
                                     Expanded(
                                       child: FloatingActionButton(
+                                        heroTag: "btn3",
                                         elevation: 0,
                                         backgroundColor: MyColors.primaryColor,
                                         onPressed: () async {
@@ -228,6 +239,7 @@ class AudioRecorderButton extends StatelessWidget {
                             ],
                           )
                         : FloatingActionButton(
+                            heroTag: "btn1",
                             elevation: 0,
                             backgroundColor: audioRecordshow.isButtonDisabled
                                 ? Colors.grey
@@ -255,21 +267,6 @@ class AudioRecorderButton extends StatelessWidget {
                           ),
                   ),
                 ],
-              ),
-              Visibility(
-                visible: !audioRecordshow.isRecord,
-                child: Positioned(
-                  top: 0,
-                  right: 8,
-                  child: FloatingActionButton(
-                    elevation: 0,
-                    backgroundColor: MyColors.primaryColor,
-                    onPressed: () => attachmentHandler.pickFiles(),
-                    child: const Icon(Icons.description),
-                    // label: const Text('Pick file'),
-                    // icon: const Icon(Icons.description)
-                  ),
-                ),
               ),
             ],
           );

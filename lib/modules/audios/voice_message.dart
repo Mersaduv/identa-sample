@@ -1,50 +1,69 @@
 import 'package:flutter/material.dart';
-import 'package:identa/core/repositories/permission_repository.dart';
-import 'package:identa/core/repositories/storage_repository.dart';
-import 'package:identa/modules/audios/audioRecorder/audio_recorder_logic.dart';
-import 'package:identa/modules/audios/audioRecorder/audio_record_button.dart';
-import 'package:identa/modules/audios/myRecords/my_audio_records_logic.dart';
-import 'package:identa/modules/audios/myRecords/my_audio_records_widget.dart';
-import 'package:provider/provider.dart'
-    show MultiProvider, Provider, ReadContext;
-import 'package:provider/single_child_widget.dart' show SingleChildWidget;
+import 'package:identa/core/extensions/context_extension.dart';
+import 'package:identa/core/repositories/note_provider.dart';
+import 'package:identa/modules/audios/audioPlayer/audio_player_card.dart';
+import 'package:identa/modules/audios/audioPlayer/audio_player_logic.dart';
+import 'package:identa/widgets/dismissible_background.dart';
+import 'package:provider/provider.dart';
 
-class VoiceMessage extends StatelessWidget {
+class VoiceMessage extends StatefulWidget {
   const VoiceMessage({
     super.key,
   });
+  @override
+  State<VoiceMessage> createState() => _VoiceMessageState();
+}
 
+class _VoiceMessageState extends State<VoiceMessage> {
   @override
   Widget build(BuildContext context) {
-    return MultiProvider(
-      providers: <SingleChildWidget>[
-        Provider<AudioRecorderLogicInterface>(
-          lazy: false,
-          create: (context) => AudioRecorderLogic(
-            permissionRepository: context.read<PermissionRepositoryInterface>(),
-          ),
-          dispose: (_, logic) => logic.onDispose(),
-        ),
-        Provider<MyAudioRecordsLogicInterface>(
-          lazy: false,
-          create: (context) => MyAudioRecordsLogic(
-            storageRepository: context.read<StorageRepositoryInterface>(),
-          ),
-        ),
-      ],
-      child: const Scaffold(
-        body: SafeArea(
-          child: MyAudioRecordsWidget(
-            padding: EdgeInsets.only(
-              left: 8.0,
-              right: 8.0,
-              bottom: 88.0,
+    final audioRecordsProvider = Provider.of<NoteProvider>(context);
+    final updatedAudioRecords = audioRecordsProvider.updatedAudioRecords;
+    return ListView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: updatedAudioRecords.length,
+      itemBuilder: (context, index) {
+        final audioRecord = updatedAudioRecords[index];
+        return Padding(
+          padding: const EdgeInsets.only(top: 8.0),
+          child: Dismissible(
+            key: Key(audioRecord.toString()),
+            background: const DismissibleBackground(),
+            onDismissed: (_) {
+              //context.read<MyAudioRecordsLogicInterface>().delete(audioRecord);
+              context.notify = 'Audio record dismissed';
+            },
+            child: Provider<AudioPlayerLogicInterface>(
+              create: (_) => AudioPlayerLogic(
+                audioPath: audioRecord.audioPath,
+              ),
+              dispose: (_, logic) => logic.onDispose(),
+              child: Row(
+                children: [
+                  AudioPlayerCard(
+                    audioRecord,
+                    key: Key(audioRecord.audioPath),
+                  ),
+                  IconButton(
+                    onPressed: () {
+                      // context
+                      //     .read<MyAudioRecordsLogicInterface>()
+                      //     .delete(audioRecord);
+                      context.notify = 'Audio record dismissed';
+                    },
+                    icon: const Icon(
+                      Icons.delete,
+                      color: Color.fromARGB(255, 250, 121, 112),
+                      size: 22,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
-        ),
-        floatingActionButton: AudioRecorderButton(),
-        floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-      ),
+        );
+      },
     );
   }
 }

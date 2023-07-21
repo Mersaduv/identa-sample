@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:identa/constants/colors.dart';
 import 'package:identa/constants/text_styles.dart';
 import 'package:identa/core/extensions/context_extension.dart';
+import 'package:identa/core/models/audio_recorder/audio_files.dart';
 import 'package:identa/core/repositories/note_provider.dart';
 import 'package:identa/widgets/dismissible_background.dart';
 import 'package:identa/widgets/loading/cardSkeleton.dart';
@@ -88,17 +89,15 @@ class NotesScreenState extends State<NotesScreen> {
                   },
                   child: GestureDetector(
                     onTap: () async {
+                      context.read<NoteProvider>().audioList.clear();
+                      context.read<NoteProvider>().updatedAudioRecords.clear();
                       if (note.title.isEmpty) {
-                        final defaultNote = NoteModel(
-                          id: note.id,
-                          title: 'New Note',
-                          details: note.details,
-                          date: note.date,
-                        );
                         await Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => NotesContent(note: note),
+                            builder: (context) => NotesContent(
+                              note: note,
+                            ),
                           ),
                         );
                       } else {
@@ -130,6 +129,7 @@ class NotesScreenState extends State<NotesScreen> {
                                             .substring(0, 1)
                                             .toUpperCase()
                                         : note.title
+                                            .trim()
                                             .split(" ")
                                             .take(2)
                                             .map((w) => w[0].toUpperCase())
@@ -195,7 +195,8 @@ class NotesScreenState extends State<NotesScreen> {
           scale: 1.1, // Adjust the scale value as needed
           child: FloatingActionButton(
             onPressed: () {
-              // noteProvider.setIsLoadBack(true);
+              noteProvider.audioList.clear();
+              noteProvider.updatedAudioRecords.clear();
               Navigator.push(
                 context,
                 MaterialPageRoute(

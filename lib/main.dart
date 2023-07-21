@@ -3,7 +3,6 @@ import 'package:identa/core/repositories/file_picker_privider.dart';
 import 'package:identa/core/repositories/note_provider.dart';
 import 'package:identa/core/repositories/notification_provider.dart';
 import 'package:identa/modules/audios/audioRecorder/recorder_button.dart';
-import 'package:identa/core/repositories/storage_repository.dart';
 import 'package:identa/screens/chat.dart'; // import chat screen
 import 'package:identa/screens/insights.dart';
 import 'package:identa/screens/notes.dart'; // import notes screen
@@ -29,11 +28,6 @@ class MyApp extends StatelessWidget {
         Provider<PermissionRepositoryInterface>(
           lazy: true,
           create: (_) => const PermissionRepository(),
-        ),
-        Provider<StorageRepositoryInterface>(
-          lazy: true,
-          create: (_) => StorageRepository(),
-          dispose: (_, repository) => repository.onDispose(),
         ),
         ChangeNotifierProvider<NoteProvider>(
           create: (_) => NoteProvider(),
