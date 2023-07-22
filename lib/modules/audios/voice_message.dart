@@ -46,7 +46,7 @@ class _VoiceMessageState extends State<VoiceMessage> {
                 return await ShowCustomDialog.show(
                   context,
                   'Delete Voice',
-                  'Are you sure you want to delete this voice?',
+                  'Are you sure you want to delete this audio recording?',
                 );
               },
               child: Provider<AudioPlayerLogicInterface>(
@@ -70,16 +70,14 @@ class _VoiceMessageState extends State<VoiceMessage> {
 
                         bool? shouldDelete = await ShowCustomDialog.show(
                           context,
-                          'Delete Audio',
+                          'Delete Voice',
                           'Are you sure you want to delete this audio recording?',
                         );
 
                         if (shouldDelete == true) {
                           Provider.of<NoteProvider>(context, listen: false)
                               .deleteNoteAudio(widget.note!, fileId);
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('Audio record deleted')),
-                          );
+                          context.notify = 'Audio record dismissed';
                         }
                       },
                       icon: const Icon(
