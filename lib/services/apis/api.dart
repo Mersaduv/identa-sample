@@ -185,6 +185,20 @@ class ServiceApis {
     }
   }
 
+  static Future<bool> deleteNoteAudio(String noteId, String audioId) async {
+    final response =
+        await sendDeleteRequest("insights/note/$noteId/file/$audioId");
+
+    if (response.statusCode == HttpStatus.ok) {
+      return true;
+    } else {
+      if (kDebugMode) {
+        print('API request failed with status code ${response.statusCode}');
+      }
+      return false;
+    }
+  }
+
   static Future<http.Response> sendAudioFile(String filePath) async {
     final client = RetryClient(http.Client());
     const url = 'insights/transcribe';
