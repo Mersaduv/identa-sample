@@ -156,7 +156,7 @@ class NotesContentState extends State<NotesContent>
     String? newText = Provider.of<NoteProvider>(context).note;
     if (_detailsController.text != newText) {
       _detailsController.text += newText += "";
-      Provider.of<NoteProvider>(context).addAudioText(null);
+      Provider.of<NoteProvider>(context, listen: false).addAudioText(null);
     }
     return MultiProvider(
       providers: <SingleChildWidget>[
@@ -236,7 +236,8 @@ class NotesContentState extends State<NotesContent>
                       ),
                     ),
                   ),
-                  const VoiceMessage()
+                  VoiceMessage(note: widget.note),
+                  const SizedBox(height: 100.0)
                 ],
               )),
         ),

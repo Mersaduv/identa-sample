@@ -7,6 +7,7 @@ import 'package:identa/core/repositories/note_provider.dart';
 import 'package:identa/widgets/dismissible_background.dart';
 import 'package:identa/widgets/loading/cardSkeleton.dart';
 import 'package:identa/modules/taps_page/notes_tap/note_content.dart';
+import 'package:identa/widgets/show_custom_dialog.dart';
 import 'package:provider/provider.dart';
 import 'package:identa/core/models/model_core/note_model.dart';
 
@@ -62,30 +63,15 @@ class NotesScreenState extends State<NotesScreen> {
                   direction: DismissDirection.endToStart,
                   background: const DismissibleBackground(),
                   confirmDismiss: (_) async {
-                    return await showDialog<bool>(
-                      context: context,
-                      builder: (context) {
-                        return AlertDialog(
-                          title: const Text('Delete Note'),
-                          content: const Text(
-                              'Are you sure you want to delete this note?'),
-                          actions: [
-                            TextButton(
-                              child: const Text('No'),
-                              onPressed: () => Navigator.of(context).pop(false),
-                            ),
-                            TextButton(
-                              child: const Text('Yes'),
-                              onPressed: () => Navigator.of(context).pop(true),
-                            ),
-                          ],
-                        );
-                      },
+                    return await ShowCustomDialog.show(
+                      context,
+                      'Delete Note',
+                      'Are you sure you want to delete this note?',
                     );
                   },
                   onDismissed: (_) {
-                    noteProvider.deleteNote(note);
-                    context.notify = 'note dismissed';
+                    context.watch<NoteProvider>().deleteNote(note);
+                    context.notify = 'Note dismissed';
                   },
                   child: GestureDetector(
                     onTap: () async {

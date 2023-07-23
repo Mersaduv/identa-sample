@@ -1,14 +1,21 @@
 import 'dart:async' show Completer, Future, StreamSubscription;
 
 import 'package:audio_waveforms/audio_waveforms.dart'
-    show FinishMode, PlayerController, PlayerState, PlayerStateExtension;
+    show
+        FinishMode,
+        PlayerController,
+        PlayerState,
+        PlayerStateExtension,
+        PlayerWaveStyle;
 import 'package:flutter/foundation.dart' show ValueNotifier, visibleForTesting;
+import 'package:flutter/material.dart';
 import 'package:identa/core/models/audio_recorder/audio_player_state.dart';
 
 typedef AudioPlayerNotifier = ValueNotifier<AudioPlayerState>;
 
 abstract class AudioPlayerLogicInterface {
   PlayerController get playerController;
+  PlayerWaveStyle get playerWaveStyle;
   AudioPlayerNotifier get stateNotifier;
   Future<void> play();
   Future<void> pause();
@@ -29,7 +36,11 @@ class AudioPlayerLogic implements AudioPlayerLogicInterface {
   final PlayerController _playerController;
   final _stateNotifier = AudioPlayerNotifier(const AudioPlayerState.pause());
   StreamSubscription<PlayerState>? _playerStateStream;
-
+  final _playerWaveStyle = const PlayerWaveStyle(
+    fixedWaveColor: Colors.black12,
+    liveWaveColor: Colors.blue,
+    spacing: 6,
+  );
   Future<void> _setupAsync({required String audioPath}) async {
     _playerStateStream = _playerController.onPlayerStateChanged.listen((state) {
       notify = _isPlayingState
@@ -41,6 +52,12 @@ class AudioPlayerLogic implements AudioPlayerLogicInterface {
       shouldExtractWaveform: true,
       volume: 1.0,
     );
+    await _playerController
+        .extractWaveformData(
+          path: audioPath,
+          noOfSamples: playerWaveStyle.getSamplesForWidth(200),
+        )
+        .then((waveformData) => debugPrint(waveformData.toString()));
     _completer.complete();
   }
 
@@ -55,6 +72,9 @@ class AudioPlayerLogic implements AudioPlayerLogicInterface {
 
   @override
   PlayerController get playerController => _playerController;
+
+  @override
+  PlayerWaveStyle get playerWaveStyle => _playerWaveStyle;
 
   @override
   AudioPlayerNotifier get stateNotifier => _stateNotifier;
