@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:audio_session/audio_session.dart';
 import 'package:flutter/material.dart';
 import 'package:identa/constants/colors.dart';
 import 'package:identa/core/extensions/context_extension.dart';
@@ -11,7 +12,7 @@ import 'package:identa/core/repositories/permission_repository.dart';
 import 'package:identa/modules/audios/audioRecorder/recorder_button.dart';
 import 'package:identa/modules/audios/audioRecorder/audio_recorder_logic.dart';
 import 'package:identa/services/apis/api.dart';
-
+import 'package:flutter_sound/flutter_sound.dart';
 import 'package:intl/intl.dart' show DateFormat;
 import 'package:provider/provider.dart'
     show ChangeNotifierProvider, Consumer, Provider, ReadContext, WatchContext;
@@ -33,6 +34,9 @@ class AudioRecorderButton extends StatelessWidget {
   }
 
   Future<void> _stop(BuildContext context) async {
+    final session = await AudioSession.instance;
+    await session.configure(const AudioSessionConfiguration.speech());
+
     final audioRecordsProvider =
         Provider.of<NoteProvider>(context, listen: false);
     final setTextBody = Provider.of<NoteProvider>(context, listen: false);
@@ -56,14 +60,25 @@ class AudioRecorderButton extends StatelessWidget {
       String fileId = jsonDecode(response.body)['fileId'];
       String textBody = jsonDecode(response.body)["text"];
       print('Response voice: ${fileId} FIRST');
-      noteProvider.setAudioFile(AudioFile(fileId: fileId));
+
       setTextBody.addAudioText(textBody);
       final responseDownlaod = await ServiceApis.downloadAudio(fileId);
+      final audioPlayer = FlutterSoundPlayer();
+      await audioPlayer.openPlayer();
+      await audioPlayer
+          .setSubscriptionDuration(const Duration(milliseconds: 10));
+      await audioPlayer.startPlayer(fromURI: responseDownlaod.toString());
+      await Future.delayed(
+          const Duration(milliseconds: 10)); 
+      final audioDuration = await audioPlayer.getProgress();
+      await audioPlayer.closePlayer();
+      noteProvider.setAudioFile(AudioFile(
+          fileId: fileId, length: audioDuration['duration']!.inSeconds));
       final audioRecordResponse = AudioRecord(
         formattedDate: DateFormat('yyyy-MM-dd – kk:mm:ss').format(now),
         audioPath: responseDownlaod.toString(),
+        length: audioDuration['duration']!.inSeconds,
       );
-      print('text voice: ${textBody} FIRST');
       audioRecordsProvider.addAudioRecord(audioRecordResponse);
     }
   }
