@@ -33,7 +33,7 @@ class AudioRecorderButton extends StatelessWidget {
     await audioRecordLogic.start();
   }
 
-  Future<void> _stop(BuildContext context) async {
+  Future<void> _stop(BuildContext context, bool isCancel) async {
     final session = await AudioSession.instance;
     await session.configure(const AudioSessionConfiguration.speech());
 
@@ -43,43 +43,51 @@ class AudioRecorderButton extends StatelessWidget {
     final noteProvider = context.read<NoteProvider>();
     final audioRecordLogic = context.read<AudioRecorderLogicInterface>();
     final audioRecordbutton = context.read<RecorderButton>();
+    if (!isCancel) {
+      audioRecordbutton.stopTimer();
+      final audioPath = await audioRecordLogic.stop();
+      audioRecordbutton.setRecord(false);
+      audioRecordbutton.setButtonDisabled(true);
+      print(audioPath);
+      if (audioPath != null) {
+        final now = DateTime.now();
+        final audioRecord = AudioRecord(
+          formattedDate: DateFormat('yyyy-MM-dd – kk:mm:ss').format(now),
+          audioPath: audioPath,
+        );
+        //  await myAudioRecordsLogic.add(audioRecord);
+        final response = await ServiceApis.sendAudioFile(audioRecord.audioPath);
+        String fileId = jsonDecode(response.body)['fileId'];
+        String textBody = jsonDecode(response.body)["text"];
+        print('Response voice: ${fileId} FIRST');
 
-    audioRecordbutton.stopTimer();
-    final audioPath = await audioRecordLogic.stop();
-    audioRecordbutton.setRecord(false);
-    audioRecordbutton.setButtonDisabled(true);
-    print(audioPath);
-    if (audioPath != null) {
-      final now = DateTime.now();
-      final audioRecord = AudioRecord(
-        formattedDate: DateFormat('yyyy-MM-dd – kk:mm:ss').format(now),
-        audioPath: audioPath,
-      );
-      //  await myAudioRecordsLogic.add(audioRecord);
-      final response = await ServiceApis.sendAudioFile(audioRecord.audioPath);
-      String fileId = jsonDecode(response.body)['fileId'];
-      String textBody = jsonDecode(response.body)["text"];
-      print('Response voice: ${fileId} FIRST');
-
-      setTextBody.addAudioText(textBody);
-      final responseDownlaod = await ServiceApis.downloadAudio(fileId);
-      final audioPlayer = FlutterSoundPlayer();
-      await audioPlayer.openPlayer();
-      await audioPlayer
-          .setSubscriptionDuration(const Duration(milliseconds: 10));
-      await audioPlayer.startPlayer(fromURI: responseDownlaod.toString());
-      await Future.delayed(
-          const Duration(milliseconds: 10)); 
-      final audioDuration = await audioPlayer.getProgress();
-      await audioPlayer.closePlayer();
-      noteProvider.setAudioFile(AudioFile(
-          fileId: fileId, length: audioDuration['duration']!.inSeconds));
-      final audioRecordResponse = AudioRecord(
-        formattedDate: DateFormat('yyyy-MM-dd – kk:mm:ss').format(now),
-        audioPath: responseDownlaod.toString(),
-        length: audioDuration['duration']!.inSeconds,
-      );
-      audioRecordsProvider.addAudioRecord(audioRecordResponse);
+        setTextBody.addAudioText(textBody);
+        final responseDownlaod = await ServiceApis.downloadAudio(fileId);
+        final audioPlayer = FlutterSoundPlayer();
+        await audioPlayer.openPlayer();
+        await audioPlayer
+            .setSubscriptionDuration(const Duration(milliseconds: 10));
+        await audioPlayer.startPlayer(fromURI: responseDownlaod.toString());
+        await Future.delayed(const Duration(milliseconds: 10));
+        final audioDuration = await audioPlayer.getProgress();
+        await audioPlayer.closePlayer();
+        noteProvider.setAudioFile(AudioFile(
+            fileId: fileId, length: audioDuration['duration']!.inSeconds));
+        final audioRecordResponse = AudioRecord(
+          formattedDate: DateFormat('yyyy-MM-dd – kk:mm:ss').format(now),
+          audioPath: responseDownlaod.toString(),
+          length: audioDuration['duration']!.inSeconds,
+        );
+        audioRecordsProvider.addAudioRecord(audioRecordResponse);
+      }
+    } else {
+      await audioRecordLogic.stop();
+      audioRecordbutton.stopTimer();
+      audioRecordLogic.cancelRecord();
+      audioRecordLogic.onDispose();
+      audioRecordbutton.setRecord(false);
+      await audioRecordbutton.setButtonDisabled(true);
+      print("calceled !");
     }
   }
 
@@ -120,170 +128,195 @@ class AudioRecorderButton extends StatelessWidget {
       child: Consumer<AudioRecorderStateNotifier>(
         builder: (context, notifier, _) {
           final audioRecorderState = notifier.value;
+          return LayoutBuilder(
+            builder: (context, constraints) {
+              final screenWidth = constraints.maxWidth;
 
-          return Stack(
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
+              // Define the maximum and minimum widths for the container
+              final maxWidth = 375.0; // Maximum width for the container
+              final minWidth = 56.0; // Minimum width for the container
+
+              // Calculate the width of the AnimatedContainer
+              final containerWidth =
+                  audioRecordshow.isRecord ? maxWidth : minWidth;
+
+              // Ensure the width does not exceed the screen width
+              final width =
+                  containerWidth < screenWidth ? containerWidth : screenWidth;
+
+              return Stack(
                 children: [
-                  AnimatedContainer(
-                    duration: const Duration(milliseconds: 300),
-                    width: audioRecordshow.isRecord ? 375 : 56,
-                    decoration: BoxDecoration(
-                      color: audioRecordshow.isButtonDisabled
-                          ? Colors.grey
-                          : MyColors.primaryColor,
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: audioRecordshow.isRecord
-                        ? Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Expanded(
-                                child: Row(
-                                  children: [
-                                    Expanded(
-                                      child: AnimatedOpacity(
-                                        opacity: audioRecordshow.opacity,
-                                        duration:
-                                            const Duration(milliseconds: 500),
-                                        child: Container(
-                                          width: 10,
-                                          height: 10,
-                                          decoration: const BoxDecoration(
-                                            shape: BoxShape.circle,
-                                            color: Colors.orange,
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      AnimatedContainer(
+                        duration: const Duration(milliseconds: 300),
+                        width: width,
+                        decoration: BoxDecoration(
+                          color: audioRecordshow.isButtonDisabled
+                              ? Colors.grey
+                              : MyColors.primaryColor,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: audioRecordshow.isRecord
+                            ? Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Expanded(
+                                    child: Row(
+                                      children: [
+                                        Expanded(
+                                          child: AnimatedOpacity(
+                                            opacity: audioRecordshow.opacity,
+                                            duration: const Duration(
+                                                milliseconds: 500),
+                                            child: Container(
+                                              width: 10,
+                                              height: 10,
+                                              decoration: const BoxDecoration(
+                                                shape: BoxShape.circle,
+                                                color: Colors.orange,
+                                              ),
+                                            ),
                                           ),
                                         ),
-                                      ),
-                                    ),
-                                    Expanded(
-                                      child: Text(
-                                        '${(audioRecordshow.recordDuration ~/ 60).toString().padLeft(2, '0')}:${(audioRecordshow.recordDuration % 60).toString().padLeft(2, '0')}',
-                                        style: const TextStyle(
-                                            color: Colors.white, fontSize: 13),
-                                      ),
-                                    ),
-                                    const SizedBox(width: 20),
-                                  ],
-                                ),
-                              ),
-                              Expanded(
-                                child: Row(
-                                  children: [
-                                    Expanded(
-                                      child: FloatingActionButton(
-                                        heroTag: "btn2",
-                                        elevation: 0,
-                                        backgroundColor: MyColors.primaryColor,
-                                        onPressed: () async {
-                                          if (!audioRecordshow
-                                              .isButtonDisabled) {
-                                            try {
-                                              await audioRecorderState
-                                                  .maybeWhen<Future<void>>(
-                                                start: () => _stop(context),
-                                                orElse: () => _start(context),
-                                              );
-                                              //!
-                                              audioRecordLogics
-                                                  .setButtonDisabled(true);
-                                              // audioDelete
-                                              //     .delete(audioPath.path);
-                                            } catch (e) {
-                                              final message = e.toString();
-                                              context.notify = message;
-                                            } finally {
-                                              await Future.delayed(
-                                                  const Duration(seconds: 2));
-                                              audioRecordLogics
-                                                  .setButtonDisabled(false);
-                                            }
-                                          }
-                                        },
-                                        child: Icon(
-                                          audioRecorderState
-                                              .maybeWhen<IconData>(
-                                            start: () => Icons.delete,
-                                            orElse: () => Icons.mic,
+                                        Expanded(
+                                          child: Text(
+                                            '${(audioRecordshow.recordDuration ~/ 60).toString().padLeft(2, '0')}:${(audioRecordshow.recordDuration % 60).toString().padLeft(2, '0')}',
+                                            style: const TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 13),
                                           ),
                                         ),
-                                      ),
+                                        const SizedBox(width: 20),
+                                      ],
                                     ),
-                                    // const SizedBox(width: 10),
-                                    Expanded(
-                                      child: FloatingActionButton(
-                                        heroTag: "btn3",
-                                        elevation: 0,
-                                        backgroundColor: MyColors.primaryColor,
-                                        onPressed: () async {
-                                          if (!audioRecordshow
-                                              .isButtonDisabled) {
-                                            try {
-                                              audioRecordLogics
-                                                  .setButtonDisabled(true);
+                                  ),
+                                  Expanded(
+                                    child: Row(
+                                      children: [
+                                        Expanded(
+                                          child: FloatingActionButton(
+                                            heroTag: "btn2",
+                                            elevation: 0,
+                                            backgroundColor:
+                                                MyColors.primaryColor,
+                                            onPressed: () async {
+                                              if (!audioRecordshow
+                                                  .isButtonDisabled) {
+                                                try {
+                                                  audioRecordLogics
+                                                      .setButtonDisabled(true);
+                                                  await audioRecorderState
+                                                      .maybeWhen<Future<void>>(
+                                                    start: () =>
+                                                        _stop(context, true),
+                                                    orElse: () =>
+                                                        _start(context),
+                                                  );
+                                                } catch (e) {
+                                                  final message = e.toString();
+                                                  context.notify = message;
+                                                } finally {
+                                                  await Future.delayed(
+                                                      const Duration(
+                                                          seconds: 2));
+                                                  audioRecordLogics
+                                                      .setButtonDisabled(false);
+                                                }
+                                              }
+                                            },
+                                            child: Icon(
+                                              audioRecorderState
+                                                  .maybeWhen<IconData>(
+                                                start: () => Icons.delete,
+                                                orElse: () => Icons.mic,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                        // const SizedBox(width: 10),
+                                        Expanded(
+                                          child: FloatingActionButton(
+                                            heroTag: "btn3",
+                                            elevation: 0,
+                                            backgroundColor:
+                                                MyColors.primaryColor,
+                                            onPressed: () async {
+                                              if (!audioRecordshow
+                                                  .isButtonDisabled) {
+                                                try {
+                                                  audioRecordLogics
+                                                      .setButtonDisabled(true);
 
-                                              await audioRecorderState
-                                                  .maybeWhen<Future<void>>(
-                                                start: () => _stop(context),
-                                                orElse: () => _start(context),
-                                              );
-                                            } catch (e) {
-                                              final message = e.toString();
-                                              context.notify = message;
-                                            } finally {
-                                              await Future.delayed(
-                                                  const Duration(seconds: 2));
-                                              audioRecordLogics
-                                                  .setButtonDisabled(false);
-                                            }
-                                          }
-                                        },
-                                        child: Icon(
-                                          audioRecorderState
-                                              .maybeWhen<IconData>(
-                                            start: () => Icons.send,
-                                            orElse: () => Icons.mic,
+                                                  await audioRecorderState
+                                                      .maybeWhen<Future<void>>(
+                                                    start: () =>
+                                                        _stop(context, false),
+                                                    orElse: () =>
+                                                        _start(context),
+                                                  );
+                                                } catch (e) {
+                                                  final message = e.toString();
+                                                  context.notify = message;
+                                                } finally {
+                                                  await Future.delayed(
+                                                      const Duration(
+                                                          seconds: 2));
+                                                  audioRecordLogics
+                                                      .setButtonDisabled(false);
+                                                }
+                                              }
+                                            },
+                                            child: Icon(
+                                              audioRecorderState
+                                                  .maybeWhen<IconData>(
+                                                start: () => Icons.send,
+                                                orElse: () => Icons.mic,
+                                              ),
+                                            ),
                                           ),
                                         ),
-                                      ),
+                                      ],
                                     ),
-                                  ],
+                                  ),
+                                ],
+                              )
+                            : FloatingActionButton(
+                                heroTag: "btn1",
+                                elevation: 0,
+                                backgroundColor:
+                                    audioRecordshow.isButtonDisabled
+                                        ? Colors.grey
+                                        : MyColors.primaryColor,
+                                onPressed: () async {
+                                  if (!audioRecordshow.isButtonDisabled) {
+                                    try {
+                                      await audioRecorderState
+                                          .maybeWhen<Future<void>>(
+                                        start: () => _stop(context, false),
+                                        orElse: () => _start(context),
+                                      );
+                                    } catch (e) {
+                                      final message = e.toString();
+                                      context.notify = message;
+                                    }
+                                  }
+                                },
+                                child: Icon(
+                                  audioRecorderState.maybeWhen<IconData>(
+                                    start: () => Icons.stop,
+                                    orElse: () => Icons.mic,
+                                  ),
                                 ),
                               ),
-                            ],
-                          )
-                        : FloatingActionButton(
-                            heroTag: "btn1",
-                            elevation: 0,
-                            backgroundColor: audioRecordshow.isButtonDisabled
-                                ? Colors.grey
-                                : MyColors.primaryColor,
-                            onPressed: () async {
-                              if (!audioRecordshow.isButtonDisabled) {
-                                try {
-                                  await audioRecorderState
-                                      .maybeWhen<Future<void>>(
-                                    start: () => _stop(context),
-                                    orElse: () => _start(context),
-                                  );
-                                } catch (e) {
-                                  final message = e.toString();
-                                  context.notify = message;
-                                }
-                              }
-                            },
-                            child: Icon(
-                              audioRecorderState.maybeWhen<IconData>(
-                                start: () => Icons.stop,
-                                orElse: () => Icons.mic,
-                              ),
-                            ),
-                          ),
+                      ),
+                    ],
                   ),
                 ],
-              ),
-            ],
+              );
+            },
           );
         },
       ),
