@@ -128,7 +128,6 @@ class NoteProvider extends ChangeNotifier {
   Future<void> deleteNoteAudio(NoteModel note, String fileId) async {
     await ServiceApis.deleteNoteAudio(note.id, fileId);
     _notes.removeWhere((n) => n.files[0].fileId == fileId);
-    loadNotesConversation();
     notifyListeners();
   }
 

@@ -47,7 +47,6 @@ class AudioRecorderButton extends StatelessWidget {
       audioRecordbutton.stopTimer();
       final audioPath = await audioRecordLogic.stop();
       audioRecordbutton.setRecord(false);
-      audioRecordbutton.setButtonDisabled(true);
       print(audioPath);
       if (audioPath != null) {
         final now = DateTime.now();
@@ -79,6 +78,7 @@ class AudioRecorderButton extends StatelessWidget {
           length: audioDuration['duration']!.inSeconds,
         );
         audioRecordsProvider.addAudioRecord(audioRecordResponse);
+        await audioRecordbutton.setButtonDisabled(true);
       }
     } else {
       await audioRecordLogic.stop();
@@ -221,7 +221,7 @@ class AudioRecorderButton extends StatelessWidget {
                                                 } finally {
                                                   await Future.delayed(
                                                       const Duration(
-                                                          seconds: 2));
+                                                          seconds: 1));
                                                   audioRecordLogics
                                                       .setButtonDisabled(false);
                                                 }
@@ -263,7 +263,7 @@ class AudioRecorderButton extends StatelessWidget {
                                                 } finally {
                                                   await Future.delayed(
                                                       const Duration(
-                                                          seconds: 2));
+                                                          seconds: 1));
                                                   audioRecordLogics
                                                       .setButtonDisabled(false);
                                                 }

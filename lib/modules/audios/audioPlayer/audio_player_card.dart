@@ -71,7 +71,7 @@ class AudioPlayerCard extends StatelessWidget {
                           size: Size(MediaQuery.of(context).size.width / 2, 45),
                           waveformType: WaveformType.fitWidth,
                           animationDuration: kThemeAnimationDuration,
-                          enableSeekGesture: false,
+                          enableSeekGesture: true,
                           playerWaveStyle: playerWaveStyle,
                         ),
                         Row(
@@ -141,7 +141,17 @@ class AudioPlayerCard extends StatelessWidget {
                                       ),
                                     );
                                   } else {
-                                    return const Text('Loading...');
+                                    return const SizedBox(
+                                      width: 10,
+                                      height: 10,
+                                      child: CircularProgressIndicator(
+                                        valueColor:
+                                            AlwaysStoppedAnimation<Color>(
+                                                Colors.blue),
+                                        strokeWidth:
+                                            2.0, // Adjust the thickness of the spinner
+                                      ),
+                                    );
                                   }
                                 },
                               ),
