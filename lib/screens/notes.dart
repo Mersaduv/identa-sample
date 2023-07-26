@@ -70,7 +70,7 @@ class NotesScreenState extends State<NotesScreen> {
                     );
                   },
                   onDismissed: (_) {
-                    context.watch<NoteProvider>().deleteNote(note);
+                    context.read<NoteProvider>().deleteNote(note);
                     context.notify = 'Note dismissed';
                   },
                   child: GestureDetector(
