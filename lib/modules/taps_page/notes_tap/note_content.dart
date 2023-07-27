@@ -76,9 +76,9 @@ class NotesContentState extends State<NotesContent>
 
       ServiceApis.downloadAudio(n.fileId).then((response) {
         final audioRecord = AudioRecord(
-          formattedDate: DateTime.now().toString(),
-          audioPath: response.toString(),
-        );
+            formattedDate: DateTime.now().toString(),
+            audioPath: response.toString(),
+            length: n.length);
         audioRecordsProvider.addAudioRecord(audioRecord);
         print("audios ${n.fileId}");
 
@@ -96,7 +96,7 @@ class NotesContentState extends State<NotesContent>
     final String details = _detailsController.text.trim();
     List<AudioFile> audioFiles = [];
     for (var audio in noteProvider.audioList) {
-      audioFiles.add(AudioFile(fileId: audio.fileId));
+      audioFiles.add(AudioFile(fileId: audio.fileId, length: audio.length));
     }
     for (var audio in noteProvider.audioList) {
       print("Response voice: ${audio.fileId} SECEND");
@@ -127,7 +127,8 @@ class NotesContentState extends State<NotesContent>
       super.dispose();
     } else {
       for (var audio in noteProvider.audioList) {
-        widget.note!.files.add(AudioFile(fileId: audio.fileId));
+        widget.note!.files
+            .add(AudioFile(fileId: audio.fileId, length: audio.length));
       }
       for (var audio in noteProvider.audioList) {
         print("Response voice: ${audio.fileId} SECEND");
@@ -143,6 +144,7 @@ class NotesContentState extends State<NotesContent>
       noteProvider.updatedAudioRecords.clear();
       noteProvider.loadNotesConversation();
       audioFiles.clear();
+      _downloadCompleter?.complete();
       _titleController.dispose();
       _detailsController.dispose();
 

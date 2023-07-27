@@ -15,7 +15,6 @@ typedef AudioPlayerNotifier = ValueNotifier<AudioPlayerState>;
 
 abstract class AudioPlayerLogicInterface {
   PlayerController get playerController;
-  PlayerWaveStyle get playerWaveStyle;
   AudioPlayerNotifier get stateNotifier;
   Future<void> play();
   Future<void> pause();
@@ -36,7 +35,7 @@ class AudioPlayerLogic implements AudioPlayerLogicInterface {
   final PlayerController _playerController;
   final _stateNotifier = AudioPlayerNotifier(const AudioPlayerState.pause());
   StreamSubscription<PlayerState>? _playerStateStream;
-  final _playerWaveStyle = const PlayerWaveStyle(
+  final playerWaveStyle = const PlayerWaveStyle(
     fixedWaveColor: Colors.black12,
     liveWaveColor: Colors.blue,
     spacing: 6,
@@ -50,14 +49,9 @@ class AudioPlayerLogic implements AudioPlayerLogicInterface {
     await _playerController.preparePlayer(
       path: audioPath,
       shouldExtractWaveform: true,
+      noOfSamples: playerWaveStyle.getSamplesForWidth(200),
       volume: 1.0,
     );
-    await _playerController
-        .extractWaveformData(
-          path: audioPath,
-          noOfSamples: playerWaveStyle.getSamplesForWidth(200),
-        )
-        .then((waveformData) => debugPrint(waveformData.toString()));
     _completer.complete();
   }
 
@@ -72,9 +66,6 @@ class AudioPlayerLogic implements AudioPlayerLogicInterface {
 
   @override
   PlayerController get playerController => _playerController;
-
-  @override
-  PlayerWaveStyle get playerWaveStyle => _playerWaveStyle;
 
   @override
   AudioPlayerNotifier get stateNotifier => _stateNotifier;

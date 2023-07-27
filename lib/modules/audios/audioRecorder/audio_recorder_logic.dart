@@ -11,6 +11,7 @@ abstract class AudioRecorderLogicInterface {
   AudioRecorderStateNotifier get stateNotifier;
   Future<void> start({String? path});
   Future<String?> stop();
+  Future<void> cancelRecord();
   Future<void> onDispose();
 }
 
@@ -46,7 +47,13 @@ class AudioRecorderLogic implements AudioRecorderLogicInterface {
     _notify = AudioRecorderState.stop(audioPath: audioPath);
     return audioPath;
   }
-  
+
+  @override
+  Future<void> cancelRecord() async {
+    await _recorder.dispose();
+    await _recorder.stop();
+  }
+
   @override
   Future<void> onDispose() => _recorder.dispose();
 }

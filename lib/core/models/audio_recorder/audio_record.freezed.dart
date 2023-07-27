@@ -18,6 +18,7 @@ final _privateConstructorUsedError = UnsupportedError(
 mixin _$AudioRecord {
   String get formattedDate => throw _privateConstructorUsedError;
   String get audioPath => throw _privateConstructorUsedError;
+  int? get length => throw _privateConstructorUsedError;
 
   @JsonKey(ignore: true)
   $AudioRecordCopyWith<AudioRecord> get copyWith =>
@@ -30,7 +31,7 @@ abstract class $AudioRecordCopyWith<$Res> {
           AudioRecord value, $Res Function(AudioRecord) then) =
       _$AudioRecordCopyWithImpl<$Res, AudioRecord>;
   @useResult
-  $Res call({String formattedDate, String audioPath});
+  $Res call({String formattedDate, String audioPath, int? length});
 }
 
 /// @nodoc
@@ -48,6 +49,7 @@ class _$AudioRecordCopyWithImpl<$Res, $Val extends AudioRecord>
   $Res call({
     Object? formattedDate = null,
     Object? audioPath = null,
+    Object? length = freezed,
   }) {
     return _then(_value.copyWith(
       formattedDate: null == formattedDate
@@ -58,6 +60,10 @@ class _$AudioRecordCopyWithImpl<$Res, $Val extends AudioRecord>
           ? _value.audioPath
           : audioPath // ignore: cast_nullable_to_non_nullable
               as String,
+      length: freezed == length
+          ? _value.length
+          : length // ignore: cast_nullable_to_non_nullable
+              as int?,
     ) as $Val);
   }
 }
@@ -70,7 +76,7 @@ abstract class _$$_AudioRecordCopyWith<$Res>
       __$$_AudioRecordCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({String formattedDate, String audioPath});
+  $Res call({String formattedDate, String audioPath, int? length});
 }
 
 /// @nodoc
@@ -86,6 +92,7 @@ class __$$_AudioRecordCopyWithImpl<$Res>
   $Res call({
     Object? formattedDate = null,
     Object? audioPath = null,
+    Object? length = freezed,
   }) {
     return _then(_$_AudioRecord(
       formattedDate: null == formattedDate
@@ -96,6 +103,10 @@ class __$$_AudioRecordCopyWithImpl<$Res>
           ? _value.audioPath
           : audioPath // ignore: cast_nullable_to_non_nullable
               as String,
+      length: freezed == length
+          ? _value.length
+          : length // ignore: cast_nullable_to_non_nullable
+              as int?,
     ));
   }
 }
@@ -103,16 +114,19 @@ class __$$_AudioRecordCopyWithImpl<$Res>
 /// @nodoc
 
 class _$_AudioRecord implements _AudioRecord {
-  const _$_AudioRecord({required this.formattedDate, required this.audioPath});
+  const _$_AudioRecord(
+      {required this.formattedDate, required this.audioPath, this.length});
 
   @override
   final String formattedDate;
   @override
   final String audioPath;
+  @override
+  final int? length;
 
   @override
   String toString() {
-    return 'AudioRecord(formattedDate: $formattedDate, audioPath: $audioPath)';
+    return 'AudioRecord(formattedDate: $formattedDate, audioPath: $audioPath, length: $length)';
   }
 
   @override
@@ -123,11 +137,13 @@ class _$_AudioRecord implements _AudioRecord {
             (identical(other.formattedDate, formattedDate) ||
                 other.formattedDate == formattedDate) &&
             (identical(other.audioPath, audioPath) ||
-                other.audioPath == audioPath));
+                other.audioPath == audioPath) &&
+            (identical(other.length, length) || other.length == length));
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType, formattedDate, audioPath);
+  int get hashCode =>
+      Object.hash(runtimeType, formattedDate, audioPath, length);
 
   @JsonKey(ignore: true)
   @override
@@ -139,12 +155,15 @@ class _$_AudioRecord implements _AudioRecord {
 abstract class _AudioRecord implements AudioRecord {
   const factory _AudioRecord(
       {required final String formattedDate,
-      required final String audioPath}) = _$_AudioRecord;
+      required final String audioPath,
+      final int? length}) = _$_AudioRecord;
 
   @override
   String get formattedDate;
   @override
   String get audioPath;
+  @override
+  int? get length;
   @override
   @JsonKey(ignore: true)
   _$$_AudioRecordCopyWith<_$_AudioRecord> get copyWith =>

@@ -8,5 +8,6 @@ class AudioRecord with _$AudioRecord {
   const factory AudioRecord({
     required String formattedDate,
     required String audioPath,
+    int? length,
   }) = _AudioRecord;
 }
