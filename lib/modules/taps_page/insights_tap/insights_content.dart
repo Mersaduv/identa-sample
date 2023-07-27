@@ -34,6 +34,7 @@ class InsightsContentState extends State<InsightsContent> {
   void dispose() async {
     super.dispose();
     await noteProvider.loadInsightsConversation();
+    noteProvider.setIsLoading(false);
   }
 
   @override
