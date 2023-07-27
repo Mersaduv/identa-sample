@@ -22,7 +22,6 @@ class InsightsScreenState extends State<InsightsScreen> {
   void initState() {
     super.initState();
     noteProvider = context.read<NoteProvider>();
-    noteProvider.loadInsightsConversation();
   }
 
   @override

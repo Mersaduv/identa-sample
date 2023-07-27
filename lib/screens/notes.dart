@@ -27,7 +27,6 @@ class NotesScreenState extends State<NotesScreen> {
     super.initState();
 
     noteProvider = context.read<NoteProvider>();
-    noteProvider.loadNotesConversation();
   }
 
   @override
@@ -190,7 +189,6 @@ class NotesScreenState extends State<NotesScreen> {
           child: FloatingActionButton(
             onPressed: () {
               noteProvider.setIsLoading(true);
-
               noteProvider.audioList.clear();
               noteProvider.updatedAudioRecords.clear();
               Navigator.push(
