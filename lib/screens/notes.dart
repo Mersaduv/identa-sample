@@ -19,30 +19,30 @@ class NotesScreen extends StatefulWidget {
 }
 
 class NotesScreenState extends State<NotesScreen> {
+  Future<List<NoteModel>>? _futureNotes;
+  late NoteProvider noteProvider;
+
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      var noteProvider = context.read<NoteProvider>();
-      noteProvider.setIsLoading(true); // Check the value of isLoadBack here
-      int delay = noteProvider.isLoadBack ? 0 : 600;
-      Future.delayed(Duration(milliseconds: delay), () {
-        noteProvider.setIsLoadBack(false);
-        noteProvider.setIsLoading(false);
-      });
 
-      noteProvider.loadNotesConversation();
-    });
+    noteProvider = context.read<NoteProvider>();
   }
 
   @override
   Widget build(BuildContext context) {
-    var noteProvider = context.watch<NoteProvider>();
-    var notes = noteProvider.notes;
-    var loading = noteProvider;
+    var noteFuture = context.watch<NoteProvider>().noteFurure;
+    var statusNote = context.watch<NoteProvider>().statusCode;
+    var isLoading = context.watch<NoteProvider>().isLoading;
+    var setIsLoading = context.read<NoteProvider>();
+    _futureNotes = noteFuture;
     return Scaffold(
-      body: loading.isLoading
-          ? Padding(
+      body: FutureBuilder<List<NoteModel>>(
+        future: _futureNotes,
+        builder: (_, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting ||
+              isLoading) {
+            return (Padding(
               padding: const EdgeInsets.all(18),
               child: ListView.separated(
                 itemCount: 5,
@@ -52,12 +52,14 @@ class NotesScreenState extends State<NotesScreen> {
                   child: SizedBox(height: defaultPadding),
                 ),
               ),
-            )
-          : ListView.builder(
-              itemCount: notes.length,
+            ));
+          } else if (statusNote != "") {
+            return const Text("You are not authenticated");
+          } else if (snapshot.hasData && snapshot.data!.isNotEmpty) {
+            return ListView.builder(
+              itemCount: snapshot.data!.length,
               itemBuilder: (context, index) {
-                final note = notes[notes.length - index - 1];
-
+                final note = snapshot.data![index];
                 return Dismissible(
                   key: Key(note.title),
                   direction: DismissDirection.endToStart,
@@ -75,6 +77,7 @@ class NotesScreenState extends State<NotesScreen> {
                   },
                   child: GestureDetector(
                     onTap: () async {
+                      setIsLoading.setIsLoading(true);
                       context.read<NoteProvider>().audioList.clear();
                       context.read<NoteProvider>().updatedAudioRecords.clear();
                       if (note.title.isEmpty) {
@@ -94,7 +97,6 @@ class NotesScreenState extends State<NotesScreen> {
                           ),
                         );
                       }
-                      noteProvider.setIsLoadBack(true);
                     },
                     child: Column(
                       children: [
@@ -174,13 +176,19 @@ class NotesScreenState extends State<NotesScreen> {
                   ),
                 );
               },
-            ),
+            );
+          } else {
+            return Center(child: Text('Empty Notes'));
+          }
+        },
+      ),
       floatingActionButton: Container(
         margin: const EdgeInsets.only(bottom: 16, right: 16),
         child: Transform.scale(
           scale: 1.1, // Adjust the scale value as needed
           child: FloatingActionButton(
             onPressed: () {
+              noteProvider.setIsLoading(true);
               noteProvider.audioList.clear();
               noteProvider.updatedAudioRecords.clear();
               Navigator.push(

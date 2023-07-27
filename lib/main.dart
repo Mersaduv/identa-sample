@@ -58,10 +58,15 @@ class App extends StatefulWidget {
 class AppState extends State<App> with SingleTickerProviderStateMixin {
   late TabController _tabController;
   late GlobalKey<ScaffoldState> _scaffoldKey;
+  late NoteProvider noteProvider;
+
   @override
   void initState() {
     NotificationController.startListeningNotificationEvents();
     super.initState();
+    noteProvider = context.read<NoteProvider>();
+    noteProvider.loadNotesConversation();
+    noteProvider.loadInsightsConversation();
     _tabController = TabController(length: 3, vsync: this);
     _scaffoldKey = GlobalKey<ScaffoldState>();
   }

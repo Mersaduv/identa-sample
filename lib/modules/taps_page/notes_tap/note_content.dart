@@ -103,6 +103,7 @@ class NotesContentState extends State<NotesContent>
     }
 
     if (widget.note == null) {
+
       final int defaultNoteCount = noteProvider.notes
           .where((note) => note.title.startsWith('New Note'))
           .length;
@@ -140,6 +141,7 @@ class NotesContentState extends State<NotesContent>
         date: widget.note!.date,
         files: widget.note!.files,
       );
+      noteProvider.setIsLoading(true);
       noteProvider.editConversation(editedNote);
       noteProvider.updatedAudioRecords.clear();
       noteProvider.loadNotesConversation();

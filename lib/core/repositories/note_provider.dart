@@ -14,13 +14,19 @@ class NoteProvider extends ChangeNotifier {
   String _note = "";
   String get note => _note;
 
+  String? _statusCode = "";
+  String get statusCode => _statusCode!;
   late bool _isLoading = false;
   late bool _isLoadBack = false;
   bool get isLoading => _isLoading;
   bool get isLoadBack => _isLoadBack;
   List<NoteModel> _notes = [];
   List<NoteModel> get notes => _notes;
-
+  Future<List<NoteModel>>? _noteFuture;
+  Future<List<NoteModel>>? get noteFurure => _noteFuture;
+  Future<List<InsightsConversationModel>>? _insightsconversationFuture;
+  Future<List<InsightsConversationModel>>? get insightsconversationFurure =>
+      _insightsconversationFuture;
   List<AudioFile> _audioList = [];
   List<AudioFile> get audioList => _audioList;
 
@@ -48,44 +54,59 @@ class NoteProvider extends ChangeNotifier {
   }
 
 // ? notes tap
-  void loadNotesConversation() async {
+  Future<List> loadNotesConversation() async {
     List<NoteModel> noteList = [];
-
+    _statusCode = "";
     var allNotes = await ServiceApis.getNotes();
 
-    for (var note in allNotes) {
-      NoteModel n = NoteModel.fromDynamic(note);
-      noteList.add(n);
+    if (allNotes[0] != 401) {
+      for (var note in allNotes) {
+        NoteModel n = NoteModel.fromDynamic(note);
+        noteList.add(n);
+      }
+      _noteFuture = Future.value(noteList);
+      _notes = noteList;
+      notifyListeners();
+      return allNotes;
+    } else {
+      _statusCode = allNotes[0].toString();
+      notifyListeners();
+
+      return allNotes;
     }
-    _notes = noteList;
-    // _isLoading = false;
-    notifyListeners();
   }
 
 // ? insights tap
-  Future<void> loadInsightsConversation() async {
+  Future<List> loadInsightsConversation() async {
     List<InsightsConversationModel> conversationList = [];
-
+    _statusCode = "";
     var todoNotesData = await ServiceApis.getNotes();
     List<String> conversationName = ['Todo', 'Business', 'Health'];
 
-    for (int i = 0; i < conversationName.length; i++) {
-      List<NoteModel> todoNotes = [];
-      for (var note in todoNotesData) {
-        NoteModel n = NoteModel.fromDynamic(note);
-        todoNotes.add(n);
-      }
+    if (todoNotesData[0] != 401) {
+      for (int i = 0; i < conversationName.length; i++) {
+        List<NoteModel> todoNotes = [];
+        for (var note in todoNotesData) {
+          NoteModel n = NoteModel.fromDynamic(note);
+          todoNotes.add(n);
+        }
 
-      InsightsConversationModel conversation = InsightsConversationModel(
-        name: conversationName[i],
-        notes: todoNotes,
-        icon: Icons.pending_actions,
-      );
-      conversationList.add(conversation);
+        InsightsConversationModel conversation = InsightsConversationModel(
+          name: conversationName[i],
+          notes: todoNotes,
+          icon: Icons.pending_actions,
+        );
+        conversationList.add(conversation);
+      }
+      _insightsconversationFuture = Future.value(conversationList);
+      _insightsconversation = conversationList;
+      notifyListeners();
+      return todoNotesData;
+    } else {
+      _statusCode = todoNotesData[0].toString();
+      notifyListeners();
+      return todoNotesData;
     }
-    _insightsconversation = conversationList;
-    //  _isLoading = false;
-    notifyListeners();
   }
 
   void addAudioRecord(AudioRecord audioRecord) {
@@ -132,13 +153,20 @@ class NoteProvider extends ChangeNotifier {
   }
 
   Future<void> saveConversation(NoteModel note) async {
+    setIsLoading(false);
     if (note.title.isNotEmpty) {
       await ServiceApis.createNote(note);
+      setIsLoading(false);
+
       loadNotesConversation();
     }
   }
 
   Future<void> editConversation(NoteModel editedNote) async {
+    setIsLoading(false);
     await ServiceApis.editNote(editedNote);
+    setIsLoading(false);
+
+    notifyListeners();
   }
 }
