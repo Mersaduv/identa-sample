@@ -166,7 +166,7 @@ class ServiceApis {
       if (kDebugMode) {
         print('API request failed with status code ${response.statusCode}');
       }
-      return [];
+      return [response.statusCode];
     }
   }
 

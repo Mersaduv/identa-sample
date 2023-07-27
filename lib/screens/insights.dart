@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:identa/constants/colors.dart';
 import 'package:identa/core/models/model_core/insights_conversation_model.dart';
+import 'package:identa/core/models/model_core/note_model.dart';
 import 'package:identa/core/repositories/note_provider.dart';
 import 'package:identa/modules/taps_page/insights_tap/insights_content.dart';
-import 'package:identa/widgets/insights_new.dart';
 import 'package:identa/widgets/loading/cardSkeleton.dart';
 import 'package:provider/provider.dart';
 
@@ -15,42 +15,46 @@ class InsightsScreen extends StatefulWidget {
 }
 
 class InsightsScreenState extends State<InsightsScreen> {
+  Future<List<InsightsConversationModel>>? _futureNotes;
+  late NoteProvider noteProvider;
+
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      var noteProvider = context.read<NoteProvider>();
-      noteProvider.setIsLoading(true);
-      Future.delayed(const Duration(milliseconds: 600), () {
-        noteProvider.setIsLoading(false);
-      });
-
-      noteProvider.loadInsightsConversation();
-    });
+    noteProvider = context.read<NoteProvider>();
+    noteProvider.loadInsightsConversation();
   }
 
   @override
   Widget build(BuildContext context) {
-    var noteProvider = context.watch<NoteProvider>();
     var noteProviderHandle = context.read<NoteProvider>();
-
-    var insights = noteProvider.insightsconversation;
-    var isLoading = noteProvider.isLoading;
+    var insightFuture =
+        context.watch<NoteProvider>().insightsconversationFurure;
+    var statusNote = context.watch<NoteProvider>().statusCode;
+    var isLoading = context.watch<NoteProvider>().isLoading;
+    var setIsLoading = context.read<NoteProvider>();
+    _futureNotes = insightFuture;
     return Scaffold(
       floatingActionButton: Container(
         margin: const EdgeInsets.only(bottom: 16, right: 16),
         child: Transform.scale(
           scale: 1.1, // Adjust the scale value as needed
           child: FloatingActionButton(
-            onPressed: () => noteProviderHandle.showNewInsightsDialog(context),
+            onPressed: () {
+              noteProviderHandle.showNewInsightsDialog(context);
+            },
             child: const Icon(Icons.add),
             backgroundColor: const Color(0xFF2993CF),
           ),
         ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
-      body: isLoading
-          ? Padding(
+      body: FutureBuilder<List<InsightsConversationModel>>(
+        future: _futureNotes,
+        builder: (_, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting ||
+              isLoading) {
+            return (Padding(
               padding: const EdgeInsets.all(18),
               child: ListView.separated(
                 itemCount: 5,
@@ -60,16 +64,21 @@ class InsightsScreenState extends State<InsightsScreen> {
                   child: SizedBox(height: defaultPadding),
                 ),
               ),
-            )
-          : ListView.builder(
-              itemCount: insights.length,
+            ));
+          } else if (statusNote != "") {
+            return const Text("You are not authenticated");
+          } else if (snapshot.hasData && snapshot.data!.isNotEmpty) {
+            return ListView.builder(
+              itemCount: snapshot.data!.length,
               itemBuilder: (context, index) {
-                InsightsConversationModel conversation = insights[index];
+                InsightsConversationModel conversation = snapshot.data![index];
                 String lastNote = conversation.notes.isNotEmpty
                     ? conversation.notes.last.title
                     : "No note available";
                 return GestureDetector(
                   onTap: () async {
+                    setIsLoading.setIsLoading(true);
+
                     await Navigator.push(
                         context,
                         MaterialPageRoute(
@@ -144,7 +153,12 @@ class InsightsScreenState extends State<InsightsScreen> {
                   ),
                 );
               },
-            ),
+            );
+          } else {
+            return const Center(child: Text('Empty Notes'));
+          }
+        },
+      ),
     );
   }
 }
