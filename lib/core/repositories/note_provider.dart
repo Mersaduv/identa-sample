@@ -40,17 +40,23 @@ class NoteProvider extends ChangeNotifier {
 
   Future<void> setAudioFile(AudioFile audioFiles) async {
     _audioList.add(audioFiles);
-    notifyListeners();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      notifyListeners();
+    });
   }
 
   void setIsLoading(bool isLoading) {
     _isLoading = isLoading;
-    notifyListeners();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      notifyListeners();
+    });
   }
 
   void setIsLoadBack(bool isLoadBack) {
     _isLoadBack = isLoadBack;
-    notifyListeners();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      notifyListeners();
+    });
   }
 
 // ? notes tap
@@ -66,11 +72,15 @@ class NoteProvider extends ChangeNotifier {
       }
       _noteFuture = Future.value(noteList);
       _notes = noteList;
-      notifyListeners();
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        notifyListeners();
+      });
       return allNotes;
     } else {
       _statusCode = allNotes[0].toString();
-      notifyListeners();
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        notifyListeners();
+      });
 
       return allNotes;
     }
@@ -100,18 +110,24 @@ class NoteProvider extends ChangeNotifier {
       }
       _insightsconversationFuture = Future.value(conversationList);
       _insightsconversation = conversationList;
-      notifyListeners();
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        notifyListeners();
+      });
       return todoNotesData;
     } else {
       _statusCode = todoNotesData[0].toString();
-      notifyListeners();
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        notifyListeners();
+      });
       return todoNotesData;
     }
   }
 
   void addAudioRecord(AudioRecord audioRecord) {
     _updatedAudioRecords.add(audioRecord);
-    notifyListeners();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      notifyListeners();
+    });
   }
 
   void addAudioText(String? textBody) {
@@ -125,7 +141,9 @@ class NoteProvider extends ChangeNotifier {
       icon: Icons.lightbulb_outline,
     );
     _insightsconversation.add(newInsights);
-    notifyListeners();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      notifyListeners();
+    });
   }
 
   void showNewInsightsDialog(BuildContext context) {
@@ -137,19 +155,25 @@ class NoteProvider extends ChangeNotifier {
         );
       },
     );
-    notifyListeners();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      notifyListeners();
+    });
   }
 
   Future<void> deleteNote(NoteModel note) async {
     await ServiceApis.deleteNote(note.id);
     _notes.removeWhere((n) => n.id == note.id);
-    notifyListeners();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      notifyListeners();
+    });
   }
 
   Future<void> deleteNoteAudio(NoteModel note, String fileId) async {
     await ServiceApis.deleteNoteAudio(note.id, fileId);
     _notes.removeWhere((n) => n.files[0].fileId == fileId);
-    notifyListeners();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      notifyListeners();
+    });
   }
 
   Future<void> saveConversation(NoteModel note) async {
@@ -166,7 +190,8 @@ class NoteProvider extends ChangeNotifier {
     setIsLoading(false);
     await ServiceApis.editNote(editedNote);
     setIsLoading(false);
-
-    notifyListeners();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      notifyListeners();
+    });
   }
 }

@@ -103,7 +103,6 @@ class NotesContentState extends State<NotesContent>
     }
 
     if (widget.note == null) {
-
       final int defaultNoteCount = noteProvider.notes
           .where((note) => note.title.startsWith('New Note'))
           .length;
@@ -152,7 +151,11 @@ class NotesContentState extends State<NotesContent>
 
       super.dispose();
     }
-    Provider.of<NoteProvider>(context, listen: false).addAudioText(null);
+    try {
+      Provider.of<NoteProvider>(context, listen: false).addAudioText(null);
+    } catch (e) {
+      print(e);
+    }
   }
 
   @override

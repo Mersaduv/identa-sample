@@ -1,5 +1,6 @@
 import 'package:flutter_appauth/flutter_appauth.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:mutex/mutex.dart';
 
 class AuthService {
   static var _refreshToken = '';
@@ -22,47 +23,52 @@ class AuthService {
   Future<bool> signInWithAutoCodeExchange(
       {bool preferEphemeralSession = false}) async {
     // get refresh token from secure storage
-    _secureStorage.read(key: 'refresh_token').then((value) {
-      if (value != null) {
-        _refreshToken = value;
-      }
-    });
-
+    final m = Mutex();
+    await m.acquire();
+    try {
+      _refreshToken = await _secureStorage.read(key: 'refresh_token') ?? '';
+    } catch (e) {}
     // try to refresh token
     if (_refreshToken.isNotEmpty) {
-      var refreshTokenResult = await _appAuth.token(TokenRequest(
-        _clientId,
-        _redirectUrl,
-        clientSecret: "dkDkIt9APGFWtI7fFq7aVp5I1U1rCAWE",
-        refreshToken: _refreshToken,
-        discoveryUrl: _discoveryUrl,
-        scopes: _scopes,
-      ));
-
+      TokenResponse? refreshTokenResult;
+      try {
+        refreshTokenResult = await _appAuth.token(TokenRequest(
+          _clientId,
+          _redirectUrl,
+          clientSecret: "dkDkIt9APGFWtI7fFq7aVp5I1U1rCAWE",
+          refreshToken: _refreshToken,
+          discoveryUrl: _discoveryUrl,
+          scopes: _scopes,
+        ));
+      } catch (ex) {}
       if (refreshTokenResult != null) {
         _setTokens(refreshTokenResult);
 
         return true;
       }
     }
+    try {
+      AuthorizationTokenResponse? result =
+          await _appAuth.authorizeAndExchangeCode(
+        AuthorizationTokenRequest(
+          _clientId,
+          _redirectUrl,
+          clientSecret: "dkDkIt9APGFWtI7fFq7aVp5I1U1rCAWE",
+          discoveryUrl: _discoveryUrl,
+          scopes: _scopes,
+          preferEphemeralSession: preferEphemeralSession,
+        ),
+      );
+      if (result != null) {
+        _idToken = result.idToken;
+        _setTokens(result);
 
-    final AuthorizationTokenResponse? result =
-        await _appAuth.authorizeAndExchangeCode(
-      AuthorizationTokenRequest(
-        _clientId,
-        _redirectUrl,
-        clientSecret: "dkDkIt9APGFWtI7fFq7aVp5I1U1rCAWE",
-        discoveryUrl: _discoveryUrl,
-        scopes: _scopes,
-        preferEphemeralSession: preferEphemeralSession,
-      ),
-    );
-    if (result != null) {
-      _idToken = result.idToken;
-      _setTokens(result);
-
-      return true;
+        return true;
+      }
+    } catch (e) {
+      print(e);
     }
+    m.release();
 
     return false;
   }
@@ -100,7 +106,10 @@ class AuthService {
     _secureStorage.write(key: 'refresh_token', value: _refreshToken);
   }
 
-  String getAuthHeader() {
+  Future<String> getAuthHeader() async {
+    if (_accessToken.isEmpty) {
+      await signInWithAutoCodeExchange();
+    }
     return "Bearer $_accessToken";
   }
 }

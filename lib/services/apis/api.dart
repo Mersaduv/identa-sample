@@ -18,7 +18,7 @@ class ServiceApis {
     var response = await client.delete(
       Uri.parse('${ServiceConfig.baseURL}/$url'),
       headers: {
-        'Authorization': _authService.getAuthHeader(),
+        'Authorization': await _authService.getAuthHeader(),
       },
     );
 
@@ -28,7 +28,7 @@ class ServiceApis {
       response = await client.delete(
         Uri.parse('${ServiceConfig.baseURL}/$url'),
         headers: {
-          'Authorization': _authService.getAuthHeader(),
+          'Authorization': await _authService.getAuthHeader(),
         },
       );
     }
@@ -42,7 +42,7 @@ class ServiceApis {
     var response = await client.put(
       Uri.parse('${ServiceConfig.baseURL}/$url'),
       headers: {
-        'Authorization': _authService.getAuthHeader(),
+        'Authorization': await _authService.getAuthHeader(),
         'Content-type': 'application/json; charset=UTF-8',
       },
       body: jsonEncode(body),
@@ -54,7 +54,7 @@ class ServiceApis {
       response = await client.put(
         Uri.parse('${ServiceConfig.baseURL}/$url'),
         headers: {
-          'Authorization': _authService.getAuthHeader(),
+          'Authorization': await _authService.getAuthHeader(),
           'Content-type': 'application/json; charset=UTF-8',
         },
         body: jsonEncode(body),
@@ -70,7 +70,7 @@ class ServiceApis {
     var response = await client.get(
       Uri.parse('${ServiceConfig.baseURL}/$url'),
       headers: {
-        'Authorization': _authService.getAuthHeader(),
+        'Authorization': await _authService.getAuthHeader(),
       },
     );
 
@@ -80,7 +80,7 @@ class ServiceApis {
       response = await client.get(
         Uri.parse('${ServiceConfig.baseURL}/$url'),
         headers: {
-          'Authorization': _authService.getAuthHeader(),
+          'Authorization': await _authService.getAuthHeader(),
         },
       );
     }
@@ -95,7 +95,7 @@ class ServiceApis {
       Uri.parse('${ServiceConfig.baseURL}/$url'),
       body: jsonEncode(body),
       headers: {
-        'Authorization': _authService.getAuthHeader(),
+        'Authorization': await _authService.getAuthHeader(),
         'Content-type': 'application/json; charset=UTF-8',
       },
     );
@@ -107,7 +107,7 @@ class ServiceApis {
         Uri.parse('${ServiceConfig.baseURL}/$url'),
         body: jsonEncode(body),
         headers: {
-          'Authorization': _authService.getAuthHeader(),
+          'Authorization': await _authService.getAuthHeader(),
           'Content-type': 'application/json; charset=UTF-8',
         },
       );
@@ -209,7 +209,7 @@ class ServiceApis {
       Uri.parse('${ServiceConfig.baseURL}/$url'),
       headers: {
         'Content-Type': 'audio/mpeg',
-        'Authorization': _authService.getAuthHeader(),
+        'Authorization': await _authService.getAuthHeader(),
       },
       body: bytes,
     );
@@ -225,7 +225,7 @@ class ServiceApis {
     var response = await client.get(
       Uri.parse('${ServiceConfig.baseURL}/$url/$fileId'),
       headers: {
-        'Authorization': _authService.getAuthHeader(),
+        'Authorization': await _authService.getAuthHeader(),
       },
     );
 

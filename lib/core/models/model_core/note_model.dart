@@ -35,7 +35,7 @@ class NoteModel {
   }
 
   factory NoteModel.fromDynamic(dynamic n) {
-    var list = n['files'] as List;
+    var list = n['files'] as List? ?? [];
     List<AudioFile> filesList = list.map((i) => AudioFile.fromJson(i)).toList();
 
     return NoteModel(

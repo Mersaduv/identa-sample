@@ -1,12 +1,14 @@
 class AudioFile {
   final String fileId;
-  final int length; 
-  AudioFile({required this.fileId, required this.length}); // اضافه کردن length به constructor
+  final int length;
+  AudioFile(
+      {required this.fileId,
+      required this.length}); // اضافه کردن length به constructor
 
   factory AudioFile.fromJson(Map<String, dynamic> json) {
     return AudioFile(
       fileId: json['fileId'],
-      length: json['length'], 
+      length: json['length'] ?? 0,
     );
   }
 
