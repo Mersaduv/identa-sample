@@ -19,10 +19,6 @@ class _VoiceMessageState extends State<VoiceMessage> {
   Widget build(BuildContext context) {
     final noteProvider = Provider.of<NoteProvider>(context);
     final updatedAudioRecords = noteProvider.updatedAudioRecords;
-    updatedAudioRecords.sort((a, b) {
-      return a.length!.compareTo(b.length!);
-    });
-
     return SafeArea(
         child: ListView.builder(
       shrinkWrap: true,

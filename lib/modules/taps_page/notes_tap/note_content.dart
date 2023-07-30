@@ -31,7 +31,6 @@ class NotesContentState extends State<NotesContent>
   late FocusNode _detailsFocusNode;
   late AnimationController animationController;
   late Animation<double> scaleAnimation;
-  Completer<void>? _downloadCompleter;
   bool _keyboardVisible = false;
   final updatedAudioRecords = <AudioRecord>[];
   @override
@@ -48,13 +47,33 @@ class NotesContentState extends State<NotesContent>
 
     _titleController.text = '';
     _detailsController.text = '';
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      String? newText = Provider.of<NoteProvider>(context).note;
+      if (_detailsController.text != newText) {
+        _detailsController.text += newText += "";
+        Provider.of<NoteProvider>(context, listen: false).addAudioText(null);
+      }
+    });
     if (widget.note != null) {
       _titleController.text = widget.note!.title;
       _detailsController.text = widget.note!.details;
       loadFilesContent();
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        String? newText = Provider.of<NoteProvider>(context).note;
+        if (_detailsController.text != newText) {
+          _detailsController.text += newText += "";
+          Provider.of<NoteProvider>(context, listen: false).addAudioText(null);
+        }
+      });
     }
-
     _detailsFocusNode = FocusNode();
+    // WidgetsBinding.instance.addPostFrameCallback((_) {
+    //   String? newText = noteProvider.note;
+    //   if (_detailsController.text != newText) {
+    //     _detailsController.text += newText += "";
+    //     Provider.of<NoteProvider>(context, listen: false).addAudioText(null);
+    //   }
+    // });
   }
 
   void loadFilesContent() {
@@ -72,8 +91,6 @@ class NotesContentState extends State<NotesContent>
     }
 
     for (var n in widget.note!.files) {
-      final completer = Completer<void>();
-
       ServiceApis.downloadAudio(n.fileId).then((response) {
         final audioRecord = AudioRecord(
             formattedDate: DateTime.now().toString(),
@@ -81,17 +98,12 @@ class NotesContentState extends State<NotesContent>
             length: n.length);
         audioRecordsProvider.addAudioRecord(audioRecord);
         print("audios ${n.fileId}");
-
-        completer.complete();
-      }).catchError((error) {
-        completer.completeError(error);
       });
-      _downloadCompleter = completer;
     }
   }
 
   @override
-  void dispose() {
+  Future<void> dispose() async {
     final String title = _titleController.text.trim();
     final String details = _detailsController.text.trim();
     List<AudioFile> audioFiles = [];
@@ -103,6 +115,8 @@ class NotesContentState extends State<NotesContent>
     }
 
     if (widget.note == null) {
+      await noteProvider.setIsLoadBack(true);
+
       final int defaultNoteCount = noteProvider.notes
           .where((note) => note.title.startsWith('New Note'))
           .length;
@@ -119,6 +133,8 @@ class NotesContentState extends State<NotesContent>
         date: DateFormat('dd MMM, hh:mm a').format(DateTime.now()),
         files: audioFiles,
       ));
+      noteProvider.setIsLoading(true);
+
       noteProvider.updatedAudioRecords.clear();
       noteProvider.loadNotesConversation();
       audioFiles.clear();
@@ -126,6 +142,15 @@ class NotesContentState extends State<NotesContent>
       _detailsController.dispose();
       super.dispose();
     } else {
+      final int defaultNoteCount = noteProvider.notes
+          .where((note) => note.title.startsWith('New Note'))
+          .length;
+      if (title.isEmpty && details.isNotEmpty) {
+        final String defaultTitle = defaultNoteCount > 0
+            ? 'New Note ${defaultNoteCount + 1}'
+            : 'New Note';
+        _titleController.text = defaultTitle.trim();
+      }
       for (var audio in noteProvider.audioList) {
         widget.note!.files
             .add(AudioFile(fileId: audio.fileId, length: audio.length));
@@ -145,7 +170,6 @@ class NotesContentState extends State<NotesContent>
       noteProvider.updatedAudioRecords.clear();
       noteProvider.loadNotesConversation();
       audioFiles.clear();
-      _downloadCompleter?.complete();
       _titleController.dispose();
       _detailsController.dispose();
 
@@ -160,11 +184,7 @@ class NotesContentState extends State<NotesContent>
 
   @override
   Widget build(BuildContext context) {
-    String? newText = Provider.of<NoteProvider>(context).note;
-    if (_detailsController.text != newText) {
-      _detailsController.text += newText += "";
-      Provider.of<NoteProvider>(context, listen: false).addAudioText(null);
-    }
+
     return MultiProvider(
       providers: <SingleChildWidget>[
         Provider<AudioRecorderLogicInterface>(
@@ -174,83 +194,96 @@ class NotesContentState extends State<NotesContent>
           dispose: (_, logic) => logic.onDispose(),
         ),
       ],
-      child: Scaffold(
-        appBar: CustomAppBar(
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back),
-            color: Colors.white,
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
-          ),
-          title: 'New note',
-        ),
-        body: SafeArea(
-          child: SingleChildScrollView(
-              physics: const BouncingScrollPhysics(),
-              child: Column(
-                mainAxisSize: MainAxisSize.max,
-                children: [
-                  GestureDetector(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 16.0, vertical: 8.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          const SizedBox(height: 16.0),
-                          TextField(
-                            controller: _titleController,
-                            decoration: const InputDecoration(
-                              hintText: 'Title',
-                              hintStyle: TextStyle(color: Colors.grey),
-                              border: InputBorder.none,
-                            ),
-                            maxLines: null,
-                            style: const TextStyle(
-                              fontSize: 24.0,
-                              fontWeight: FontWeight.bold,
-                              color: Color(0xFF4B5563),
-                            ),
-                            onTap: () {
-                              // Activate the text field or hide the keyboard
-                            },
-                            onSubmitted: (value) {
-                              FocusScope.of(context)
-                                  .requestFocus(_detailsFocusNode);
-                            },
+      child: Consumer<NoteProvider>(
+        builder: (context, value, child) {
+          String? newText = Provider.of<NoteProvider>(context).note;
+          if (_detailsController.text != newText) {
+            _detailsController.text += newText += "";
+            Provider.of<NoteProvider>(context, listen: false)
+                .addAudioText(null);
+          }
+
+          return Scaffold(
+            appBar: CustomAppBar(
+              leading: IconButton(
+                icon: const Icon(Icons.arrow_back),
+                color: Colors.white,
+                onPressed: () async {
+                  await noteProvider.setIsLoadBack(true);
+                  Navigator.of(context).pop();
+                },
+              ),
+              title: 'New note',
+            ),
+            body: SafeArea(
+              child: SingleChildScrollView(
+                  physics: const BouncingScrollPhysics(),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.max,
+                    children: [
+                      GestureDetector(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 16.0, vertical: 8.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              const SizedBox(height: 16.0),
+                              TextField(
+                                controller: _titleController,
+                                decoration: const InputDecoration(
+                                  hintText: 'Title',
+                                  hintStyle: TextStyle(color: Colors.grey),
+                                  border: InputBorder.none,
+                                ),
+                                maxLines: null,
+                                style: const TextStyle(
+                                  fontSize: 24.0,
+                                  fontWeight: FontWeight.bold,
+                                  color: Color(0xFF4B5563),
+                                ),
+                                onTap: () {
+                                  // Activate the text field or hide the keyboard
+                                },
+                                onSubmitted: (value) {
+                                  FocusScope.of(context)
+                                      .requestFocus(_detailsFocusNode);
+                                },
+                              ),
+                              const SizedBox(height: 8.0),
+                              TextField(
+                                controller: _detailsController,
+                                decoration: const InputDecoration(
+                                  hintText: 'Start typing or recording ...  ',
+                                  hintStyle: TextStyle(color: Colors.grey),
+                                  border: InputBorder
+                                      .none, // Remove the bottom line
+                                ),
+                                maxLines: null,
+                                onTap: () {
+                                  // Activate the text field or hide the keyboard
+                                },
+                                focusNode: _detailsFocusNode,
+                                style: const TextStyle(
+                                  color: Color(0xFF4B5563),
+                                ),
+                              ),
+                              const SizedBox(height: 8.0),
+                            ],
                           ),
-                          const SizedBox(height: 8.0),
-                          TextField(
-                            controller: _detailsController,
-                            decoration: const InputDecoration(
-                              hintText: 'Start typing or recording ...  ',
-                              hintStyle: TextStyle(color: Colors.grey),
-                              border:
-                                  InputBorder.none, // Remove the bottom line
-                            ),
-                            maxLines: null,
-                            onTap: () {
-                              // Activate the text field or hide the keyboard
-                            },
-                            focusNode: _detailsFocusNode,
-                            style: const TextStyle(
-                              color: Color(0xFF4B5563),
-                            ),
-                          ),
-                          const SizedBox(height: 8.0),
-                        ],
+                        ),
                       ),
-                    ),
-                  ),
-                  VoiceMessage(note: widget.note),
-                  const SizedBox(height: 100.0)
-                ],
-              )),
-        ),
-        floatingActionButton:
-            !_keyboardVisible ? const BottomNavigation() : null,
-        floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+                      VoiceMessage(note: widget.note),
+                      const SizedBox(height: 100.0)
+                    ],
+                  )),
+            ),
+            floatingActionButton:
+                !_keyboardVisible ? const BottomNavigation() : null,
+            floatingActionButtonLocation:
+                FloatingActionButtonLocation.centerFloat,
+          );
+        },
       ),
     );
   }

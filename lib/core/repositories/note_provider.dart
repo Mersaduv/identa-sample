@@ -40,9 +40,7 @@ class NoteProvider extends ChangeNotifier {
 
   Future<void> setAudioFile(AudioFile audioFiles) async {
     _audioList.add(audioFiles);
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      notifyListeners();
-    });
+    notifyListeners();
   }
 
   void setIsLoading(bool isLoading) {
@@ -52,86 +50,58 @@ class NoteProvider extends ChangeNotifier {
     });
   }
 
-  void setIsLoadBack(bool isLoadBack) {
+  Future<void> setIsLoadBack(bool isLoadBack) async {
     _isLoadBack = isLoadBack;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       notifyListeners();
     });
   }
 
-// ? notes tap
-  Future<List> loadNotesConversation() async {
+  void loadNotesConversation() async {
     List<NoteModel> noteList = [];
-    _statusCode = "";
+
     var allNotes = await ServiceApis.getNotes();
 
-    if (allNotes[0] != 401) {
-      for (var note in allNotes) {
-        NoteModel n = NoteModel.fromDynamic(note);
-        noteList.add(n);
-      }
-      _noteFuture = Future.value(noteList);
-      _notes = noteList;
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        notifyListeners();
-      });
-      return allNotes;
-    } else {
-      _statusCode = allNotes[0].toString();
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        notifyListeners();
-      });
-
-      return allNotes;
+    for (var note in allNotes) {
+      NoteModel n = NoteModel.fromDynamic(note);
+      noteList.add(n);
     }
+    _notes = noteList;
+    notifyListeners();
   }
 
-// ? insights tap
-  Future<List> loadInsightsConversation() async {
+  Future<void> loadInsightsConversation() async {
     List<InsightsConversationModel> conversationList = [];
-    _statusCode = "";
+
     var todoNotesData = await ServiceApis.getNotes();
     List<String> conversationName = ['Todo', 'Business', 'Health'];
 
-    if (todoNotesData[0] != 401) {
-      for (int i = 0; i < conversationName.length; i++) {
-        List<NoteModel> todoNotes = [];
-        for (var note in todoNotesData) {
-          NoteModel n = NoteModel.fromDynamic(note);
-          todoNotes.add(n);
-        }
-
-        InsightsConversationModel conversation = InsightsConversationModel(
-          name: conversationName[i],
-          notes: todoNotes,
-          icon: Icons.pending_actions,
-        );
-        conversationList.add(conversation);
+    for (int i = 0; i < conversationName.length; i++) {
+      List<NoteModel> todoNotes = [];
+      for (var note in todoNotesData) {
+        NoteModel n = NoteModel.fromDynamic(note);
+        todoNotes.add(n);
       }
-      _insightsconversationFuture = Future.value(conversationList);
-      _insightsconversation = conversationList;
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        notifyListeners();
-      });
-      return todoNotesData;
-    } else {
-      _statusCode = todoNotesData[0].toString();
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        notifyListeners();
-      });
-      return todoNotesData;
+
+      InsightsConversationModel conversation = InsightsConversationModel(
+        name: conversationName[i],
+        notes: todoNotes,
+        icon: Icons.pending_actions,
+      );
+      conversationList.add(conversation);
     }
+    _insightsconversation = conversationList;
+    notifyListeners();
   }
 
   void addAudioRecord(AudioRecord audioRecord) {
     _updatedAudioRecords.add(audioRecord);
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      notifyListeners();
-    });
+    notifyListeners();
   }
 
   void addAudioText(String? textBody) {
     _note = textBody ?? "";
+    notifyListeners();
   }
 
   void createNewInsights(String insightsName) {
@@ -187,10 +157,9 @@ class NoteProvider extends ChangeNotifier {
   }
 
   Future<void> editConversation(NoteModel editedNote) async {
-    setIsLoading(false);
-    await ServiceApis.editNote(editedNote);
-    setIsLoading(false);
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await ServiceApis.editNote(editedNote);
+
       notifyListeners();
     });
   }
