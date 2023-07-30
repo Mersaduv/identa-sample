@@ -47,33 +47,12 @@ class NotesContentState extends State<NotesContent>
 
     _titleController.text = '';
     _detailsController.text = '';
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      String? newText = Provider.of<NoteProvider>(context).note;
-      if (_detailsController.text != newText) {
-        _detailsController.text += newText += "";
-        Provider.of<NoteProvider>(context, listen: false).addAudioText(null);
-      }
-    });
     if (widget.note != null) {
       _titleController.text = widget.note!.title;
       _detailsController.text = widget.note!.details;
       loadFilesContent();
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        String? newText = Provider.of<NoteProvider>(context).note;
-        if (_detailsController.text != newText) {
-          _detailsController.text += newText += "";
-          Provider.of<NoteProvider>(context, listen: false).addAudioText(null);
-        }
-      });
     }
     _detailsFocusNode = FocusNode();
-    // WidgetsBinding.instance.addPostFrameCallback((_) {
-    //   String? newText = noteProvider.note;
-    //   if (_detailsController.text != newText) {
-    //     _detailsController.text += newText += "";
-    //     Provider.of<NoteProvider>(context, listen: false).addAudioText(null);
-    //   }
-    // });
   }
 
   void loadFilesContent() {
@@ -184,7 +163,11 @@ class NotesContentState extends State<NotesContent>
 
   @override
   Widget build(BuildContext context) {
-
+    String? newText = Provider.of<NoteProvider>(context).note;
+    if (_detailsController.text != newText) {
+      _detailsController.text += newText += "";
+      Provider.of<NoteProvider>(context, listen: false).addAudioText(null);
+    }
     return MultiProvider(
       providers: <SingleChildWidget>[
         Provider<AudioRecorderLogicInterface>(
@@ -194,96 +177,84 @@ class NotesContentState extends State<NotesContent>
           dispose: (_, logic) => logic.onDispose(),
         ),
       ],
-      child: Consumer<NoteProvider>(
-        builder: (context, value, child) {
-          String? newText = Provider.of<NoteProvider>(context).note;
-          if (_detailsController.text != newText) {
-            _detailsController.text += newText += "";
-            Provider.of<NoteProvider>(context, listen: false)
-                .addAudioText(null);
-          }
-
-          return Scaffold(
-            appBar: CustomAppBar(
-              leading: IconButton(
-                icon: const Icon(Icons.arrow_back),
-                color: Colors.white,
-                onPressed: () async {
-                  await noteProvider.setIsLoadBack(true);
-                  Navigator.of(context).pop();
-                },
-              ),
-              title: 'New note',
-            ),
-            body: SafeArea(
-              child: SingleChildScrollView(
-                  physics: const BouncingScrollPhysics(),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.max,
-                    children: [
-                      GestureDetector(
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 16.0, vertical: 8.0),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              const SizedBox(height: 16.0),
-                              TextField(
-                                controller: _titleController,
-                                decoration: const InputDecoration(
-                                  hintText: 'Title',
-                                  hintStyle: TextStyle(color: Colors.grey),
-                                  border: InputBorder.none,
-                                ),
-                                maxLines: null,
-                                style: const TextStyle(
-                                  fontSize: 24.0,
-                                  fontWeight: FontWeight.bold,
-                                  color: Color(0xFF4B5563),
-                                ),
-                                onTap: () {
-                                  // Activate the text field or hide the keyboard
-                                },
-                                onSubmitted: (value) {
-                                  FocusScope.of(context)
-                                      .requestFocus(_detailsFocusNode);
-                                },
-                              ),
-                              const SizedBox(height: 8.0),
-                              TextField(
-                                controller: _detailsController,
-                                decoration: const InputDecoration(
-                                  hintText: 'Start typing or recording ...  ',
-                                  hintStyle: TextStyle(color: Colors.grey),
-                                  border: InputBorder
-                                      .none, // Remove the bottom line
-                                ),
-                                maxLines: null,
-                                onTap: () {
-                                  // Activate the text field or hide the keyboard
-                                },
-                                focusNode: _detailsFocusNode,
-                                style: const TextStyle(
-                                  color: Color(0xFF4B5563),
-                                ),
-                              ),
-                              const SizedBox(height: 8.0),
-                            ],
+      child: Scaffold(
+        appBar: CustomAppBar(
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            color: Colors.white,
+            onPressed: () async {
+              await noteProvider.setIsLoadBack(true);
+              Navigator.of(context).pop();
+            },
+          ),
+          title: 'New note',
+        ),
+        body: SafeArea(
+          child: SingleChildScrollView(
+              physics: const BouncingScrollPhysics(),
+              child: Column(
+                mainAxisSize: MainAxisSize.max,
+                children: [
+                  GestureDetector(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16.0, vertical: 8.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          const SizedBox(height: 16.0),
+                          TextField(
+                            controller: _titleController,
+                            decoration: const InputDecoration(
+                              hintText: 'Title',
+                              hintStyle: TextStyle(color: Colors.grey),
+                              border: InputBorder.none,
+                            ),
+                            maxLines: null,
+                            style: const TextStyle(
+                              fontSize: 24.0,
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFF4B5563),
+                            ),
+                            onTap: () {
+                              // Activate the text field or hide the keyboard
+                            },
+                            onSubmitted: (value) {
+                              FocusScope.of(context)
+                                  .requestFocus(_detailsFocusNode);
+                            },
                           ),
-                        ),
+                          const SizedBox(height: 8.0),
+                          TextField(
+                            controller: _detailsController,
+                            decoration: const InputDecoration(
+                              hintText: 'Start typing or recording ...  ',
+                              hintStyle: TextStyle(color: Colors.grey),
+                              border:
+                                  InputBorder.none, // Remove the bottom line
+                            ),
+                            maxLines: null,
+                            onTap: () {
+                              // Activate the text field or hide the keyboard
+                            },
+                            focusNode: _detailsFocusNode,
+                            style: const TextStyle(
+                              color: Color(0xFF4B5563),
+                            ),
+                          ),
+                          const SizedBox(height: 8.0),
+                        ],
                       ),
-                      VoiceMessage(note: widget.note),
-                      const SizedBox(height: 100.0)
-                    ],
-                  )),
-            ),
-            floatingActionButton:
-                !_keyboardVisible ? const BottomNavigation() : null,
-            floatingActionButtonLocation:
-                FloatingActionButtonLocation.centerFloat,
-          );
-        },
+                    ),
+                  ),
+                  VoiceMessage(note: widget.note),
+                  const SizedBox(height: 100.0)
+                ],
+              )),
+        ),
+        floatingActionButton:
+            !_keyboardVisible ? const BottomNavigation() : null,
+        floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       ),
     );
   }
