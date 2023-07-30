@@ -220,7 +220,7 @@ class ServiceApis {
   static Future<String?> downloadAudio(String fileId) async {
     final client = RetryClient(http.Client());
 
-    String url = 'insights/download-audio/';
+    String url = 'insights/download-audio';
 
     var response = await client.get(
       Uri.parse('${ServiceConfig.baseURL}/$url/$fileId'),
