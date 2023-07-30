@@ -184,18 +184,7 @@ class NotesContentState extends State<NotesContent>
 
   @override
   Widget build(BuildContext context) {
-    // String? newText = Provider.of<NoteProvider>(context).note;
-    // if (_detailsController.text != newText) {
-    //   _detailsController.text += newText += "";
-    //   Provider.of<NoteProvider>(context, listen: false).addAudioText(null);
-    // }
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      String? newText = Provider.of<NoteProvider>(context).note;
-      if (_detailsController.text != newText) {
-        _detailsController.text += newText += "";
-        Provider.of<NoteProvider>(context, listen: false).addAudioText(null);
-      }
-    });
+
     return MultiProvider(
       providers: <SingleChildWidget>[
         Provider<AudioRecorderLogicInterface>(
