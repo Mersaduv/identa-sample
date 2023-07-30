@@ -166,7 +166,6 @@ class NotesContentState extends State<NotesContent>
     String? newText = Provider.of<NoteProvider>(context).note;
     if (_detailsController.text != newText) {
       _detailsController.text += newText += "";
-      Provider.of<NoteProvider>(context, listen: false).addAudioText(null);
     }
     return MultiProvider(
       providers: <SingleChildWidget>[
@@ -183,8 +182,8 @@ class NotesContentState extends State<NotesContent>
             icon: const Icon(Icons.arrow_back),
             color: Colors.white,
             onPressed: () async {
-              await noteProvider.setIsLoadBack(true);
               Navigator.of(context).pop();
+              await noteProvider.setIsLoadBack(true);
             },
           ),
           title: 'New note',
