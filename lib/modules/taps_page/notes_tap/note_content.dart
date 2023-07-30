@@ -42,6 +42,11 @@ class NotesContentState extends State<NotesContent>
       });
     });
     noteProvider = context.read<NoteProvider>();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      noteProvider.addAudioText(null);
+    });
+
     _titleController = TextEditingController();
     _detailsController = TextEditingController();
 
@@ -82,7 +87,7 @@ class NotesContentState extends State<NotesContent>
   }
 
   @override
-  Future<void> dispose() async {
+  void dispose() async {
     final String title = _titleController.text.trim();
     final String details = _detailsController.text.trim();
     List<AudioFile> audioFiles = [];
@@ -94,7 +99,7 @@ class NotesContentState extends State<NotesContent>
     }
 
     if (widget.note == null) {
-      await noteProvider.setIsLoadBack(true);
+      noteProvider.setIsLoadBack(true);
 
       final int defaultNoteCount = noteProvider.notes
           .where((note) => note.title.startsWith('New Note'))
@@ -163,7 +168,7 @@ class NotesContentState extends State<NotesContent>
 
   @override
   Widget build(BuildContext context) {
-    String? newText = Provider.of<NoteProvider>(context).note;
+    String? newText = context.watch<NoteProvider>().note;
     if (_detailsController.text != newText) {
       _detailsController.text += newText += "";
     }
