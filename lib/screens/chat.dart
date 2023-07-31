@@ -114,16 +114,6 @@ class ChatScreenState extends State<ChatScreen>
         Expanded(
           child: _buildList(),
         ),
-        // Visibility(
-        //   visible: isBotTyping,
-        //   child: const Padding(
-        //     padding: EdgeInsets.all(6.0),
-        //     child: SpinKitThreeBounce(
-        //       color: MyColors.primaryColor,
-        //       size: 20,
-        //     ),
-        //   ),
-        // ),
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 8.0),
           child: Row(

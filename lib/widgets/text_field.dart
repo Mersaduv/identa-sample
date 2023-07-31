@@ -87,23 +87,32 @@ class ChatTextFieldState extends State<ChatTextField>
           child: Row(
             children: [
               Expanded(
-                child: TextField(
-                  controller: widget.controller,
-                  enabled: widget.isEnabled,
-                  style: const TextStyle(color: Color(0xFF4B5563)),
-                  maxLines: null,
-                  decoration: InputDecoration(
-                    hintText: widget.hint,
-                    hintStyle: TextStyle(
-                      color: Color(
-                          0xFF9CA3AF), // Set the hint text color to #9CA3AF
+                child: SingleChildScrollView(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(
+                      minHeight: 100.0,
+                      maxHeight: 300.0,
                     ),
-                    border: InputBorder.none,
-                    contentPadding:
-                        const EdgeInsets.symmetric(horizontal: 16.0),
+                    child: TextField(
+                      controller: widget.controller,
+                      enabled: widget.isEnabled,
+                      style: const TextStyle(color: Color(0xFF4B5563)),
+                      maxLines: null,
+                      decoration: InputDecoration(
+                        hintText: widget.hint,
+                        hintStyle: TextStyle(
+                          color: Color(
+                            0xFF9CA3AF, // Set the hint text color to #9CA3AF
+                          ),
+                        ),
+                        border: InputBorder.none,
+                        contentPadding:
+                            const EdgeInsets.symmetric(horizontal: 16.0),
+                      ),
+                      onSubmitted: widget.onSubmitted,
+                      autofocus: true,
+                    ),
                   ),
-                  onSubmitted: widget.onSubmitted,
-                  autofocus: true,
                 ),
               ),
               if (!widget.isEnabled)
