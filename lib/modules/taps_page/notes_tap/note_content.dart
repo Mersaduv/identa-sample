@@ -172,17 +172,13 @@ class NotesContentState extends State<NotesContent>
   Widget build(BuildContext context) {
     String? newText = context.watch<NoteProvider>().note;
     if (previousText != newText) {
-      // ذخیره موقعیت مکان‌نما
       final lastCursorPosition = _detailsController.selection.baseOffset;
 
-      // اضافه کردن newText به متن جدید
       _detailsController.text = _detailsController.text! + newText;
 
-      // بازیابی موقعیت مکان‌نما
       _detailsController.selection =
           TextSelection.fromPosition(TextPosition(offset: lastCursorPosition));
 
-      // اضافه کردن newText به provider تا خالی شود
       context.read<NoteProvider>().addAudioText('');
     }
 
@@ -201,6 +197,7 @@ class NotesContentState extends State<NotesContent>
             icon: const Icon(Icons.arrow_back),
             color: Colors.white,
             onPressed: () async {
+              context.read<NoteProvider>().loadNotesConversation();
               Navigator.of(context).pop();
               await noteProvider.setIsLoadBack(true);
             },
