@@ -90,7 +90,6 @@ class ChatTextFieldState extends State<ChatTextField>
                 child: SingleChildScrollView(
                   child: ConstrainedBox(
                     constraints: const BoxConstraints(
-                      minHeight: 100.0,
                       maxHeight: 300.0,
                     ),
                     child: TextField(
