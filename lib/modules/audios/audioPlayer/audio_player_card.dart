@@ -35,7 +35,7 @@ class AudioPlayerCard extends StatelessWidget {
               );
             },
             child: Container(
-              width: 290,
+              width: MediaQuery.of(context).size.width * 0.8,
               padding: const EdgeInsets.only(right: 15, left: 15),
               decoration: BoxDecoration(
                 color: Color.fromARGB(255, 229, 237, 252),

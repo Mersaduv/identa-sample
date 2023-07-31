@@ -101,7 +101,6 @@ class NoteProvider extends ChangeNotifier {
 
   void addAudioText(String? textBody) {
     _note = textBody ?? "";
-    notifyListeners();
   }
 
   void createNewInsights(String insightsName) {
@@ -159,7 +158,7 @@ class NoteProvider extends ChangeNotifier {
   Future<void> editConversation(NoteModel editedNote) async {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       await ServiceApis.editNote(editedNote);
-
+      loadNotesConversation();
       notifyListeners();
     });
   }

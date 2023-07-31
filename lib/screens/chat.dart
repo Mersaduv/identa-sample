@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:identa/constants/colors.dart';
 import 'package:identa/core/models/model_core/bot.dart';
 import 'package:identa/core/models/model_core/message.dart';
 import 'package:identa/core/models/model_core/user.dart';
@@ -21,7 +23,7 @@ class ChatScreenState extends State<ChatScreen>
   List<Message> messages = [];
   bool isLoggedIn = false;
   bool isBotTyping = false;
-
+  bool isKeyboardVisible = false;
   final AuthService _authService = AuthService();
   final TextEditingController _messageController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
@@ -45,14 +47,13 @@ class ChatScreenState extends State<ChatScreen>
           messages.add(Message(sender: bot.name, message: botResponse));
           isBotTyping = false;
         });
-        WidgetsBinding.instance!.addPostFrameCallback((_) {
-          _scrollController.animateTo(
-            _scrollController.position.maxScrollExtent,
-            duration: const Duration(milliseconds: 300),
-            curve: Curves.easeOut,
-          );
+        Future.delayed(const Duration(milliseconds: 1)).then((_) {
+          _scrollDown(); // Scroll to the latest message
         });
       }
+    });
+    Future.delayed(const Duration(milliseconds: 1)).then((_) {
+      _scrollDown(); // Scroll to the latest message
     });
   }
 
@@ -67,6 +68,14 @@ class ChatScreenState extends State<ChatScreen>
     });
   }
 
+  void _scrollDown() {
+    _scrollController.animateTo(
+      _scrollController.position.minScrollExtent,
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeOut,
+    );
+  }
+
   @override
   void dispose() {
     _messageController.dispose();
@@ -77,70 +86,89 @@ class ChatScreenState extends State<ChatScreen>
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () {
-        FocusScope.of(context).unfocus();
-      },
-      child: Scaffold(
-        backgroundColor: const Color.fromARGB(255, 241, 245, 255),
-        body: Column(
+    return Scaffold(
+      backgroundColor: const Color.fromARGB(255, 241, 245, 255),
+      body: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 4),
+        child: Stack(
           children: [
-            Expanded(
-              child: SingleChildScrollView(
-                reverse: true,
-                child: Column(
-                  children: messages
-                      .map((message) => ChatBubble(
-                            content: message.message,
-                            isMe: message.sender == user.name,
-                          ))
-                      .toList(),
+            Positioned.fill(
+              child: Align(
+                alignment: Alignment.bottomCenter,
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 300),
+                  margin: EdgeInsets.only(bottom: isKeyboardVisible ? 300 : 0),
+                  child: _buildChatScreen(),
                 ),
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.only(top: 4.0),
-              child: Column(
-                children: [
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(
-                        child: Padding(
-                          padding: const EdgeInsets.only(
-                              right: 4.0), // Adjust the right padding as needed
-                          child: Theme(
-                            data: Theme.of(context).copyWith(
-                              textTheme: Theme.of(context).textTheme.copyWith(
-                                    subtitle1: TextStyle(
-                                      color: Color(
-                                          0xFF9CA3AF), // Set the hint text color to #9CA3AF
-                                    ),
-                                  ),
-                            ),
-                            child: ChatTextField(
-                              controller: _messageController,
-                              isEnabled: !isBotTyping,
-                              hint: isBotTyping
-                                  ? 'is typing...'
-                                  : 'Type a message',
-                              onSubmitted: (value) {
-                                String messageContent = value.trim();
-                                if (messageContent.isNotEmpty) {
-                                  sendMessage(messageContent);
-                                  _messageController.clear();
-                                }
-                              },
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  )
-                ],
-              ),
-            ),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildChatScreen() {
+    return Column(
+      children: [
+        Expanded(
+          child: _buildList(),
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8.0),
+          child: Row(
+            children: [
+              _buildInput(),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildList() {
+    var messagesList = messages.reversed.toList();
+    return ListView.builder(
+      controller: _scrollController,
+      itemCount: messagesList.length,
+      reverse: true,
+      itemBuilder: (context, index) {
+        var message = messagesList[index];
+        return ChatBubble(
+          content: message.message,
+          isMe: message.sender == user.name,
+        );
+      },
+    );
+  }
+
+  Expanded _buildInput() {
+    return Expanded(
+      child: Padding(
+        padding: const EdgeInsets.only(
+            right: 4.0), // Adjust the right padding as needed
+        child: Theme(
+          data: Theme.of(context).copyWith(
+            textTheme: Theme.of(context).textTheme.copyWith(
+                  titleMedium: const TextStyle(
+                    color:
+                        Color(0xFF9CA3AF), // Set the hint text color to #9CA3AF
+                  ),
+                ),
+          ),
+          child: ChatTextField(
+            controller: _messageController,
+            isEnabled: !isBotTyping,
+            hint: isBotTyping ? 'is typing...' : 'Type a message',
+            onSubmitted: (value) {
+              String messageContent = value.trim();
+              if (messageContent.isNotEmpty) {
+                _scrollDown();
+                sendMessage(messageContent);
+                _messageController.clear();
+              }
+            },
+          ),
         ),
       ),
     );
