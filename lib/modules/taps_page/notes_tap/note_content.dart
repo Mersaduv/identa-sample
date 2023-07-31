@@ -33,6 +33,8 @@ class NotesContentState extends State<NotesContent>
   late Animation<double> scaleAnimation;
   bool _keyboardVisible = false;
   final updatedAudioRecords = <AudioRecord>[];
+  String? previousText;
+
   @override
   void initState() {
     super.initState();
@@ -169,9 +171,21 @@ class NotesContentState extends State<NotesContent>
   @override
   Widget build(BuildContext context) {
     String? newText = context.watch<NoteProvider>().note;
-    if (_detailsController.text != newText) {
-      _detailsController.text += newText += "";
+    if (previousText != newText) {
+      // ذخیره موقعیت مکان‌نما
+      final lastCursorPosition = _detailsController.selection.baseOffset;
+
+      // اضافه کردن newText به متن جدید
+      _detailsController.text = _detailsController.text! + newText;
+
+      // بازیابی موقعیت مکان‌نما
+      _detailsController.selection =
+          TextSelection.fromPosition(TextPosition(offset: lastCursorPosition));
+
+      // اضافه کردن newText به provider تا خالی شود
+      context.read<NoteProvider>().addAudioText('');
     }
+
     return MultiProvider(
       providers: <SingleChildWidget>[
         Provider<AudioRecorderLogicInterface>(

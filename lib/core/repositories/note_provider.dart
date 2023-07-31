@@ -101,7 +101,6 @@ class NoteProvider extends ChangeNotifier {
 
   void addAudioText(String? textBody) {
     _note = textBody ?? "";
-    notifyListeners();
   }
 
   void createNewInsights(String insightsName) {
