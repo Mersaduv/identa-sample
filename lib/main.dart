@@ -4,7 +4,6 @@ import 'package:identa/core/repositories/note_provider.dart';
 import 'package:identa/core/repositories/notification_provider.dart';
 import 'package:identa/modules/audios/audioRecorder/recorder_button.dart';
 import 'package:identa/screens/chat.dart'; // import chat screen
-import 'package:identa/screens/insights.dart';
 import 'package:identa/screens/notes.dart'; // import notes screen
 import 'package:identa/widgets/tap_app_bar.dart';
 import 'package:identa/widgets/settings/view.dart';
@@ -64,7 +63,7 @@ class AppState extends State<App> with SingleTickerProviderStateMixin {
     NotificationController.startListeningNotificationEvents();
     super.initState();
 
-    _tabController = TabController(length: 3, vsync: this);
+    _tabController = TabController(length: 2, vsync: this);
     _scaffoldKey = GlobalKey<ScaffoldState>();
   }
 
@@ -92,7 +91,6 @@ class AppState extends State<App> with SingleTickerProviderStateMixin {
         controller: _tabController,
         children: const [
           ChatScreen(),
-          InsightsScreen(),
           NotesScreen(),
         ],
       ),

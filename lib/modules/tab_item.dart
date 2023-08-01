@@ -5,7 +5,8 @@ class TabItem extends StatelessWidget {
   final bool isSelected;
   final VoidCallback onTap;
 
-  const TabItem({super.key, 
+  const TabItem({
+    super.key,
     required this.title,
     required this.isSelected,
     required this.onTap,
@@ -41,7 +42,8 @@ class TabItem extends StatelessWidget {
                           color: Colors.grey.withOpacity(0.5),
                           spreadRadius: 3,
                           blurRadius: 4,
-                          offset: const Offset(0, 1), // changes position of shadow
+                          offset:
+                              const Offset(0, 1), // changes position of shadow
                         ),
                       ]
                     : [],

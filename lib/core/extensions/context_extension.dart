@@ -6,7 +6,9 @@ extension ContextExt on BuildContext {
     ScaffoldMessenger.of(this)
       ..hideCurrentSnackBar()
       ..showSnackBar(
-        SnackBar(content: Text(message), duration: const Duration(seconds: 1)),
+        SnackBar(
+            content: Text(message),
+            duration: const Duration(milliseconds: 300)),
       );
   }
 }
