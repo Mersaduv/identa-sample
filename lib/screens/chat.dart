@@ -4,10 +4,12 @@ import 'package:identa/constants/colors.dart';
 import 'package:identa/core/models/model_core/bot.dart';
 import 'package:identa/core/models/model_core/message.dart';
 import 'package:identa/core/models/model_core/user.dart';
+import 'package:identa/core/repositories/note_provider.dart';
 import 'package:identa/modules/taps_page/chat/chat_bubble.dart';
 import 'package:identa/services/auth/auth_service.dart';
 import 'package:identa/services/apis/api.dart';
 import 'package:identa/widgets/text_field.dart';
+import 'package:provider/provider.dart';
 
 class ChatScreen extends StatefulWidget {
   const ChatScreen({Key? key}) : super(key: key);
@@ -18,13 +20,13 @@ class ChatScreen extends StatefulWidget {
 
 class ChatScreenState extends State<ChatScreen>
     with SingleTickerProviderStateMixin {
+  final AuthService _authService = AuthService();
+  bool isLoggedIn = false;
   User user = User(name: '');
   Bot bot = Bot();
   List<Message> messages = [];
-  bool isLoggedIn = false;
   bool isBotTyping = false;
   bool isKeyboardVisible = false;
-  final AuthService _authService = AuthService();
   final TextEditingController _messageController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
   final FocusNode _messageFocusNode = FocusNode();
@@ -66,6 +68,7 @@ class ChatScreenState extends State<ChatScreen>
         isLoggedIn = result;
       });
     });
+    context.read<NoteProvider>().loadNotesConversation();
   }
 
   void _scrollDown() {

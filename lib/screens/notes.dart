@@ -4,6 +4,7 @@ import 'package:identa/constants/text_styles.dart';
 import 'package:identa/core/extensions/context_extension.dart';
 import 'package:identa/core/models/audio_recorder/audio_files.dart';
 import 'package:identa/core/repositories/note_provider.dart';
+import 'package:identa/services/auth/auth_service.dart';
 import 'package:identa/widgets/dismissible_background.dart';
 import 'package:identa/widgets/loading/cardSkeleton.dart';
 import 'package:identa/modules/taps_page/notes_tap/note_content.dart';
@@ -19,9 +20,18 @@ class NotesScreen extends StatefulWidget {
 }
 
 class NotesScreenState extends State<NotesScreen> {
+  final AuthService _authService = AuthService();
+  bool isLoggedIn = false;
+
   @override
   void initState() {
     super.initState();
+    var future = _authService.signInWithAutoCodeExchange();
+    future.then((result) {
+      setState(() {
+        isLoggedIn = result;
+      });
+    });
     WidgetsBinding.instance.addPostFrameCallback((_) {
       var noteProvider = context.read<NoteProvider>();
       noteProvider.setIsLoading(true);

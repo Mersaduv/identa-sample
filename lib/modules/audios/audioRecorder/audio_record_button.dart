@@ -91,33 +91,6 @@ class AudioRecorderButton extends StatelessWidget {
     }
   }
 
-  Future<void> _showConfirmationDialog(BuildContext context) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('Delete Audio'),
-          content: const Text('Are you sure you want to delete this audio?'),
-          actions: [
-            TextButton(
-              child: const Text('No'),
-              onPressed: () => Navigator.of(context).pop(false),
-            ),
-            TextButton(
-              child: const Text('Yes'),
-              onPressed: () => Navigator.of(context).pop(true),
-            ),
-          ],
-        );
-      },
-    );
-
-    if (confirmed != null && confirmed) {
-      // Delete the audio
-      // ... add your delete logic here ...
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final notifier = context.watch<AudioRecorderLogicInterface>().stateNotifier;
@@ -130,28 +103,17 @@ class AudioRecorderButton extends StatelessWidget {
           final audioRecorderState = notifier.value;
           return LayoutBuilder(
             builder: (context, constraints) {
-              final screenWidth = constraints.maxWidth;
-
-              // Define the maximum and minimum widths for the container
-              final maxWidth = 375.0; // Maximum width for the container
-              final minWidth = 56.0; // Minimum width for the container
-
-              // Calculate the width of the AnimatedContainer
-              final containerWidth =
-                  audioRecordshow.isRecord ? maxWidth : minWidth;
-
-              // Ensure the width does not exceed the screen width
-              final width =
-                  containerWidth < screenWidth ? containerWidth : screenWidth;
-
+              final screenSize = MediaQuery.of(context).size;
+              final containerWidth = screenSize.width * 0.93;
               return Stack(
                 children: [
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       AnimatedContainer(
+                        margin: const EdgeInsets.only(left: 7),
                         duration: const Duration(milliseconds: 300),
-                        width: width,
+                        width: audioRecordshow.isRecord ? containerWidth : 56.0,
                         decoration: BoxDecoration(
                           color: audioRecordshow.isButtonDisabled
                               ? Colors.grey

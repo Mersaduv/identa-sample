@@ -14,7 +14,6 @@ class BottomNavigation extends StatelessWidget {
     final attachmentHandler = context.read<FilePickerProvider>();
 
     return Container(
-      padding: const EdgeInsets.only(top: 8, bottom: 8),
       margin: const EdgeInsets.only(left: 4, right: 4),
       decoration: const BoxDecoration(
         color: Colors.grey,
@@ -30,16 +29,26 @@ class BottomNavigation extends StatelessWidget {
           const AudioRecorderButton(),
           Visibility(
             visible: !audioRecordshow.isRecord,
-            child: Container(
-              color: MyColors.primaryColor,
-              child: FloatingActionButton(
-                elevation: 0,
-                backgroundColor: MyColors.primaryColor,
-                onPressed: () => attachmentHandler.pickFiles(),
-                child: const Icon(Icons.description),
-                // label: const Text('Pick file'),
-                // icon: const Icon(Icons.description)
-              ),
+            child: FutureBuilder<bool>(
+              future:
+                  Future.delayed(const Duration(microseconds: 500), () => true),
+              builder: (context, snapshot) {
+                if (snapshot.hasData && snapshot.data == true) {
+                  return Container(
+                    color: MyColors.primaryColor,
+                    child: FloatingActionButton(
+                      elevation: 0,
+                      backgroundColor: MyColors.primaryColor,
+                      onPressed: () => attachmentHandler.pickFiles(),
+                      child: const Icon(Icons.description),
+                      // label: const Text('Pick file'),
+                      // icon: const Icon(Icons.description)
+                    ),
+                  );
+                } else {
+                  return const Text("");
+                }
+              },
             ),
           ),
         ],
