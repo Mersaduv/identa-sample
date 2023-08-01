@@ -23,7 +23,6 @@ class CustomAppBarState extends State<CustomTapAppBar> {
   int _selectedTab = 0;
   List<TabData> tabDataList = [
     TabData(title: 'Chat'),
-    TabData(title: 'Insights'),
     TabData(title: 'Notes'),
   ];
 
