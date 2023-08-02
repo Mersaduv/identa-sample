@@ -1,7 +1,6 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
+import 'package:identa/classes/language_constants.dart';
 import 'package:identa/core/models/audio_recorder/audio_files.dart';
 import 'package:identa/core/models/audio_recorder/audio_record.dart';
 import 'package:identa/core/repositories/note_provider.dart';
@@ -15,6 +14,7 @@ import 'package:identa/widgets/app_bar_content.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:provider/single_child_widget.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class NotesContent extends StatefulWidget {
   final NoteModel? note;
@@ -202,7 +202,7 @@ class NotesContentState extends State<NotesContent>
               await noteProvider.setIsLoadBack(true);
             },
           ),
-          title: 'New note',
+          title: translation(context).newNote,
         ),
         body: SafeArea(
           child: SingleChildScrollView(
@@ -220,9 +220,9 @@ class NotesContentState extends State<NotesContent>
                           const SizedBox(height: 16.0),
                           TextField(
                             controller: _titleController,
-                            decoration: const InputDecoration(
-                              hintText: 'Title',
-                              hintStyle: TextStyle(color: Colors.grey),
+                            decoration: InputDecoration(
+                              hintText: translation(context).title,
+                              hintStyle: const TextStyle(color: Colors.grey),
                               border: InputBorder.none,
                             ),
                             maxLines: null,
@@ -242,9 +242,10 @@ class NotesContentState extends State<NotesContent>
                           const SizedBox(height: 8.0),
                           TextField(
                             controller: _detailsController,
-                            decoration: const InputDecoration(
-                              hintText: 'Start typing or recording ...  ',
-                              hintStyle: TextStyle(color: Colors.grey),
+                            decoration: InputDecoration(
+                              hintText:
+                                  translation(context).startTypingOrRecording,
+                              hintStyle: const TextStyle(color: Colors.grey),
                               border:
                                   InputBorder.none, // Remove the bottom line
                             ),

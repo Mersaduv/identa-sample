@@ -7,7 +7,6 @@ import 'package:identa/core/models/audio_recorder/audio_record.dart';
 import 'package:identa/core/models/model_core/insights_conversation_model.dart';
 import 'package:identa/core/models/model_core/note_model.dart';
 import 'package:identa/services/apis/api.dart';
-import 'package:identa/widgets/insights_new.dart';
 import 'dart:async';
 
 class NoteProvider extends ChangeNotifier {
@@ -70,29 +69,6 @@ class NoteProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> loadInsightsConversation() async {
-    List<InsightsConversationModel> conversationList = [];
-
-    var todoNotesData = await ServiceApis.getNotes();
-    List<String> conversationName = ['Todo', 'Business', 'Health'];
-
-    for (int i = 0; i < conversationName.length; i++) {
-      List<NoteModel> todoNotes = [];
-      for (var note in todoNotesData) {
-        NoteModel n = NoteModel.fromDynamic(note);
-        todoNotes.add(n);
-      }
-
-      InsightsConversationModel conversation = InsightsConversationModel(
-        name: conversationName[i],
-        notes: todoNotes,
-        icon: Icons.pending_actions,
-      );
-      conversationList.add(conversation);
-    }
-    _insightsconversation = conversationList;
-    notifyListeners();
-  }
 
   void addAudioRecord(AudioRecord audioRecord) {
     _updatedAudioRecords.add(audioRecord);
@@ -110,20 +86,6 @@ class NoteProvider extends ChangeNotifier {
       icon: Icons.lightbulb_outline,
     );
     _insightsconversation.add(newInsights);
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      notifyListeners();
-    });
-  }
-
-  void showNewInsightsDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return NewInsightsDialog(
-          onCreate: createNewInsights,
-        );
-      },
-    );
     WidgetsBinding.instance.addPostFrameCallback((_) {
       notifyListeners();
     });

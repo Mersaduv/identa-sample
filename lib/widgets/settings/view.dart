@@ -1,10 +1,12 @@
-import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:flutter/material.dart';
+import 'package:identa/classes/language.dart';
+import 'package:identa/classes/language_constants.dart';
 import 'package:identa/core/repositories/notification_provider.dart';
+import 'package:identa/main.dart';
 import 'package:identa/services/auth/auth_service.dart';
 import 'package:identa/widgets/app_bar_content.dart';
-import 'package:open_settings/open_settings.dart';
 
+import 'package:flutter/cupertino.dart';
 import 'setting_item.widget.dart';
 import 'package:identa/screens/profile.dart';
 
@@ -18,6 +20,47 @@ class Settings extends StatefulWidget {
 class SettingsState extends State<Settings> {
   final AuthService _authService = AuthService();
 
+  void _openLanguagePickerDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(translation(context).selectYourLanguage),
+        content: SizedBox(
+          width: double.maxFinite,
+          child: ListView.builder(
+            itemCount: LanguageList.languageList().length,
+            itemBuilder: (context, index) {
+              final language = LanguageList.languageList()[index];
+              return _buildDialogItem(language);
+            },
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDialogItem(LanguageList languageList) {
+    return Column(
+      children: [
+        ListTile(
+          title: Text(
+            languageList.name,
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+          ),
+          trailing: Text(languageList.flag),
+          onTap: () async {
+            if (languageList != null) {
+              Locale _locale = await setLocale(languageList.languageCode);
+              MyApp.setLocale(context, _locale);
+            }
+            Navigator.pop(context); // Close the dialog after selection
+          },
+        ),
+        const Divider(height: 5, thickness: 1.5),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -28,7 +71,7 @@ class SettingsState extends State<Settings> {
       constraints: const BoxConstraints(maxWidth: 300),
       child: Scaffold(
         appBar: CustomAppBar(
-          title: 'Settings',
+          title: translation(context).settings,
           leading: IconButton(
             padding: EdgeInsets.zero,
             onPressed: () {
@@ -48,7 +91,7 @@ class SettingsState extends State<Settings> {
                     MaterialPageRoute(builder: (context) => ProfilePage()),
                   );
                 },
-                title: 'Profile',
+                title: translation(context).profile,
                 prefixIcon: Icons.person,
                 onPressed: () async {},
               ),
@@ -58,7 +101,17 @@ class SettingsState extends State<Settings> {
                     await NotificationController.createNewNotification();
                   },
                   child: Text("Notification!")),
-              const Expanded(child: SizedBox()), // Fill remaining space
+              const Expanded(child: SizedBox()),
+              SettingItemWidget(
+                onTapped: _openLanguagePickerDialog,
+                title: translation(context).languages,
+                prefixIcon: Icons.language,
+                onPressed: () {
+                  return null;
+                },
+              ),
+
+              // Fill remaining space
               SettingItemWidget(
                 onPressed: () async {
                   try {
@@ -68,13 +121,14 @@ class SettingsState extends State<Settings> {
                   }
                 },
                 onTapped: () {},
-                title: 'LogOut',
+                title: translation(context).logout,
                 isInRed: true,
                 prefixIcon: Icons.exit_to_app_rounded,
               ),
               SettingItemWidget(
                 onTapped: () {},
-                title: 'Privacy Policy',
+                title: translation(context).privacyPolicy,
+                prefixIcon: Icons.lock,
                 onPressed: () async {},
               ),
               const Padding(

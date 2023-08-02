@@ -33,9 +33,12 @@ class SettingItemWidget extends StatelessWidget {
                   children: [
                     Padding(
                         padding: const EdgeInsets.only(right: 10),
-                        child: Icon(prefixIcon,
-                            size: 20,
-                            color: isInRed ? Colors.red : Colors.black)),
+                        child: Padding(
+                          padding: const EdgeInsets.only(right: 2, left: 8),
+                          child: Icon(prefixIcon,
+                              size: 22,
+                              color: isInRed ? Colors.red : Colors.black),
+                        )),
                     _title
                   ],
                 )

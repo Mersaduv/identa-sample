@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:identa/classes/language_constants.dart';
 
 class ShowCustomDialog {
   static Future<bool?> show(
@@ -11,11 +12,11 @@ class ShowCustomDialog {
           content: Text(content),
           actions: [
             TextButton(
-              child: const Text('No'),
+              child: Text(translation(context).no),
               onPressed: () => Navigator.of(context).pop(false),
             ),
             TextButton(
-              child: const Text('Yes'),
+              child: Text(translation(context).yes),
               onPressed: () => Navigator.of(context).pop(true),
             ),
           ],

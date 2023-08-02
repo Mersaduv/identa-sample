@@ -1,7 +1,12 @@
+import 'dart:io';
+
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:identa/classes/language_constants.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:country_list_pick/country_list_pick.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({Key? key}) : super(key: key);
@@ -16,11 +21,24 @@ class _ProfilePageState extends State<ProfilePage> {
   DateTime? _selectedDate;
   String? _selectedLocation;
   late SharedPreferences _preferences;
+  File? _coverImage;
 
   @override
   void initState() {
     super.initState();
     _loadSavedData();
+  }
+
+  Future<void> _pickImageFromGallery() async {
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+      type: FileType.image,
+    );
+
+    if (result != null) {
+      setState(() {
+        _coverImage = File(result.files.single.path!);
+      });
+    }
   }
 
   Future<void> _loadSavedData() async {
@@ -81,7 +99,7 @@ class _ProfilePageState extends State<ProfilePage> {
             Navigator.of(context).pop();
           },
         ),
-        title: Text('Profile'),
+        title: Text(translation(context).profile),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
@@ -93,18 +111,27 @@ class _ProfilePageState extends State<ProfilePage> {
               child: Container(
                 width: 130,
                 height: 130,
-                decoration: BoxDecoration(
-                  color: const Color(0xFF2993CF),
+                decoration: const BoxDecoration(
+                  color: Color(0xFF2993CF),
                   shape: BoxShape.circle,
                 ),
-                child: IconButton(
-                  icon: Icon(Icons.camera_alt),
-                  onPressed: () {
-                    // Handle profile picture upload
-                  },
-                  color: Colors.white,
-                  iconSize: 30,
-                ),
+                child: _coverImage != null
+                    ? ClipOval(
+                        child: Image.file(
+                          _coverImage!,
+                          width: 130,
+                          height: 130,
+                          fit: BoxFit.cover,
+                        ),
+                      )
+                    : IconButton(
+                        icon: Icon(Icons.camera_alt),
+                        onPressed: () {
+                          _pickImageFromGallery();
+                        },
+                        color: Colors.white,
+                        iconSize: 30,
+                      ),
               ),
             ),
             const SizedBox(height: 16),
@@ -114,7 +141,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 _saveData();
               },
               decoration: InputDecoration(
-                labelText: 'First Name',
+                labelText: translation(context).name,
               ),
             ),
             const SizedBox(height: 8),
@@ -124,7 +151,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 _saveData();
               },
               decoration: InputDecoration(
-                labelText: 'Last Name',
+                labelText: translation(context).lastName,
               ),
             ),
             const SizedBox(height: 8),
@@ -140,8 +167,8 @@ class _ProfilePageState extends State<ProfilePage> {
                         : '',
                   ),
                   decoration: InputDecoration(
-                    labelText: 'Date of Birth',
-                    suffixIcon: Icon(Icons.calendar_today),
+                    labelText: translation(context).dateOfBirth,
+                    suffixIcon: const Icon(Icons.calendar_today),
                   ),
                 ),
               ),

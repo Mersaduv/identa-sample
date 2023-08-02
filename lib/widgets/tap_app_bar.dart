@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:identa/classes/language_constants.dart';
 import 'package:identa/constants/colors.dart';
 import 'package:identa/constants/text_styles.dart';
 import 'package:identa/core/models/model_core/tap_data.dart';
 import 'package:identa/modules/tab_item.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class CustomTapAppBar extends StatefulWidget implements PreferredSizeWidget {
   const CustomTapAppBar(
@@ -21,10 +23,6 @@ class CustomTapAppBar extends StatefulWidget implements PreferredSizeWidget {
 
 class CustomAppBarState extends State<CustomTapAppBar> {
   int _selectedTab = 0;
-  List<TabData> tabDataList = [
-    TabData(title: 'Chat'),
-    TabData(title: 'Notes'),
-  ];
 
   @override
   void initState() {
@@ -38,6 +36,10 @@ class CustomAppBarState extends State<CustomTapAppBar> {
 
   @override
   Widget build(BuildContext context) {
+    List<TabData> tabDataList = [
+      TabData(title: translation(context).chat),
+      TabData(title: translation(context).notes),
+    ];
     return AppBar(
       leading: IconButton(
         padding: const EdgeInsets.only(left: 4.0, bottom: 8.0),

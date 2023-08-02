@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:identa/classes/language_constants.dart';
 import 'package:identa/core/extensions/context_extension.dart';
 import 'package:identa/core/models/model_core/note_model.dart';
 import 'package:identa/core/repositories/note_provider.dart';
@@ -50,8 +51,8 @@ class _VoiceMessageState extends State<VoiceMessage> {
 
                       bool? shouldDelete = await ShowCustomDialog.show(
                         context,
-                        'Delete Voice',
-                        'Are you sure you want to delete this audio recording?',
+                        translation(context).deleteVoice,
+                        translation(context).areYouSureDeleteRecored,
                       );
 
                       if (shouldDelete == true) {
@@ -61,7 +62,7 @@ class _VoiceMessageState extends State<VoiceMessage> {
                         noteProvider.updatedAudioRecords
                             .removeWhere((f) => f == audioRecord);
 
-                        context.notify = 'Audio record dismissed';
+                        context.notify = translation(context).audioRecordDismissed;
                       }
                     },
                     icon: const Icon(
