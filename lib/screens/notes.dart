@@ -50,7 +50,7 @@ class NotesScreenState extends State<NotesScreen> {
   Widget build(BuildContext context) {
     var noteProvider = context.watch<NoteProvider>();
     var isLoad = context.read<NoteProvider>();
-
+    Locale currentLocale = Localizations.localeOf(context);
     if (noteProvider.isLoadBack) {
       Future.delayed(const Duration(milliseconds: 500), () {
         isLoad.setIsLoadBack(false);
@@ -119,6 +119,8 @@ class NotesScreenState extends State<NotesScreen> {
                           }
                         },
                         child: Column(
+                          crossAxisAlignment: CrossAxisAlignment
+                              .start, // Align children to the start of the row (left for LTR, right for RTL)
                           children: [
                             Padding(
                               padding: const EdgeInsets.only(top: 5),
@@ -179,9 +181,15 @@ class NotesScreenState extends State<NotesScreen> {
                               ),
                             ),
                             Align(
-                              alignment: Alignment.bottomRight,
+                              alignment: currentLocale.languageCode == "fa"
+                                  ? Alignment.bottomLeft
+                                  : currentLocale.languageCode == "ar"
+                                      ? Alignment.bottomLeft
+                                      : Alignment
+                                          .bottomRight, // Align center for other languages
                               child: Padding(
-                                padding: const EdgeInsets.only(right: 8.0),
+                                padding: const EdgeInsets.only(
+                                    right: 8.0, left: 8.0),
                                 child: Text(
                                   note.date,
                                   style: MyTextStyles.small,
