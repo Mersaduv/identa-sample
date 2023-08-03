@@ -11,10 +11,10 @@ import 'package:identa/core/models/model_core/note_model.dart';
 import 'package:identa/modules/taps_page/notes_tap/bottom_navigation.dart';
 import 'package:identa/services/apis/api.dart';
 import 'package:identa/widgets/app_bar_content.dart';
-import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:provider/single_child_widget.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:intl/intl.dart' as intl;
 
 class NotesContent extends StatefulWidget {
   final NoteModel? note;
@@ -103,7 +103,7 @@ class NotesContentState extends State<NotesContent>
     if (widget.note == null) {
       noteProvider.setIsLoadBack(true);
 
-      final int defaultNoteCount = noteProvider.notes
+      final defaultNoteCount = noteProvider.notes
           .where((note) => note.title.startsWith('New Note'))
           .length;
       if (title.isEmpty && details.isNotEmpty) {
@@ -116,7 +116,7 @@ class NotesContentState extends State<NotesContent>
         id: "0",
         title: _titleController.text.trim(),
         details: _detailsController.text.trim(),
-        date: DateFormat('dd MMM, hh:mm a').format(DateTime.now()),
+        date: intl.DateFormat('dd MMM, hh:mm a').format(DateTime.now()),
         files: audioFiles,
       ));
       noteProvider.setIsLoading(true);
@@ -128,7 +128,7 @@ class NotesContentState extends State<NotesContent>
       _detailsController.dispose();
       super.dispose();
     } else {
-      final int defaultNoteCount = noteProvider.notes
+      final defaultNoteCount = noteProvider.notes
           .where((note) => note.title.startsWith('New Note'))
           .length;
       if (title.isEmpty && details.isNotEmpty) {
@@ -182,6 +182,11 @@ class NotesContentState extends State<NotesContent>
       context.read<NoteProvider>().addAudioText('');
     }
 
+    final ValueNotifier<TextDirection> _titleTextDir =
+        ValueNotifier(TextDirection.ltr);
+    final ValueNotifier<TextDirection> _detailsTextDir =
+        ValueNotifier(TextDirection.ltr);
+
     return MultiProvider(
       providers: <SingleChildWidget>[
         Provider<AudioRecorderLogicInterface>(
@@ -218,45 +223,77 @@ class NotesContentState extends State<NotesContent>
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
                           const SizedBox(height: 16.0),
-                          TextField(
-                            controller: _titleController,
-                            decoration: InputDecoration(
-                              hintText: translation(context).title,
-                              hintStyle: const TextStyle(color: Colors.grey),
-                              border: InputBorder.none,
-                            ),
-                            maxLines: null,
-                            style: const TextStyle(
-                              fontSize: 24.0,
-                              fontWeight: FontWeight.bold,
-                              color: Color(0xFF4B5563),
-                            ),
-                            onTap: () {
-                              // Activate the text field or hide the keyboard
-                            },
-                            onSubmitted: (value) {
-                              FocusScope.of(context)
-                                  .requestFocus(_detailsFocusNode);
+                          ValueListenableBuilder<TextDirection>(
+                            valueListenable: _titleTextDir,
+                            builder: (context, value, child) {
+                              return TextField(
+                                controller: _titleController,
+                                decoration: InputDecoration(
+                                  hintText: translation(context).title,
+                                  hintStyle:
+                                      const TextStyle(color: Colors.grey),
+                                  border: InputBorder.none,
+                                ),
+                                maxLines: null,
+                                style: const TextStyle(
+                                  fontSize: 24.0,
+                                  fontWeight: FontWeight.bold,
+                                  color: Color(0xFF4B5563),
+                                ),
+                                onTap: () {
+                                  // Activate the text field or hide the keyboard
+                                },
+                                textDirection: _titleTextDir.value,
+                                onChanged: (input) {
+                                  final isRTL =
+                                      intl.Bidi.detectRtlDirectionality(input);
+                                  if (isRTL) {
+                                    _titleTextDir.value = TextDirection.rtl;
+                                  } else {
+                                    _titleTextDir.value = TextDirection.ltr;
+                                  }
+                                },
+                                onSubmitted: (value) {
+                                  FocusScope.of(context)
+                                      .requestFocus(_detailsFocusNode);
+                                },
+                              );
                             },
                           ),
                           const SizedBox(height: 8.0),
-                          TextField(
-                            controller: _detailsController,
-                            decoration: InputDecoration(
-                              hintText:
-                                  translation(context).startTypingOrRecording,
-                              hintStyle: const TextStyle(color: Colors.grey),
-                              border:
-                                  InputBorder.none, // Remove the bottom line
-                            ),
-                            maxLines: null,
-                            onTap: () {
-                              // Activate the text field or hide the keyboard
+                          ValueListenableBuilder<TextDirection>(
+                            valueListenable: _detailsTextDir,
+                            builder: (context, value, child) {
+                              return TextField(
+                                controller: _detailsController,
+                                decoration: InputDecoration(
+                                  hintText: translation(context)
+                                      .startTypingOrRecording,
+                                  hintStyle:
+                                      const TextStyle(color: Colors.grey),
+                                  border: InputBorder
+                                      .none, // Remove the bottom line
+                                ),
+                                maxLines: null,
+                                onTap: () {
+                                  // Activate the text field or hide the keyboard
+                                },
+                                textDirection: _detailsTextDir.value,
+                                onChanged: (input) {
+                                  final isRTL =
+                                      intl.Bidi.detectRtlDirectionality(input);
+                                  if (isRTL) {
+                                    _detailsTextDir.value = TextDirection.rtl;
+                                  } else {
+                                    _detailsTextDir.value = TextDirection.ltr;
+                                  }
+                                },
+                                focusNode: _detailsFocusNode,
+                                style: const TextStyle(
+                                  color: Color(0xFF4B5563),
+                                ),
+                              );
                             },
-                            focusNode: _detailsFocusNode,
-                            style: const TextStyle(
-                              color: Color(0xFF4B5563),
-                            ),
                           ),
                           const SizedBox(height: 8.0),
                         ],

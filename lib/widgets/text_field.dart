@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:identa/constants/colors.dart';
+import 'package:intl/intl.dart' as intl;
 
 class ChatTextField extends StatefulWidget {
   final TextEditingController controller;
@@ -23,9 +24,6 @@ class ChatTextField extends StatefulWidget {
 class ChatTextFieldState extends State<ChatTextField>
     with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
-  late Animation<double> _animation1;
-  late Animation<double> _animation2;
-  late Animation<double> _animation3;
 
   @override
   void initState() {
@@ -33,27 +31,6 @@ class ChatTextFieldState extends State<ChatTextField>
     _animationController = AnimationController(
       duration: const Duration(milliseconds: 600),
       vsync: this,
-    );
-    _animation1 = Tween<double>(begin: -2.0, end: 2.0).animate(
-      CurvedAnimation(
-        parent: _animationController,
-        curve: Curves.easeInOut,
-        reverseCurve: Curves.easeInOut,
-      ),
-    );
-    _animation2 = Tween<double>(begin: -2.0, end: 2.0).animate(
-      CurvedAnimation(
-        parent: _animationController,
-        curve: const Interval(0.2, 1.0),
-        reverseCurve: Curves.easeInOut,
-      ),
-    );
-    _animation3 = Tween<double>(begin: -2.0, end: 2.0).animate(
-      CurvedAnimation(
-        parent: _animationController,
-        curve: const Interval(0.4, 1.0),
-        reverseCurve: Curves.easeInOut,
-      ),
     );
     _animationController.repeat(reverse: true);
   }
@@ -66,6 +43,9 @@ class ChatTextFieldState extends State<ChatTextField>
 
   @override
   Widget build(BuildContext context) {
+    final ValueNotifier<TextDirection> _textDir =
+        ValueNotifier(TextDirection.ltr);
+
     return Container(
       margin: const EdgeInsets.fromLTRB(8.0, 0.0, 8.0, 16.0),
       decoration: BoxDecoration(
@@ -92,24 +72,39 @@ class ChatTextFieldState extends State<ChatTextField>
                     constraints: const BoxConstraints(
                       maxHeight: 300.0,
                     ),
-                    child: TextField(
-                      controller: widget.controller,
-                      enabled: widget.isEnabled,
-                      style: const TextStyle(color: Color(0xFF4B5563)),
-                      maxLines: null,
-                      decoration: InputDecoration(
-                        hintText: widget.hint,
-                        hintStyle: TextStyle(
-                          color: Color(
-                            0xFF9CA3AF, // Set the hint text color to #9CA3AF
+                    child: ValueListenableBuilder<TextDirection>(
+                      valueListenable: _textDir,
+                      builder: (context, value, child) {
+                        return TextField(
+                          controller: widget.controller,
+                          enabled: widget.isEnabled,
+                          style: const TextStyle(color: Color(0xFF4B5563)),
+                          maxLines: null,
+                          decoration: InputDecoration(
+                            hintText: widget.hint,
+                            hintStyle: const TextStyle(
+                              color: Color(
+                                0xFF9CA3AF, // Set the hint text color to #9CA3AF
+                              ),
+                            ),
+                            border: InputBorder.none,
+                            contentPadding:
+                                const EdgeInsets.symmetric(horizontal: 16.0),
                           ),
-                        ),
-                        border: InputBorder.none,
-                        contentPadding:
-                            const EdgeInsets.symmetric(horizontal: 16.0),
-                      ),
-                      onSubmitted: widget.onSubmitted,
-                      autofocus: true,
+                          textDirection: _textDir.value,
+                          onChanged: (input) {
+                            final isRTL =
+                                intl.Bidi.detectRtlDirectionality(input);
+                            if (isRTL) {
+                              _textDir.value = TextDirection.rtl;
+                            } else {
+                              _textDir.value = TextDirection.ltr;
+                            }
+                          },
+                          onSubmitted: widget.onSubmitted,
+                          autofocus: true,
+                        );
+                      },
                     ),
                   ),
                 ),

@@ -12,6 +12,7 @@ import 'package:identa/services/apis/api.dart';
 import 'package:identa/widgets/text_field.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:intl/intl.dart' as intl;
 
 class ChatScreen extends StatefulWidget {
   const ChatScreen({Key? key}) : super(key: key);
@@ -148,6 +149,8 @@ class ChatScreenState extends State<ChatScreen>
   }
 
   Expanded _buildInput() {
+    // final isRTL = intl.Bidi.detectRtlDirectionality(_messageController.text);
+
     return Expanded(
       child: Padding(
         padding: const EdgeInsets.only(
