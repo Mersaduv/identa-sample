@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:identa/classes/language_constants.dart';
 import 'package:identa/constants/colors.dart';
 import 'package:identa/constants/text_styles.dart';
 import 'package:identa/core/extensions/context_extension.dart';
@@ -11,6 +12,7 @@ import 'package:identa/modules/taps_page/notes_tap/note_content.dart';
 import 'package:identa/widgets/show_custom_dialog.dart';
 import 'package:provider/provider.dart';
 import 'package:identa/core/models/model_core/note_model.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class NotesScreen extends StatefulWidget {
   const NotesScreen({Key? key}) : super(key: key);
@@ -48,7 +50,7 @@ class NotesScreenState extends State<NotesScreen> {
   Widget build(BuildContext context) {
     var noteProvider = context.watch<NoteProvider>();
     var isLoad = context.read<NoteProvider>();
-
+    Locale currentLocale = Localizations.localeOf(context);
     if (noteProvider.isLoadBack) {
       Future.delayed(const Duration(milliseconds: 500), () {
         isLoad.setIsLoadBack(false);
@@ -83,13 +85,13 @@ class NotesScreenState extends State<NotesScreen> {
                       confirmDismiss: (_) async {
                         return await ShowCustomDialog.show(
                           context,
-                          'Delete Note',
-                          'Are you sure you want to delete this note?',
+                          translation(context).deleteNote,
+                          translation(context).areYouSureDeleteNote,
                         );
                       },
                       onDismissed: (_) {
                         context.read<NoteProvider>().deleteNote(note);
-                        context.notify = 'Note dismissed';
+                        context.notify = translation(context).noteDismissed;
                       },
                       child: GestureDetector(
                         onTap: () async {
@@ -117,6 +119,8 @@ class NotesScreenState extends State<NotesScreen> {
                           }
                         },
                         child: Column(
+                          crossAxisAlignment: CrossAxisAlignment
+                              .start, // Align children to the start of the row (left for LTR, right for RTL)
                           children: [
                             Padding(
                               padding: const EdgeInsets.only(top: 5),
@@ -177,9 +181,15 @@ class NotesScreenState extends State<NotesScreen> {
                               ),
                             ),
                             Align(
-                              alignment: Alignment.bottomRight,
+                              alignment: currentLocale.languageCode == "fa"
+                                  ? Alignment.bottomLeft
+                                  : currentLocale.languageCode == "ar"
+                                      ? Alignment.bottomLeft
+                                      : Alignment
+                                          .bottomRight, // Align center for other languages
                               child: Padding(
-                                padding: const EdgeInsets.only(right: 8.0),
+                                padding: const EdgeInsets.only(
+                                    right: 8.0, left: 8.0),
                                 child: Text(
                                   note.date,
                                   style: MyTextStyles.small,

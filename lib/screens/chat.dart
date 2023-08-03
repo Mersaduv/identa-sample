@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:identa/classes/language_constants.dart';
 import 'package:identa/constants/colors.dart';
 import 'package:identa/core/models/model_core/bot.dart';
 import 'package:identa/core/models/model_core/message.dart';
@@ -10,6 +11,8 @@ import 'package:identa/services/auth/auth_service.dart';
 import 'package:identa/services/apis/api.dart';
 import 'package:identa/widgets/text_field.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:intl/intl.dart' as intl;
 
 class ChatScreen extends StatefulWidget {
   const ChatScreen({Key? key}) : super(key: key);
@@ -146,6 +149,8 @@ class ChatScreenState extends State<ChatScreen>
   }
 
   Expanded _buildInput() {
+    // final isRTL = intl.Bidi.detectRtlDirectionality(_messageController.text);
+
     return Expanded(
       child: Padding(
         padding: const EdgeInsets.only(
@@ -162,7 +167,9 @@ class ChatScreenState extends State<ChatScreen>
           child: ChatTextField(
             controller: _messageController,
             isEnabled: !isBotTyping,
-            hint: isBotTyping ? 'is typing...' : 'Type a message',
+            hint: isBotTyping
+                ? translation(context).isTypings
+                : translation(context).typeMessage,
             onSubmitted: (value) {
               String messageContent = value.trim();
               if (messageContent.isNotEmpty) {
