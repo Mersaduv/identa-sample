@@ -63,6 +63,7 @@ dependencies:
   flutter_spinkit: ^5.2.0
   language_picker: ^0.4.3
   translator: ^0.1.7
+  photo_view: ^0.14.0
   
 dependency_overrides:
   intl: ^0.18.1

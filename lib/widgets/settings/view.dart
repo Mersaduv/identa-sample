@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:identa/classes/language.dart';
 import 'package:identa/classes/language_constants.dart';
+import 'package:identa/core/repositories/note_provider.dart';
 import 'package:identa/core/repositories/notification_provider.dart';
 import 'package:identa/main.dart';
 import 'package:identa/services/auth/auth_service.dart';
 import 'package:identa/widgets/app_bar_content.dart';
 
 import 'package:flutter/cupertino.dart';
+import 'package:provider/provider.dart';
 import 'setting_item.widget.dart';
 import 'package:identa/screens/profile.dart';
 
@@ -63,6 +65,7 @@ class SettingsState extends State<Settings> {
 
   @override
   Widget build(BuildContext context) {
+    var profileProvider = context.read<NoteProvider>();
     return Container(
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.background,
@@ -85,10 +88,11 @@ class SettingsState extends State<Settings> {
             children: [
               const SizedBox(height: 15), // Add space at the top
               SettingItemWidget(
-                onTapped: () {
+                onTapped: () async {
+                  profileProvider.downloadProfilePicture();
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => ProfilePage()),
+                    MaterialPageRoute(builder: (context) => const ProfilePage()),
                   );
                 },
                 title: translation(context).profile,

@@ -246,4 +246,113 @@ class ServiceApis {
       return response.toString();
     }
   }
+
+  // Profile Section
+  static Future<http.Response> sendPostProfileRequest({
+    required String firstName,
+    required String lastName,
+    required String email,
+    String? phone,
+    String? address,
+    String? city,
+    String? state,
+    String? zip,
+    String? country,
+    String? dateOfBirth,
+  }) async {
+    final client = RetryClient(http.Client());
+
+    var body = {
+      "firstName": firstName,
+      "lastName": lastName,
+      "email": email,
+      "phone": phone,
+      "address": address,
+      "city": city,
+      "state": state,
+      "zip": zip,
+      "country": country,
+      "dateOfBirth": dateOfBirth,
+    };
+
+    var response = await client.post(
+      Uri.parse('${ServiceConfig.baseURL}/insights/profile'),
+      body: jsonEncode(body),
+      headers: {
+        'Authorization': await _authService.getAuthHeader(),
+        'Content-type': 'application/json; charset=UTF-8',
+      },
+    );
+
+    if (response.statusCode == 401) {
+      _authService.signInWithAutoCodeExchange();
+
+      response = await client.post(
+        Uri.parse('${ServiceConfig.baseURL}/insights/profile'),
+        body: jsonEncode(body),
+        headers: {
+          'Authorization': await _authService.getAuthHeader(),
+          'Content-type': 'application/json; charset=UTF-8',
+        },
+      );
+    }
+
+    return response;
+  }
+
+  static Future<http.Response> sendGetProfileRequest() async {
+    final client = RetryClient(http.Client());
+
+    var response = await client.get(
+      Uri.parse('${ServiceConfig.baseURL}/insights/profile'),
+      headers: {
+        'Authorization': await _authService.getAuthHeader(),
+      },
+    );
+
+    if (response.statusCode == 401) {
+      _authService.signInWithAutoCodeExchange();
+
+      response = await client.get(
+        Uri.parse('${ServiceConfig.baseURL}/insights/profile'),
+        headers: {
+          'Authorization': await _authService.getAuthHeader(),
+        },
+      );
+    }
+
+    return response;
+  }
+
+  static Future<http.Response> sendProfilePicture(String filePath) async {
+    final client = RetryClient(http.Client());
+    const url = 'insights/profile/picture';
+
+    final file = File(filePath);
+    final bytes = await file.readAsBytes();
+    final response = await client.post(
+      Uri.parse('${ServiceConfig.baseURL}/$url'),
+      headers: {
+        'Content-Type': 'application/octet-stream',
+        'Authorization': await _authService.getAuthHeader(),
+      },
+      body: bytes,
+    );
+
+    return response;
+  }
+
+  static Future<http.Response> getProfilePicture() async {
+    final client = RetryClient(http.Client());
+    const url = 'insights/profile/picture';
+
+    final response = await client.get(
+      Uri.parse('${ServiceConfig.baseURL}/$url'),
+      headers: {
+        'Authorization': await _authService.getAuthHeader(),
+      },
+    );
+
+    return response;
+  }
 }

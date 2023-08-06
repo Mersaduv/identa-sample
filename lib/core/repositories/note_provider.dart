@@ -9,6 +9,8 @@ import 'package:identa/core/models/model_core/note_model.dart';
 import 'package:identa/services/apis/api.dart';
 import 'dart:async';
 
+import 'package:path_provider/path_provider.dart';
+
 class NoteProvider extends ChangeNotifier {
   String _note = "";
   String get note => _note;
@@ -36,6 +38,48 @@ class NoteProvider extends ChangeNotifier {
   List<InsightsConversationModel> _insightsconversation = [];
   List<InsightsConversationModel> get insightsconversation =>
       _insightsconversation;
+
+  File? _coverImage;
+
+  File? get coverImage => _coverImage;
+
+  setCoverImage(File? newCoverImage) {
+    _coverImage = newCoverImage;
+    notifyListeners();
+  }
+
+  Future<void> downloadProfilePicture() async {
+    var response = await ServiceApis.getProfilePicture();
+
+    if (response.statusCode == 200) {
+      Uint8List bytes = response.bodyBytes;
+      String fileName = 'profile_picture.jpg';
+      String directory = (await getApplicationDocumentsDirectory()).path;
+      String filePath = '$directory/$fileName';
+
+      File file = File(filePath);
+      await file.writeAsBytes(bytes);
+      _coverImage = file;
+      print('Profile picture downloaded successfully! $filePath');
+      notifyListeners();
+    } else {
+      print(
+          'Failed to download profile picture. Status code: ${response.statusCode}');
+    }
+  }
+
+  Future<void> uploadProfilePicture(File file) async {
+    _coverImage = null;
+    var response = await ServiceApis.sendProfilePicture(file.path);
+
+    if (response.statusCode == 200) {
+      print('Profile picture uploaded successfully!');
+      notifyListeners();
+    } else {
+      print(
+          'Failed to upload profile picture. Status code: ${response.statusCode}');
+    }
+  }
 
   Future<void> setAudioFile(AudioFile audioFiles) async {
     _audioList.add(audioFiles);
@@ -68,7 +112,6 @@ class NoteProvider extends ChangeNotifier {
     _notes = noteList;
     notifyListeners();
   }
-
 
   void addAudioRecord(AudioRecord audioRecord) {
     _updatedAudioRecords.add(audioRecord);
