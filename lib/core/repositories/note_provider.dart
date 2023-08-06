@@ -21,8 +21,8 @@ class NoteProvider extends ChangeNotifier {
   late bool _isLoadBack = false;
   bool get isLoading => _isLoading;
   bool get isLoadBack => _isLoadBack;
-  List<NoteModel> _notes = [];
-  List<NoteModel> get notes => _notes;
+  List<NoteModel>? _notes = null;
+  List<NoteModel>? get notes => _notes;
   Future<List<NoteModel>>? _noteFuture;
   Future<List<NoteModel>>? get noteFurure => _noteFuture;
   Future<List<InsightsConversationModel>>? _insightsconversationFuture;
@@ -104,7 +104,6 @@ class NoteProvider extends ChangeNotifier {
     List<NoteModel> noteList = [];
 
     var allNotes = await ServiceApis.getNotes();
-
     for (var note in allNotes) {
       NoteModel n = NoteModel.fromDynamic(note);
       noteList.add(n);
@@ -136,7 +135,7 @@ class NoteProvider extends ChangeNotifier {
 
   Future<void> deleteNote(NoteModel note) async {
     await ServiceApis.deleteNote(note.id);
-    _notes.removeWhere((n) => n.id == note.id);
+    _notes?.removeWhere((n) => n.id == note.id);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       notifyListeners();
     });
@@ -144,7 +143,7 @@ class NoteProvider extends ChangeNotifier {
 
   Future<void> deleteNoteAudio(NoteModel note, String fileId) async {
     await ServiceApis.deleteNoteAudio(note.id, fileId);
-    _notes.removeWhere((n) => n.files[0].fileId == fileId);
+    _notes?.removeWhere((n) => n.files[0].fileId == fileId);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       notifyListeners();
     });

@@ -38,7 +38,7 @@ class NotesScreenState extends State<NotesScreen> {
       var noteProvider = context.read<NoteProvider>();
       noteProvider.setIsLoading(true);
 
-      Future.delayed(const Duration(milliseconds: 500), () {
+      Future.delayed(const Duration(milliseconds: 100), () {
         noteProvider.setIsLoading(false);
       });
 
@@ -52,7 +52,7 @@ class NotesScreenState extends State<NotesScreen> {
     var isLoad = context.read<NoteProvider>();
     Locale currentLocale = Localizations.localeOf(context);
     if (noteProvider.isLoadBack) {
-      Future.delayed(const Duration(milliseconds: 500), () {
+      Future.delayed(const Duration(milliseconds: 100), () {
         isLoad.setIsLoadBack(false);
       });
     }
@@ -60,6 +60,21 @@ class NotesScreenState extends State<NotesScreen> {
     var loading = noteProvider;
     return Consumer<NoteProvider>(
       builder: (context, value, child) {
+        if (notes == null) {
+          return Padding(
+            padding: const EdgeInsets.all(18),
+            child: ListView.separated(
+              itemCount: 5,
+              itemBuilder: (context, index) => const CardSkelton(),
+              separatorBuilder: (context, index) => const Padding(
+                padding: EdgeInsets.all(10.0),
+                child: SizedBox(height: defaultPadding),
+              ),
+            ),
+          );
+        } else if (notes.isEmpty) {
+          return const Text("Empty");
+        }
         return Scaffold(
           body: loading.isLoadBack
               ? Padding(

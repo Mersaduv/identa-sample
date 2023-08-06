@@ -103,7 +103,7 @@ class NotesContentState extends State<NotesContent>
     if (widget.note == null) {
       noteProvider.setIsLoadBack(true);
 
-      final defaultNoteCount = noteProvider.notes
+      final defaultNoteCount = noteProvider.notes!
           .where((note) => note.title.startsWith('New Note'))
           .length;
       if (title.isEmpty && details.isNotEmpty) {
@@ -128,7 +128,9 @@ class NotesContentState extends State<NotesContent>
       _detailsController.dispose();
       super.dispose();
     } else {
-      final defaultNoteCount = noteProvider.notes
+      noteProvider.setIsLoadBack(true);
+
+      final defaultNoteCount = noteProvider.notes!
           .where((note) => note.title.startsWith('New Note'))
           .length;
       if (title.isEmpty && details.isNotEmpty) {
@@ -151,7 +153,7 @@ class NotesContentState extends State<NotesContent>
         date: widget.note!.date,
         files: widget.note!.files,
       );
-      noteProvider.setIsLoading(true);
+      // noteProvider.setIsLoading(true);
       noteProvider.editConversation(editedNote);
       noteProvider.updatedAudioRecords.clear();
       noteProvider.loadNotesConversation();

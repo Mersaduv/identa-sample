@@ -36,7 +36,6 @@ class _ProfilePageState extends State<ProfilePage> {
 
   DateTime? _selectedDate;
   String? _selectedLocation;
-  late SharedPreferences _preferences;
   late NoteProvider noteProvider;
   // File? _coverImage;
   bool _status = true;
@@ -149,6 +148,24 @@ class _ProfilePageState extends State<ProfilePage> {
   @override
   Widget build(BuildContext context) {
     var _coverImage = context.watch<NoteProvider>().coverImage;
+    final ValueNotifier<TextDirection> _firstNameControllerTextDir =
+        ValueNotifier(TextDirection.ltr);
+    final ValueNotifier<TextDirection> _lastNameControllerTextDir =
+        ValueNotifier(TextDirection.ltr);
+    final ValueNotifier<TextDirection> _emailControllerTextDir =
+        ValueNotifier(TextDirection.ltr);
+    final ValueNotifier<TextDirection> _phoneControllerTextDir =
+        ValueNotifier(TextDirection.ltr);
+    final ValueNotifier<TextDirection> _addressControllerTextDir =
+        ValueNotifier(TextDirection.ltr);
+    final ValueNotifier<TextDirection> _cityControllerTextDir =
+        ValueNotifier(TextDirection.ltr);
+    final ValueNotifier<TextDirection> _stateControllerTextDir =
+        ValueNotifier(TextDirection.ltr);
+    final ValueNotifier<TextDirection> _zipControllerTextDir =
+        ValueNotifier(TextDirection.ltr);
+    final ValueNotifier<TextDirection> _countryControllerTextDir =
+        ValueNotifier(TextDirection.ltr);
     return Scaffold(
       appBar: CustomAppBar(
         leading: IconButton(
@@ -290,39 +307,83 @@ class _ProfilePageState extends State<ProfilePage> {
                   ],
                 )),
             const SizedBox(height: 16),
-            TextField(
-              enabled: !_status,
-              controller: _firstNameController,
-              onChanged: (value) {},
-              decoration: InputDecoration(
-                labelText: translation(context).name,
+            ValueListenableBuilder<TextDirection>(
+              valueListenable: _firstNameControllerTextDir,
+              builder: (context, value, child) => TextField(
+                enabled: !_status,
+                controller: _firstNameController,
+                textDirection: _firstNameControllerTextDir.value,
+                onChanged: (input) {
+                  final isRTL = intl.Bidi.detectRtlDirectionality(input);
+                  if (isRTL) {
+                    _firstNameControllerTextDir.value = TextDirection.rtl;
+                  } else {
+                    _firstNameControllerTextDir.value = TextDirection.ltr;
+                  }
+                },
+                decoration: InputDecoration(
+                  labelText: translation(context).name,
+                ),
               ),
             ),
             const SizedBox(height: 8),
-            TextField(
-              enabled: !_status,
-              controller: _lastNameController,
-              onChanged: (value) {},
-              decoration: InputDecoration(
-                labelText: translation(context).lastName,
+            ValueListenableBuilder<TextDirection>(
+              valueListenable: _lastNameControllerTextDir,
+              builder: (context, value, child) => TextField(
+                enabled: !_status,
+                controller: _lastNameController,
+                textDirection: _lastNameControllerTextDir.value,
+                onChanged: (input) {
+                  final isRTL = intl.Bidi.detectRtlDirectionality(input);
+                  if (isRTL) {
+                    _lastNameControllerTextDir.value = TextDirection.rtl;
+                  } else {
+                    _lastNameControllerTextDir.value = TextDirection.ltr;
+                  }
+                },
+                decoration: InputDecoration(
+                  labelText: translation(context).lastName,
+                ),
               ),
             ),
             const SizedBox(height: 8),
-            TextField(
-              enabled: !_status,
-              controller: _emailController,
-              onChanged: (value) {},
-              decoration: InputDecoration(
-                labelText: translation(context).email,
+            ValueListenableBuilder<TextDirection>(
+              valueListenable: _emailControllerTextDir,
+              builder: (context, value, child) => TextField(
+                enabled: !_status,
+                controller: _emailController,
+                textDirection: _emailControllerTextDir.value,
+                onChanged: (input) {
+                  final isRTL = intl.Bidi.detectRtlDirectionality(input);
+                  if (isRTL) {
+                    _emailControllerTextDir.value = TextDirection.rtl;
+                  } else {
+                    _emailControllerTextDir.value = TextDirection.ltr;
+                  }
+                },
+                decoration: InputDecoration(
+                  labelText: translation(context).email,
+                ),
               ),
             ),
             const SizedBox(height: 8),
-            TextField(
-              enabled: !_status,
-              controller: _phoneController,
-              onChanged: (value) {},
-              decoration: InputDecoration(
-                labelText: translation(context).phoneNumber,
+            ValueListenableBuilder<TextDirection>(
+              valueListenable: _phoneControllerTextDir,
+              builder: (context, value, child) => TextField(
+                enabled: !_status,
+                controller: _phoneController,
+                textDirection: _phoneControllerTextDir.value,
+                onChanged: (input) {
+                  final isRTL = intl.Bidi.detectRtlDirectionality(input);
+                  if (isRTL) {
+                    _phoneControllerTextDir.value = TextDirection.rtl;
+                  } else {
+                    _phoneControllerTextDir.value = TextDirection.ltr;
+                  }
+                },
+                decoration: InputDecoration(
+                  labelText: translation(context).phoneNumber,
+                ),
               ),
             ),
             const SizedBox(height: 8),
@@ -352,24 +413,48 @@ class _ProfilePageState extends State<ProfilePage> {
                   children: <Widget>[
                     Expanded(
                       flex: 2,
-                      child: TextField(
-                        enabled: !_status,
-                        controller: _zipController,
-                        onChanged: (value) {},
-                        decoration: InputDecoration(
-                          labelText: translation(context).zipCode,
+                      child: ValueListenableBuilder<TextDirection>(
+                        valueListenable: _zipControllerTextDir,
+                        builder: (context, value, child) => TextField(
+                          enabled: !_status,
+                          controller: _zipController,
+                          textDirection: _zipControllerTextDir.value,
+                          onChanged: (input) {
+                            final isRTL =
+                                intl.Bidi.detectRtlDirectionality(input);
+                            if (isRTL) {
+                              _zipControllerTextDir.value = TextDirection.rtl;
+                            } else {
+                              _zipControllerTextDir.value = TextDirection.ltr;
+                            }
+                          },
+                          decoration: InputDecoration(
+                            labelText: translation(context).zipCode,
+                          ),
                         ),
                       ),
                     ),
                     const SizedBox(width: 14),
                     Expanded(
                       flex: 2,
-                      child: TextField(
-                        enabled: !_status,
-                        controller: _stateController,
-                        onChanged: (value) {},
-                        decoration: InputDecoration(
-                          labelText: translation(context).state,
+                      child: ValueListenableBuilder<TextDirection>(
+                        valueListenable: _stateControllerTextDir,
+                        builder: (context, value, child) => TextField(
+                          enabled: !_status,
+                          controller: _stateController,
+                          textDirection: _stateControllerTextDir.value,
+                          onChanged: (input) {
+                            final isRTL =
+                                intl.Bidi.detectRtlDirectionality(input);
+                            if (isRTL) {
+                              _stateControllerTextDir.value = TextDirection.rtl;
+                            } else {
+                              _stateControllerTextDir.value = TextDirection.ltr;
+                            }
+                          },
+                          decoration: InputDecoration(
+                            labelText: translation(context).state,
+                          ),
                         ),
                       ),
                     ),
@@ -382,24 +467,50 @@ class _ProfilePageState extends State<ProfilePage> {
                   children: <Widget>[
                     Expanded(
                       flex: 2,
-                      child: TextField(
-                        enabled: !_status,
-                        controller: _addressController,
-                        onChanged: (value) {},
-                        decoration: InputDecoration(
-                          labelText: translation(context).address,
+                      child: ValueListenableBuilder<TextDirection>(
+                        valueListenable: _addressControllerTextDir,
+                        builder: (context, value, child) => TextField(
+                          enabled: !_status,
+                          controller: _addressController,
+                          textDirection: _addressControllerTextDir.value,
+                          onChanged: (input) {
+                            final isRTL =
+                                intl.Bidi.detectRtlDirectionality(input);
+                            if (isRTL) {
+                              _addressControllerTextDir.value =
+                                  TextDirection.rtl;
+                            } else {
+                              _addressControllerTextDir.value =
+                                  TextDirection.ltr;
+                            }
+                          },
+                          decoration: InputDecoration(
+                            labelText: translation(context).address,
+                          ),
                         ),
                       ),
                     ),
                     const SizedBox(width: 14),
                     Expanded(
                       flex: 2,
-                      child: TextField(
-                        enabled: !_status,
-                        controller: _cityController,
-                        onChanged: (value) {},
-                        decoration: InputDecoration(
-                          labelText: translation(context).city,
+                      child: ValueListenableBuilder<TextDirection>(
+                        valueListenable: _cityControllerTextDir,
+                        builder: (context, value, child) => TextField(
+                          enabled: !_status,
+                          controller: _cityController,
+                          textDirection: _cityControllerTextDir.value,
+                          onChanged: (input) {
+                            final isRTL =
+                                intl.Bidi.detectRtlDirectionality(input);
+                            if (isRTL) {
+                              _cityControllerTextDir.value = TextDirection.rtl;
+                            } else {
+                              _cityControllerTextDir.value = TextDirection.ltr;
+                            }
+                          },
+                          decoration: InputDecoration(
+                            labelText: translation(context).city,
+                          ),
                         ),
                       ),
                     ),
