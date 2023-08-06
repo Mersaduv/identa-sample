@@ -168,7 +168,7 @@ class ChatScreenState extends State<ChatScreen>
             controller: _messageController,
             isEnabled: !isBotTyping,
             hint: isBotTyping
-                ? translation(context).isTypings
+                ? translation(context).isTyping
                 : translation(context).typeMessage,
             onSubmitted: (value) {
               String messageContent = value.trim();

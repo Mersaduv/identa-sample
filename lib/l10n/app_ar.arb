@@ -42,5 +42,6 @@
   "yes": "نعم",
   "no": "لا",
   "search": "بحث",
-  "searchHint": "بحث.."
+  "searchHint": "بحث..",
+  "emptyList": "فارغة"
 }

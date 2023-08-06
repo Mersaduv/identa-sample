@@ -42,5 +42,6 @@
   "yes": "हाँ",
   "no": "नहीं",
   "search": "खोज",
-  "searchHint": "खोज.."
+  "searchHint": "खोज..",
+  "emptyList": "खाली है"
 }

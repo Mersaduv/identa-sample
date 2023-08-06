@@ -42,5 +42,6 @@
   "yes": "بله",
   "no": "نه",
   "search": "جستجو",
-  "searchHint": "جستجو.."
+  "searchHint": "جستجو..",
+  "emptyList": "خالی است"
 }
