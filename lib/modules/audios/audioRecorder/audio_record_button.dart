@@ -104,7 +104,7 @@ class AudioRecorderButton extends StatelessWidget {
           return LayoutBuilder(
             builder: (context, constraints) {
               final screenSize = MediaQuery.of(context).size;
-              final containerWidth = screenSize.width * 0.93;
+              final containerWidth = screenSize.width * 0.9;
               return Stack(
                 children: [
                   Directionality(
@@ -113,7 +113,7 @@ class AudioRecorderButton extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         AnimatedContainer(
-                          margin: const EdgeInsets.only(left: 7),
+                          // margin: const EdgeInsets.only(left: 7),
                           duration: const Duration(milliseconds: 300),
                           width:
                               audioRecordshow.isRecord ? containerWidth : 56.0,

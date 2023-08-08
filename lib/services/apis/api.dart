@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/retry.dart';
+import 'package:identa/core/models/model_core/profile_data%20.dart';
 import 'package:identa/services/auth/auth_service.dart';
 import 'package:path_provider/path_provider.dart';
 import 'config.dart';
@@ -245,5 +246,83 @@ class ServiceApis {
       print('Failed to download audio file. Error: ${response.statusCode}');
       return response.toString();
     }
+  }
+
+  static Future<http.Response> sendPostProfileRequest(
+      ProfileData profileData) async {
+    final client = RetryClient(http.Client());
+    var body = profileData.toJson();
+    print("mapdata ${body}");
+    final response = await client.post(
+      Uri.parse('${ServiceConfig.baseURL}/insights/profile'),
+      body: jsonEncode(body),
+      headers: {
+        'Authorization': await _authService.getAuthHeader(),
+        'Content-type': 'application/json; charset=UTF-8',
+      },
+    );
+
+    if (response.statusCode != 200) {
+      print('Request failed with status: ${response.statusCode}');
+    }
+
+    return response;
+  }
+
+  static Future<http.Response> sendGetProfileRequest() async {
+    final client = RetryClient(http.Client());
+
+    final response = await client.get(
+      Uri.parse('${ServiceConfig.baseURL}/insights/profile'),
+      headers: {
+        'Authorization': await _authService.getAuthHeader(),
+      },
+    );
+
+    if (response.statusCode != 200) {
+      print('Request failed with status: ${response.statusCode}');
+    }
+
+    return response;
+  }
+
+  static Future<http.Response> sendProfilePicture(String filePath) async {
+    final client = RetryClient(http.Client());
+    const url = 'insights/profile/picture';
+
+    final file = File(filePath);
+    final bytes = await file.readAsBytes();
+    final response = await client.post(
+      Uri.parse('${ServiceConfig.baseURL}/$url'),
+      headers: {
+        'Content-Type': 'application/octet-stream',
+        'Authorization': await _authService.getAuthHeader(),
+      },
+      body: bytes,
+    );
+
+    if (response.statusCode != 200) {
+      print('Request failed with status: ${response.statusCode}');
+    }
+
+    return response;
+  }
+
+  static Future<http.Response> getProfilePicture() async {
+    final client = RetryClient(http.Client());
+    const url = 'insights/profile/picture';
+
+    final response = await client.get(
+      Uri.parse('${ServiceConfig.baseURL}/$url'),
+      headers: {
+        'Authorization': await _authService.getAuthHeader(),
+      },
+    );
+
+    if (response.statusCode != 200) {
+      print('Request failed with status: ${response.statusCode}');
+    }
+
+    return response;
   }
 }

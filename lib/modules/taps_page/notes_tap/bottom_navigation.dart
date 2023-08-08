@@ -14,7 +14,6 @@ class BottomNavigation extends StatelessWidget {
     final attachmentHandler = context.read<FilePickerProvider>();
 
     return Container(
-      margin: const EdgeInsets.only(left: 4, right: 4),
       decoration: const BoxDecoration(
         color: Colors.grey,
         borderRadius: BorderRadius.only(
@@ -23,7 +22,9 @@ class BottomNavigation extends StatelessWidget {
         ),
       ),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        mainAxisAlignment: audioRecordshow.isRecord
+            ? MainAxisAlignment.center
+            : MainAxisAlignment.spaceAround,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           const AudioRecorderButton(),

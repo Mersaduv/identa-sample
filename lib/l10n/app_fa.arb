@@ -12,7 +12,15 @@
   "nameHint": "اسم خود را وارد نمایید",
   "email": "آدرس الکترونیکی",
   "emailHint": "آدرس الکترونیکی خود را وارد نمایید",
+  "phoneNumber": "تلفن همراه",
   "dateOfBirth": "تاریخ تولد",
+  "zipCode": "کد پستی",
+  "state": "استان",
+  "address": "آدرس",
+  "city": "شهر",
+  "selectCountry": "انتخاب کشور",
+  "save": "ذخیره",
+  "cancel": "انصراف",
   "requiredField": "این زمینه ضروری می باشد",
   "submitInfo": "ثبت معلومات",
   "aboutUs": "در باره ما",
@@ -32,5 +40,8 @@
   "areYouSureDeleteNote": "آیا مطمئن هستید که می‌خواهید این یادداشت را حذف کنید؟",
   "deleteNote": "حذف یادداشت",
   "yes": "بله",
-  "no": "نه"
+  "no": "نه",
+  "search": "جستجو",
+  "searchHint": "جستجو..",
+  "emptyList": "خالی است"
 }

@@ -12,7 +12,15 @@
   "nameHint": "अपना नाम दर्ज करें",
   "email": "ईमेल",
   "emailHint": "अपना ईमेल दर्ज करें",
-  "dateOfBirth": "जन्म की तारीख",
+  "phoneNumber": "मोबाइल नंबर",
+  "dateOfBirth": "जन्म तिथि",
+  "zipCode": "पिन कोड",
+  "state": "राज्य",
+  "address": "पता",
+  "city": "शहर",
+  "selectCountry": "देश चुनें",
+  "save": "बचाना",
+  "cancel": "रद्द करना",
   "requiredField": "यह फ़ील्ड आवश्यक है",
   "submitInfo": "जानकारी सबमिट करें",
   "aboutUs": "हमारे बारे में",
@@ -32,5 +40,8 @@
   "areYouSureDeleteNote": "क्या आप इस नोट को हटाना चाहते हैं?",
   "deleteNote": "नोट हटाएं",
   "yes": "हाँ",
-  "no": "नहीं"
+  "no": "नहीं",
+  "search": "खोज",
+  "searchHint": "खोज..",
+  "emptyList": "खाली है"
 }

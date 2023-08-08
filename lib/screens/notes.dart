@@ -38,7 +38,7 @@ class NotesScreenState extends State<NotesScreen> {
       var noteProvider = context.read<NoteProvider>();
       noteProvider.setIsLoading(true);
 
-      Future.delayed(const Duration(milliseconds: 500), () {
+      Future.delayed(const Duration(milliseconds: 100), () {
         noteProvider.setIsLoading(false);
       });
 
@@ -52,7 +52,7 @@ class NotesScreenState extends State<NotesScreen> {
     var isLoad = context.read<NoteProvider>();
     Locale currentLocale = Localizations.localeOf(context);
     if (noteProvider.isLoadBack) {
-      Future.delayed(const Duration(milliseconds: 500), () {
+      Future.delayed(const Duration(milliseconds: 100), () {
         isLoad.setIsLoadBack(false);
       });
     }
@@ -60,151 +60,172 @@ class NotesScreenState extends State<NotesScreen> {
     var loading = noteProvider;
     return Consumer<NoteProvider>(
       builder: (context, value, child) {
+        if (notes == null) {
+          return Padding(
+            padding: const EdgeInsets.all(18),
+            child: ListView.separated(
+              itemCount: 5,
+              itemBuilder: (context, index) => const CardSkelton(),
+              separatorBuilder: (context, index) => const Padding(
+                padding: EdgeInsets.all(10.0),
+                child: SizedBox(height: defaultPadding),
+              ),
+            ),
+          );
+        }
         return Scaffold(
-          body: loading.isLoadBack
-              ? Padding(
-                  padding: const EdgeInsets.all(18),
-                  child: ListView.separated(
-                    itemCount: 5,
-                    itemBuilder: (context, index) => const CardSkelton(),
-                    separatorBuilder: (context, index) => const Padding(
-                      padding: EdgeInsets.all(10.0),
-                      child: SizedBox(height: defaultPadding),
-                    ),
-                  ),
+          body: notes.isEmpty
+              ? Align(
+                  alignment: Alignment.center,
+                  child: Text(translation(context).emptyList),
                 )
-              : ListView.builder(
-                  itemCount: notes.length,
-                  itemBuilder: (context, index) {
-                    final note = notes[notes.length - index - 1];
-
-                    return Dismissible(
-                      key: Key(note.title),
-                      direction: DismissDirection.endToStart,
-                      background: const DismissibleBackground(),
-                      confirmDismiss: (_) async {
-                        return await ShowCustomDialog.show(
-                          context,
-                          translation(context).deleteNote,
-                          translation(context).areYouSureDeleteNote,
-                        );
-                      },
-                      onDismissed: (_) {
-                        context.read<NoteProvider>().deleteNote(note);
-                        context.notify = translation(context).noteDismissed;
-                      },
-                      child: GestureDetector(
-                        onTap: () async {
-                          context.read<NoteProvider>().audioList.clear();
-                          context
-                              .read<NoteProvider>()
-                              .updatedAudioRecords
-                              .clear();
-                          if (note.title.isEmpty) {
-                            await Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => NotesContent(
-                                  note: note,
-                                ),
-                              ),
-                            );
-                          } else {
-                            await Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => NotesContent(note: note),
-                              ),
-                            );
-                          }
-                        },
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment
-                              .start, // Align children to the start of the row (left for LTR, right for RTL)
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.only(top: 5),
-                              child: ListTile(
-                                leading: ClipRRect(
-                                  borderRadius: BorderRadius.circular(13.0),
-                                  child: Container(
-                                    height: 50.0,
-                                    width: 50.0,
-                                    color: const Color(0xFF2993CF),
-                                    child: Center(
-                                      child: Text(
-                                        note.title.split(" ").length == 1 ||
-                                                note.title.length == 1
-                                            ? note.title
-                                                .substring(0, 1)
-                                                .toUpperCase()
-                                            : note.title
-                                                .trim()
-                                                .split(" ")
-                                                .take(2)
-                                                .map((w) => w[0].toUpperCase())
-                                                .join(),
-                                        style: const TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 20,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                                title: Text(
-                                  note.title,
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.w500,
-                                    fontSize: 20,
-                                    color: Color(0xFF4B5563),
-                                  ),
-                                ),
-                                subtitle: Row(
-                                  children: [
-                                    Expanded(
-                                      child: Opacity(
-                                        opacity: 0.8,
-                                        child: Text(
-                                          note.details,
-                                          maxLines: 2,
-                                          overflow: TextOverflow.ellipsis,
-                                          style: MyTextStyles.small.copyWith(
-                                              color: Color(0xFF4B5563)),
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                            Align(
-                              alignment: currentLocale.languageCode == "fa"
-                                  ? Alignment.bottomLeft
-                                  : currentLocale.languageCode == "ar"
-                                      ? Alignment.bottomLeft
-                                      : Alignment
-                                          .bottomRight, // Align center for other languages
-                              child: Padding(
-                                padding: const EdgeInsets.only(
-                                    right: 8.0, left: 8.0),
-                                child: Text(
-                                  note.date,
-                                  style: MyTextStyles.small,
-                                ),
-                              ),
-                            ),
-                            const Divider(
-                              height: 10,
-                            ),
-                          ],
+              : loading.isLoadBack
+                  ? Padding(
+                      padding: const EdgeInsets.all(18),
+                      child: ListView.separated(
+                        itemCount: 5,
+                        itemBuilder: (context, index) => const CardSkelton(),
+                        separatorBuilder: (context, index) => const Padding(
+                          padding: EdgeInsets.all(10.0),
+                          child: SizedBox(height: defaultPadding),
                         ),
                       ),
-                    );
-                  },
-                ),
+                    )
+                  : ListView.builder(
+                      itemCount: notes.length,
+                      itemBuilder: (context, index) {
+                        final note = notes[notes.length - index - 1];
+
+                        return Dismissible(
+                          key: Key(note.title),
+                          direction: DismissDirection.endToStart,
+                          background: const DismissibleBackground(),
+                          confirmDismiss: (_) async {
+                            return await ShowCustomDialog.show(
+                              context,
+                              translation(context).deleteNote,
+                              translation(context).areYouSureDeleteNote,
+                            );
+                          },
+                          onDismissed: (_) {
+                            context.read<NoteProvider>().deleteNote(note);
+                            context.notify = translation(context).noteDismissed;
+                          },
+                          child: GestureDetector(
+                            onTap: () async {
+                              context.read<NoteProvider>().audioList.clear();
+                              context
+                                  .read<NoteProvider>()
+                                  .updatedAudioRecords
+                                  .clear();
+                              if (note.title.isEmpty) {
+                                await Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => NotesContent(
+                                      note: note,
+                                    ),
+                                  ),
+                                );
+                              } else {
+                                await Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        NotesContent(note: note),
+                                  ),
+                                );
+                              }
+                            },
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment
+                                  .start, // Align children to the start of the row (left for LTR, right for RTL)
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 5),
+                                  child: ListTile(
+                                    leading: ClipRRect(
+                                      borderRadius: BorderRadius.circular(13.0),
+                                      child: Container(
+                                        height: 50.0,
+                                        width: 50.0,
+                                        color: const Color(0xFF2993CF),
+                                        child: Center(
+                                          child: Text(
+                                            note.title.split(" ").length == 1 ||
+                                                    note.title.length == 1
+                                                ? note.title
+                                                    .substring(0, 1)
+                                                    .toUpperCase()
+                                                : note.title
+                                                    .trim()
+                                                    .split(" ")
+                                                    .take(2)
+                                                    .map((w) =>
+                                                        w[0].toUpperCase())
+                                                    .join(),
+                                            style: const TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 20,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    title: Text(
+                                      note.title,
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.w500,
+                                        fontSize: 20,
+                                        color: Color(0xFF4B5563),
+                                      ),
+                                    ),
+                                    subtitle: Row(
+                                      children: [
+                                        Expanded(
+                                          child: Opacity(
+                                            opacity: 0.8,
+                                            child: Text(
+                                              note.details,
+                                              maxLines: 2,
+                                              overflow: TextOverflow.ellipsis,
+                                              style: MyTextStyles.small
+                                                  .copyWith(
+                                                      color: Color(0xFF4B5563)),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                                Align(
+                                  alignment: currentLocale.languageCode == "fa"
+                                      ? Alignment.bottomLeft
+                                      : currentLocale.languageCode == "ar"
+                                          ? Alignment.bottomLeft
+                                          : Alignment
+                                              .bottomRight, // Align center for other languages
+                                  child: Padding(
+                                    padding: const EdgeInsets.only(
+                                        right: 8.0, left: 8.0),
+                                    child: Text(
+                                      note.date,
+                                      style: MyTextStyles.small,
+                                    ),
+                                  ),
+                                ),
+                                const Divider(
+                                  height: 10,
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      },
+                    ),
           floatingActionButton: Container(
             margin: const EdgeInsets.only(bottom: 16, right: 16),
             child: Transform.scale(

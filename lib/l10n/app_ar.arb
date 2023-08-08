@@ -12,7 +12,15 @@
   "nameHint": "أدخل اسمك",
   "email": "البريد الإلكتروني",
   "emailHint": "أدخل بريدك الإلكتروني",
+  "phoneNumber": "رقم الهاتف",
   "dateOfBirth": "تاريخ الميلاد",
+  "zipCode": "الرمز البريدي",
+  "state": "الولاية",
+  "address": "العنوان",
+  "city": "المدينة",
+  "selectCountry": "اختر البلد",
+  "save": "حفظ",
+  "cancel": "إلغاء",
   "requiredField": "هذا الحقل مطلوب",
   "submitInfo": "إرسال المعلومات",
   "aboutUs": "معلومات عنا",
@@ -32,5 +40,8 @@
   "areYouSureDeleteNote": "هل أنت متأكد أنك تريد حذف هذه المذكرة؟",
   "deleteNote": "حذف المذكرة",
   "yes": "نعم",
-  "no": "لا"
+  "no": "لا",
+  "search": "بحث",
+  "searchHint": "بحث..",
+  "emptyList": "فارغة"
 }
