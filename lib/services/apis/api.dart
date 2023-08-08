@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/retry.dart';
+import 'package:identa/core/models/model_core/profile_data%20.dart';
 import 'package:identa/services/auth/auth_service.dart';
 import 'package:path_provider/path_provider.dart';
 import 'config.dart';
@@ -247,35 +248,12 @@ class ServiceApis {
     }
   }
 
-  // Profile Section
-  static Future<http.Response> sendPostProfileRequest({
-    required String firstName,
-    required String lastName,
-    required String email,
-    String? phone,
-    String? address,
-    String? city,
-    String? state,
-    String? zip,
-    String? country,
-    String? dateOfBirth,
-  }) async {
+  static Future<http.Response> sendPostProfileRequest(
+      ProfileData profileData) async {
     final client = RetryClient(http.Client());
-
-    var body = {
-      "firstName": firstName,
-      "lastName": lastName,
-      "email": email,
-      "phone": phone,
-      "address": address,
-      "city": city,
-      "state": state,
-      "zip": zip,
-      "country": country,
-      "dateOfBirth": dateOfBirth,
-    };
-
-    var response = await client.post(
+    var body = profileData.toJson();
+    print("mapdata ${body}");
+    final response = await client.post(
       Uri.parse('${ServiceConfig.baseURL}/insights/profile'),
       body: jsonEncode(body),
       headers: {
@@ -284,17 +262,8 @@ class ServiceApis {
       },
     );
 
-    if (response.statusCode == 401) {
-      _authService.signInWithAutoCodeExchange();
-
-      response = await client.post(
-        Uri.parse('${ServiceConfig.baseURL}/insights/profile'),
-        body: jsonEncode(body),
-        headers: {
-          'Authorization': await _authService.getAuthHeader(),
-          'Content-type': 'application/json; charset=UTF-8',
-        },
-      );
+    if (response.statusCode != 200) {
+      print('Request failed with status: ${response.statusCode}');
     }
 
     return response;
@@ -303,22 +272,15 @@ class ServiceApis {
   static Future<http.Response> sendGetProfileRequest() async {
     final client = RetryClient(http.Client());
 
-    var response = await client.get(
+    final response = await client.get(
       Uri.parse('${ServiceConfig.baseURL}/insights/profile'),
       headers: {
         'Authorization': await _authService.getAuthHeader(),
       },
     );
 
-    if (response.statusCode == 401) {
-      _authService.signInWithAutoCodeExchange();
-
-      response = await client.get(
-        Uri.parse('${ServiceConfig.baseURL}/insights/profile'),
-        headers: {
-          'Authorization': await _authService.getAuthHeader(),
-        },
-      );
+    if (response.statusCode != 200) {
+      print('Request failed with status: ${response.statusCode}');
     }
 
     return response;
@@ -339,6 +301,10 @@ class ServiceApis {
       body: bytes,
     );
 
+    if (response.statusCode != 200) {
+      print('Request failed with status: ${response.statusCode}');
+    }
+
     return response;
   }
 
@@ -352,6 +318,10 @@ class ServiceApis {
         'Authorization': await _authService.getAuthHeader(),
       },
     );
+
+    if (response.statusCode != 200) {
+      print('Request failed with status: ${response.statusCode}');
+    }
 
     return response;
   }

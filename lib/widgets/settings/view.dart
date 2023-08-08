@@ -66,6 +66,7 @@ class SettingsState extends State<Settings> {
   @override
   Widget build(BuildContext context) {
     var profileProvider = context.read<NoteProvider>();
+    var profileProviderDisplay = context.watch<NoteProvider>();
     return Container(
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.background,
@@ -90,9 +91,11 @@ class SettingsState extends State<Settings> {
               SettingItemWidget(
                 onTapped: () async {
                   profileProvider.downloadProfilePicture();
+                  profileProvider.getProfileData();
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => const ProfilePage()),
+                    MaterialPageRoute(
+                        builder: (context) =>  ProfilePage(profileProviderDisplay.profileData)),
                   );
                 },
                 title: translation(context).profile,

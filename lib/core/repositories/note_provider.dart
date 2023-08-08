@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
@@ -42,6 +43,29 @@ class NoteProvider extends ChangeNotifier {
   File? _coverImage;
 
   File? get coverImage => _coverImage;
+
+  Map<String, dynamic>? _profileData;
+
+  Map<String, dynamic>? get profileData => _profileData;
+
+  Future<void> getProfileData() async {
+    notifyListeners();
+
+    try {
+      var response = await ServiceApis.sendGetProfileRequest();
+
+      if (response.statusCode == HttpStatus.ok) {
+        var decodedResponse = jsonDecode(response.body);
+        _profileData = decodedResponse;
+      } else {
+        print('API request failed with status code ${response.statusCode}');
+      }
+    } catch (error) {
+      print('Error fetching profile data: $error');
+    } finally {
+      notifyListeners();
+    }
+  }
 
   setCoverImage(File? newCoverImage) {
     _coverImage = newCoverImage;

@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:identa/classes/language_constants.dart';
 import 'package:identa/constants/colors.dart';
+import 'package:identa/core/models/model_core/profile_data%20.dart';
 import 'package:identa/core/repositories/note_provider.dart';
 import 'package:identa/services/apis/api.dart';
 import 'package:identa/widgets/app_bar_content.dart';
@@ -17,7 +18,8 @@ import 'package:country_list_pick/country_list_pick.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class ProfilePage extends StatefulWidget {
-  const ProfilePage({Key? key}) : super(key: key);
+  Map<String, dynamic>? profileData;
+  ProfilePage(this.profileData, {Key? key}) : super(key: key);
 
   @override
   _ProfilePageState createState() => _ProfilePageState();
@@ -37,7 +39,6 @@ class _ProfilePageState extends State<ProfilePage> {
   DateTime? _selectedDate;
   String? _selectedLocation;
   late NoteProvider noteProvider;
-  // File? _coverImage;
   bool _status = true;
   @override
   void initState() {
@@ -50,57 +51,44 @@ class _ProfilePageState extends State<ProfilePage> {
     FilePickerResult? result = await FilePicker.platform.pickFiles(
       type: FileType.image,
     );
+    noteProvider.setCoverImage(null);
 
-    // if (result != null) {
     noteProvider.uploadProfilePicture(File(result!.files.single.path!));
-    // setState(() {
-    // _coverImage = File(result.files.single.path!);
-    // _uploadProfilePicture();
-    // });
-    // }
+    _loadSavedData();
   }
 
-  Future<void> _loadSavedData() async {}
+  Future<void> _loadSavedData() async {
+    Map<String, dynamic>? profileData = widget.profileData;
+
+    if (profileData != null) {
+      _firstNameController.text = profileData['firstName'];
+      _lastNameController.text = profileData['lastName'];
+      _emailController.text = profileData['email'];
+      _phoneController.text = profileData['phoneNumber'];
+      _addressController.text = profileData['address'];
+      _cityController.text = profileData['city'];
+      _stateController.text = profileData['state'];
+      _zipController.text = profileData['zipCode'];
+      _countryController.text = profileData['country'];
+    }
+    noteProvider.downloadProfilePicture();
+  }
 
   Future<void> _saveData() async {
-    String firstName = _firstNameController.text;
-    String lastName = _lastNameController.text;
-    String email = _emailController.text;
-    String phoneNumber = _phoneController.text;
-    String dateOfBirth = _selectedDate != null
-        ? intl.DateFormat('yyyy-MM-dd').format(_selectedDate!)
-        : '';
-    String zipCode = _zipController.text;
-    String state = _stateController.text;
-    String address = _addressController.text;
-    String city = _cityController.text;
-    String country = _selectedLocation ?? '';
-    // var response = await ServiceApis.sendPostProfileRequest(
-    //   firstName: firstName,
-    //   lastName: lastName,
-    //   email: email,
-    //   phone: phoneNumber,
-    //   address: address,
-    //   city: city,
-    //   state: state,
-    //   zip: zipCode,
-    //   country: countryCode,
-    //   dateOfBirth: dateOfBirth,
-    // );
+    ProfileData profileData = ProfileData(
+      firstName: _firstNameController.text,
+      lastName: _lastNameController.text,
+      email: _emailController.text,
+      phoneNumber: _phoneController.text,
+      selectedDate: _selectedDate,
+      zipCode: _zipController.text,
+      state: _stateController.text,
+      address: _addressController.text,
+      city: _cityController.text,
+      selectedLocation: _selectedLocation ?? '',
+    );
 
-    // if (response.statusCode == HttpStatus.ok) {
-    //   print('Profile created successfully!');
-    // } else {
-    //   print('API request failed with status code ${response.statusCode}');
-    // }
-    var respond = await ServiceApis.sendGetProfileRequest();
-
-    if (respond.statusCode == HttpStatus.ok) {
-      var decodedResponse = jsonDecode(respond.body);
-      print('Profile Data: $decodedResponse');
-    } else {
-      print('API request failed with status code ${respond.statusCode}');
-    }
+    await ServiceApis.sendPostProfileRequest(profileData);
 
     setState(() {
       _status = true;
@@ -127,7 +115,6 @@ class _ProfilePageState extends State<ProfilePage> {
       setState(() {
         _selectedLocation = countryCode.name;
       });
-      _saveData();
     }
   }
 
@@ -163,8 +150,6 @@ class _ProfilePageState extends State<ProfilePage> {
     final ValueNotifier<TextDirection> _stateControllerTextDir =
         ValueNotifier(TextDirection.ltr);
     final ValueNotifier<TextDirection> _zipControllerTextDir =
-        ValueNotifier(TextDirection.ltr);
-    final ValueNotifier<TextDirection> _countryControllerTextDir =
         ValueNotifier(TextDirection.ltr);
     return Scaffold(
       appBar: CustomAppBar(
@@ -212,7 +197,7 @@ class _ProfilePageState extends State<ProfilePage> {
                             },
                             child: ClipOval(
                               child: Image.file(
-                                _coverImage!,
+                                _coverImage,
                                 width: 142,
                                 height: 142,
                                 fit: BoxFit.cover,
