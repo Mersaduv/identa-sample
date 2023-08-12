@@ -250,23 +250,33 @@ class ServiceApis {
 
   static Future<http.Response> sendPostProfileRequest(
       ProfileData profileData) async {
-    final client = RetryClient(http.Client());
-    var body = profileData.toJson();
-    print("mapdata ${body}");
-    final response = await client.post(
-      Uri.parse('${ServiceConfig.baseURL}/insights/profile'),
-      body: jsonEncode(body),
-      headers: {
-        'Authorization': await _authService.getAuthHeader(),
-        'Content-type': 'application/json; charset=UTF-8',
-      },
-    );
+    // final client = RetryClient(http.Client());
+    final response = await sendPostRequest("insights/profile", profileData);
+    // var body = profileData.toJson();
+    print("mapdata ${response.body}");
 
-    if (response.statusCode != 200) {
-      print('Request failed with status: ${response.statusCode}');
+    if (response.statusCode == HttpStatus.ok) {
+      return response;
+    } else {
+      if (kDebugMode) {
+        print('API request failed with status code ${response.statusCode}');
+      }
+      return response;
     }
+    // final response = await client.post(
+    //   Uri.parse('${ServiceConfig.baseURL}/insights/profile'),
+    //   body: body,
+    //   headers: {
+    //     'Authorization': await _authService.getAuthHeader(),
+    //     'Content-type': 'application/json; charset=UTF-8',
+    //   },
+    // );
 
-    return response;
+    // if (response.statusCode != 200) {
+    //   print('Request failed with status: ${response.statusCode}');
+    // }
+
+    // return response;
   }
 
   static Future<http.Response> sendGetProfileRequest() async {

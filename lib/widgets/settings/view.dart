@@ -21,6 +21,15 @@ class Settings extends StatefulWidget {
 
 class SettingsState extends State<Settings> {
   final AuthService _authService = AuthService();
+  late NoteProvider noteProvider;
+
+  @override
+  void initState() {
+    super.initState();
+    noteProvider = context.read<NoteProvider>();
+    noteProvider.getProfileData();
+    noteProvider.downloadProfilePicture();
+  }
 
   void _openLanguagePickerDialog() {
     showDialog(
@@ -65,8 +74,10 @@ class SettingsState extends State<Settings> {
 
   @override
   Widget build(BuildContext context) {
-    var profileProvider = context.read<NoteProvider>();
+    // var profileProvider = context.read<NoteProvider>();
     var profileProviderDisplay = context.watch<NoteProvider>();
+    var profileData = profileProviderDisplay.profileData;
+    // print("dataProf ${profileProviderDisplay.profileData!['firstName']}");
     return Container(
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.background,
@@ -90,12 +101,12 @@ class SettingsState extends State<Settings> {
               const SizedBox(height: 15), // Add space at the top
               SettingItemWidget(
                 onTapped: () async {
-                  profileProvider.downloadProfilePicture();
-                  profileProvider.getProfileData();
+                  noteProvider.getProfileData();
+                  noteProvider.downloadProfilePicture();
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                        builder: (context) =>  ProfilePage(profileProviderDisplay.profileData)),
+                        builder: (context) => ProfilePage(profileData)),
                   );
                 },
                 title: translation(context).profile,

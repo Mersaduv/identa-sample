@@ -120,9 +120,9 @@ class NotesContentState extends State<NotesContent>
         files: audioFiles,
       ));
       noteProvider.setIsLoading(true);
-
-      noteProvider.updatedAudioRecords.clear();
       noteProvider.loadNotesConversation();
+      noteProvider.audioList.clear();
+      noteProvider.updatedAudioRecords.clear();
       audioFiles.clear();
       _titleController.dispose();
       _detailsController.dispose();
@@ -155,8 +155,9 @@ class NotesContentState extends State<NotesContent>
       );
       // noteProvider.setIsLoading(true);
       noteProvider.editConversation(editedNote);
-      noteProvider.updatedAudioRecords.clear();
       noteProvider.loadNotesConversation();
+      noteProvider.audioList.clear();
+      noteProvider.updatedAudioRecords.clear();
       audioFiles.clear();
       _titleController.dispose();
       _detailsController.dispose();

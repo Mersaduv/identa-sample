@@ -4,12 +4,15 @@ import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:identa/widgets/loading/profile/cardSkeleton.dart';
 import 'package:identa/classes/language_constants.dart';
 import 'package:identa/constants/colors.dart';
 import 'package:identa/core/models/model_core/profile_data%20.dart';
 import 'package:identa/core/repositories/note_provider.dart';
+import 'package:identa/widgets/profile/profile_image_widget.dart';
 import 'package:identa/services/apis/api.dart';
 import 'package:identa/widgets/app_bar_content.dart';
+import 'package:identa/widgets/loading/skeleton.dart';
 import 'package:intl/intl.dart' as intl;
 import 'package:photo_view/photo_view.dart';
 import 'package:provider/provider.dart';
@@ -24,6 +27,8 @@ class ProfilePage extends StatefulWidget {
   @override
   _ProfilePageState createState() => _ProfilePageState();
 }
+
+const double defaultPadding = 16.0;
 
 class _ProfilePageState extends State<ProfilePage> {
   final TextEditingController _firstNameController = TextEditingController();
@@ -40,11 +45,30 @@ class _ProfilePageState extends State<ProfilePage> {
   String? _selectedLocation;
   late NoteProvider noteProvider;
   bool _status = true;
+  bool _showLoading = false;
+
   @override
   void initState() {
     super.initState();
     noteProvider = context.read<NoteProvider>();
-    _loadSavedData();
+    noteProvider.getProfileData();
+    _firstNameController.text = widget.profileData?['firstName'] ?? "";
+    _lastNameController.text = widget.profileData?['lastName'] ?? "";
+    _emailController.text = widget.profileData?['email'] ?? "";
+    _phoneController.text = widget.profileData?['phone'] ?? "";
+    _addressController.text = widget.profileData?['address'] ?? "";
+    _cityController.text = widget.profileData?['city'] ?? "";
+    _stateController.text = widget.profileData?['state'] ?? "";
+    _zipController.text = widget.profileData?['zip'] ?? "";
+    _selectedLocation = widget.profileData?['country'] ?? "";
+    if (widget.profileData?["dateOfBirth"] != null) {
+      _selectedDate = intl.DateFormat('yyyy-MM-dd')
+          .parse(widget.profileData?["dateOfBirth"]);
+    } else {
+      _selectedDate = DateTime.now();
+    }
+
+    // _loadSavedData();
   }
 
   Future<void> _pickImageFromGallery() async {
@@ -53,46 +77,49 @@ class _ProfilePageState extends State<ProfilePage> {
     );
     noteProvider.setCoverImage(null);
 
-    noteProvider.uploadProfilePicture(File(result!.files.single.path!));
-    _loadSavedData();
-  }
-
-  Future<void> _loadSavedData() async {
-    Map<String, dynamic>? profileData = widget.profileData;
-
-    if (profileData != null) {
-      _firstNameController.text = profileData['firstName'];
-      _lastNameController.text = profileData['lastName'];
-      _emailController.text = profileData['email'];
-      _phoneController.text = profileData['phoneNumber'];
-      _addressController.text = profileData['address'];
-      _cityController.text = profileData['city'];
-      _stateController.text = profileData['state'];
-      _zipController.text = profileData['zipCode'];
-      _countryController.text = profileData['country'];
-    }
+    await noteProvider.uploadProfilePicture(File(result!.files.single.path!));
     noteProvider.downloadProfilePicture();
+    // _loadSavedData();
   }
+
+  // Future<void> _loadSavedData() async {
+  //   Map<String, dynamic>? profileData = widget.profileData;
+
+  //   if (profileData != null) {
+  //     _firstNameController.text = profileData['firstName'];
+  //     _lastNameController.text = profileData['lastName'];
+  //     _emailController.text = profileData['email'];
+  //     _phoneController.text = profileData['phoneNumber'];
+  //     _addressController.text = profileData['address'];
+  //     _cityController.text = profileData['city'];
+  //     _stateController.text = profileData['state'];
+  //     _zipController.text = profileData['zipCode'];
+  //     _countryController.text = profileData['country'];
+  //   }
+  //   noteProvider.downloadProfilePicture();
+  // }
 
   Future<void> _saveData() async {
+    noteProvider.profileData?.clear();
+    String formattedDate =
+        intl.DateFormat('yyyy-MM-ddTHH:mm:ss.SSSSSSSZ').format(_selectedDate!);
     ProfileData profileData = ProfileData(
-      firstName: _firstNameController.text,
-      lastName: _lastNameController.text,
-      email: _emailController.text,
-      phoneNumber: _phoneController.text,
-      selectedDate: _selectedDate,
-      zipCode: _zipController.text,
-      state: _stateController.text,
-      address: _addressController.text,
-      city: _cityController.text,
-      selectedLocation: _selectedLocation ?? '',
-    );
-
+        firstName: _firstNameController.text.isNotEmpty
+            ? _firstNameController.text
+            : null,
+        lastName: _lastNameController.text.isNotEmpty
+            ? _lastNameController.text
+            : null,
+        email: _emailController.text.isNotEmpty ? _emailController.text : null,
+        phone: _phoneController.text.isNotEmpty ? _phoneController.text : null,
+        address:
+            _addressController.text.isNotEmpty ? _addressController.text : null,
+        city: _cityController.text.isNotEmpty ? _cityController.text : null,
+        state: _stateController.text.isNotEmpty ? _stateController.text : null,
+        zip: _zipController.text.isNotEmpty ? _zipController.text : null,
+        country: _selectedLocation!.isNotEmpty ? _selectedLocation : null,
+        dateOfBirth: formattedDate.isNotEmpty ? null : null);
     await ServiceApis.sendPostProfileRequest(profileData);
-
-    setState(() {
-      _status = true;
-    });
   }
 
   Future<void> _selectDate(BuildContext context) async {
@@ -113,7 +140,7 @@ class _ProfilePageState extends State<ProfilePage> {
   void _selectLocation(CountryCode? countryCode) {
     if (countryCode != null) {
       setState(() {
-        _selectedLocation = countryCode.name;
+        _selectedLocation = countryCode.code;
       });
     }
   }
@@ -129,12 +156,15 @@ class _ProfilePageState extends State<ProfilePage> {
     _stateController.dispose();
     _zipController.dispose();
     _countryController.dispose();
+    noteProvider.getProfileData();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    var _coverImage = context.watch<NoteProvider>().coverImage;
+    var provide = context.watch<NoteProvider>();
+    var _coverImage = provide.coverImage;
+    var _profileData = provide.profileData;
     final ValueNotifier<TextDirection> _firstNameControllerTextDir =
         ValueNotifier(TextDirection.ltr);
     final ValueNotifier<TextDirection> _lastNameControllerTextDir =
@@ -151,397 +181,347 @@ class _ProfilePageState extends State<ProfilePage> {
         ValueNotifier(TextDirection.ltr);
     final ValueNotifier<TextDirection> _zipControllerTextDir =
         ValueNotifier(TextDirection.ltr);
-    return Scaffold(
-      appBar: CustomAppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () {
-            _saveData();
-            Navigator.of(context).pop();
-          },
-        ),
-        title: translation(context).profile,
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Align(
-              alignment: Alignment.center,
-              child: Container(
-                width: 142,
-                height: 142,
-                decoration: const BoxDecoration(
-                  color: MyColors.primaryColor,
-                  shape: BoxShape.circle,
-                ),
-                child: Stack(
-                  alignment: Alignment.center,
+    return Consumer<NoteProvider>(
+      builder: (context, value, child) {
+        if (_profileData == null) {
+          return Scaffold(
+            body: SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.all(18),
+                child: Column(
                   children: [
-                    _coverImage != null
-                        ? GestureDetector(
-                            onTap: () {
-                              if (_coverImage != null) {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => FullScreenImageView(
-                                        imagePath: context
-                                            .read<NoteProvider>()
-                                            .coverImage!
-                                            .path),
-                                  ),
-                                );
-                              }
-                            },
-                            child: ClipOval(
-                              child: Image.file(
-                                _coverImage,
-                                width: 142,
-                                height: 142,
-                                fit: BoxFit.cover,
-                              ),
-                            ),
-                          )
-                        : IconButton(
-                            icon: const Icon(Icons.camera_alt),
-                            onPressed: () {
-                              _pickImageFromGallery();
-                            },
-                            color: Colors.white,
-                            iconSize: 30,
-                          ),
-                    _coverImage != null
-                        ? Positioned(
-                            bottom: 2,
-                            child: ClipRRect(
-                              borderRadius: const BorderRadius.only(
-                                bottomLeft: Radius.circular(100),
-                                bottomRight: Radius.circular(100),
-                                topLeft: Radius.zero,
-                                topRight: Radius.zero,
-                              ),
-                              child: Opacity(
-                                opacity: 0.4,
-                                child: InkWell(
-                                  borderRadius: const BorderRadius.only(
-                                    bottomLeft: Radius.circular(100),
-                                    bottomRight: Radius.circular(100),
-                                    topLeft: Radius.zero,
-                                    topRight: Radius.zero,
-                                  ),
-                                  onTap: () => _pickImageFromGallery(),
-                                  child: Container(
-                                    width: 142,
-                                    height: 65,
-                                    decoration: const BoxDecoration(
-                                      color: Color(0xFF2993CF),
-                                      shape: BoxShape.rectangle,
-                                    ),
-                                    child: const Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      children: <Widget>[
-                                        CircleAvatar(
-                                          backgroundColor:
-                                              MyColors.primaryColor,
-                                          radius: 16.0,
-                                          child: Icon(
-                                            Icons.camera_alt,
-                                            color: Colors.white,
-                                            size: 33,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          )
-                        : Text(""),
-                  ],
-                ),
-              ),
-            ),
-            Padding(
-                padding: const EdgeInsets.only(top: 25.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  mainAxisSize: MainAxisSize.max,
-                  children: <Widget>[
-                    Column(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: <Widget>[
-                        Text(
-                          translation(context).personalInformation,
-                          style: const TextStyle(
-                              fontSize: 18.0, fontWeight: FontWeight.bold),
+                    const Skeleton(height: 90, width: 90),
+                    const SizedBox(height: 60),
+                    Expanded(
+                      child: ListView.separated(
+                        itemCount: 6,
+                        itemBuilder: (context, index) =>
+                            const CardSkeltonProfile(),
+                        separatorBuilder: (context, index) => const Padding(
+                          padding: EdgeInsets.all(10.0),
+                          child: SizedBox(height: defaultPadding),
                         ),
-                      ],
+                      ),
                     ),
-                    Column(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      mainAxisSize: MainAxisSize.min,
-                      children: <Widget>[
-                        _status ? _getEditIcon() : Container(),
-                      ],
-                    )
                   ],
-                )),
-            const SizedBox(height: 16),
-            ValueListenableBuilder<TextDirection>(
-              valueListenable: _firstNameControllerTextDir,
-              builder: (context, value, child) => TextField(
-                enabled: !_status,
-                controller: _firstNameController,
-                textDirection: _firstNameControllerTextDir.value,
-                onChanged: (input) {
-                  final isRTL = intl.Bidi.detectRtlDirectionality(input);
-                  if (isRTL) {
-                    _firstNameControllerTextDir.value = TextDirection.rtl;
-                  } else {
-                    _firstNameControllerTextDir.value = TextDirection.ltr;
-                  }
-                },
-                decoration: InputDecoration(
-                  labelText: translation(context).name,
                 ),
               ),
             ),
-            const SizedBox(height: 8),
-            ValueListenableBuilder<TextDirection>(
-              valueListenable: _lastNameControllerTextDir,
-              builder: (context, value, child) => TextField(
-                enabled: !_status,
-                controller: _lastNameController,
-                textDirection: _lastNameControllerTextDir.value,
-                onChanged: (input) {
-                  final isRTL = intl.Bidi.detectRtlDirectionality(input);
-                  if (isRTL) {
-                    _lastNameControllerTextDir.value = TextDirection.rtl;
-                  } else {
-                    _lastNameControllerTextDir.value = TextDirection.ltr;
-                  }
-                },
-                decoration: InputDecoration(
-                  labelText: translation(context).lastName,
-                ),
-              ),
-            ),
-            const SizedBox(height: 8),
-            ValueListenableBuilder<TextDirection>(
-              valueListenable: _emailControllerTextDir,
-              builder: (context, value, child) => TextField(
-                enabled: !_status,
-                controller: _emailController,
-                textDirection: _emailControllerTextDir.value,
-                onChanged: (input) {
-                  final isRTL = intl.Bidi.detectRtlDirectionality(input);
-                  if (isRTL) {
-                    _emailControllerTextDir.value = TextDirection.rtl;
-                  } else {
-                    _emailControllerTextDir.value = TextDirection.ltr;
-                  }
-                },
-                decoration: InputDecoration(
-                  labelText: translation(context).email,
-                ),
-              ),
-            ),
-            const SizedBox(height: 8),
-            ValueListenableBuilder<TextDirection>(
-              valueListenable: _phoneControllerTextDir,
-              builder: (context, value, child) => TextField(
-                enabled: !_status,
-                controller: _phoneController,
-                textDirection: _phoneControllerTextDir.value,
-                onChanged: (input) {
-                  final isRTL = intl.Bidi.detectRtlDirectionality(input);
-                  if (isRTL) {
-                    _phoneControllerTextDir.value = TextDirection.rtl;
-                  } else {
-                    _phoneControllerTextDir.value = TextDirection.ltr;
-                  }
-                },
-                decoration: InputDecoration(
-                  labelText: translation(context).phoneNumber,
-                ),
-              ),
-            ),
-            const SizedBox(height: 8),
-            GestureDetector(
-              onTap: () {
-                _selectDate(context);
+          );
+        }
+
+        return Scaffold(
+          appBar: CustomAppBar(
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back),
+              onPressed: () async {
+                noteProvider.profileDataIsNull();
+                await noteProvider.getProfileData();
+                Navigator.of(context).pop();
               },
-              child: AbsorbPointer(
-                child: TextFormField(
-                  enabled: !_status,
-                  controller: TextEditingController(
-                    text: _selectedDate != null
-                        ? intl.DateFormat('yyyy-MM-dd').format(_selectedDate!)
-                        : '',
-                  ),
-                  decoration: InputDecoration(
-                    labelText: translation(context).dateOfBirth,
-                    suffixIcon: const Icon(Icons.calendar_today),
+            ),
+            title: translation(context).profile,
+          ),
+          body: SingleChildScrollView(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                ProfileImageWidget(
+                  coverImage: _coverImage,
+                  onPickImage: _pickImageFromGallery,
+                ),
+                Padding(
+                    padding: const EdgeInsets.only(top: 25.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      mainAxisSize: MainAxisSize.max,
+                      children: <Widget>[
+                        Column(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: <Widget>[
+                            Text(
+                              translation(context).personalInformation,
+                              style: const TextStyle(
+                                  fontSize: 18.0, fontWeight: FontWeight.bold),
+                            ),
+                          ],
+                        ),
+                        Column(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          mainAxisSize: MainAxisSize.min,
+                          children: <Widget>[
+                            _status ? _getEditIcon() : Container(),
+                          ],
+                        )
+                      ],
+                    )),
+                const SizedBox(height: 16),
+                ValueListenableBuilder<TextDirection>(
+                  valueListenable: _firstNameControllerTextDir,
+                  builder: (context, value, child) => TextField(
+                    enabled: !_status,
+                    controller: _firstNameController,
+                    textDirection: _firstNameControllerTextDir.value,
+                    onChanged: (input) {
+                      final isRTL = intl.Bidi.detectRtlDirectionality(input);
+                      if (isRTL) {
+                        _firstNameControllerTextDir.value = TextDirection.rtl;
+                      } else {
+                        _firstNameControllerTextDir.value = TextDirection.ltr;
+                      }
+                    },
+                    decoration: InputDecoration(
+                      labelText: translation(context).name,
+                    ),
                   ),
                 ),
-              ),
-            ),
-            Padding(
-                padding: const EdgeInsets.only(top: 20.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: <Widget>[
-                    Expanded(
-                      flex: 2,
-                      child: ValueListenableBuilder<TextDirection>(
-                        valueListenable: _zipControllerTextDir,
-                        builder: (context, value, child) => TextField(
-                          enabled: !_status,
-                          controller: _zipController,
-                          textDirection: _zipControllerTextDir.value,
-                          onChanged: (input) {
-                            final isRTL =
-                                intl.Bidi.detectRtlDirectionality(input);
-                            if (isRTL) {
-                              _zipControllerTextDir.value = TextDirection.rtl;
-                            } else {
-                              _zipControllerTextDir.value = TextDirection.ltr;
-                            }
-                          },
-                          decoration: InputDecoration(
-                            labelText: translation(context).zipCode,
-                          ),
-                        ),
-                      ),
+                const SizedBox(height: 8),
+                ValueListenableBuilder<TextDirection>(
+                  valueListenable: _lastNameControllerTextDir,
+                  builder: (context, value, child) => TextField(
+                    enabled: !_status,
+                    controller: _lastNameController,
+                    textDirection: _lastNameControllerTextDir.value,
+                    onChanged: (input) {
+                      final isRTL = intl.Bidi.detectRtlDirectionality(input);
+                      if (isRTL) {
+                        _lastNameControllerTextDir.value = TextDirection.rtl;
+                      } else {
+                        _lastNameControllerTextDir.value = TextDirection.ltr;
+                      }
+                    },
+                    decoration: InputDecoration(
+                      labelText: translation(context).lastName,
                     ),
-                    const SizedBox(width: 14),
-                    Expanded(
-                      flex: 2,
-                      child: ValueListenableBuilder<TextDirection>(
-                        valueListenable: _stateControllerTextDir,
-                        builder: (context, value, child) => TextField(
-                          enabled: !_status,
-                          controller: _stateController,
-                          textDirection: _stateControllerTextDir.value,
-                          onChanged: (input) {
-                            final isRTL =
-                                intl.Bidi.detectRtlDirectionality(input);
-                            if (isRTL) {
-                              _stateControllerTextDir.value = TextDirection.rtl;
-                            } else {
-                              _stateControllerTextDir.value = TextDirection.ltr;
-                            }
-                          },
-                          decoration: InputDecoration(
-                            labelText: translation(context).state,
-                          ),
-                        ),
-                      ),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                ValueListenableBuilder<TextDirection>(
+                  valueListenable: _emailControllerTextDir,
+                  builder: (context, value, child) => TextField(
+                    enabled: !_status,
+                    controller: _emailController,
+                    textDirection: _emailControllerTextDir.value,
+                    onChanged: (input) {
+                      final isRTL = intl.Bidi.detectRtlDirectionality(input);
+                      if (isRTL) {
+                        _emailControllerTextDir.value = TextDirection.rtl;
+                      } else {
+                        _emailControllerTextDir.value = TextDirection.ltr;
+                      }
+                    },
+                    decoration: InputDecoration(
+                      labelText: translation(context).email,
                     ),
-                  ],
-                )),
-            Padding(
-                padding: const EdgeInsets.only(top: 25.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: <Widget>[
-                    Expanded(
-                      flex: 2,
-                      child: ValueListenableBuilder<TextDirection>(
-                        valueListenable: _addressControllerTextDir,
-                        builder: (context, value, child) => TextField(
-                          enabled: !_status,
-                          controller: _addressController,
-                          textDirection: _addressControllerTextDir.value,
-                          onChanged: (input) {
-                            final isRTL =
-                                intl.Bidi.detectRtlDirectionality(input);
-                            if (isRTL) {
-                              _addressControllerTextDir.value =
-                                  TextDirection.rtl;
-                            } else {
-                              _addressControllerTextDir.value =
-                                  TextDirection.ltr;
-                            }
-                          },
-                          decoration: InputDecoration(
-                            labelText: translation(context).address,
-                          ),
-                        ),
-                      ),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                ValueListenableBuilder<TextDirection>(
+                  valueListenable: _phoneControllerTextDir,
+                  builder: (context, value, child) => TextField(
+                    enabled: !_status,
+                    controller: _phoneController,
+                    textDirection: _phoneControllerTextDir.value,
+                    onChanged: (input) {
+                      final isRTL = intl.Bidi.detectRtlDirectionality(input);
+                      if (isRTL) {
+                        _phoneControllerTextDir.value = TextDirection.rtl;
+                      } else {
+                        _phoneControllerTextDir.value = TextDirection.ltr;
+                      }
+                    },
+                    decoration: InputDecoration(
+                      labelText: translation(context).phoneNumber,
                     ),
-                    const SizedBox(width: 14),
-                    Expanded(
-                      flex: 2,
-                      child: ValueListenableBuilder<TextDirection>(
-                        valueListenable: _cityControllerTextDir,
-                        builder: (context, value, child) => TextField(
-                          enabled: !_status,
-                          controller: _cityController,
-                          textDirection: _cityControllerTextDir.value,
-                          onChanged: (input) {
-                            final isRTL =
-                                intl.Bidi.detectRtlDirectionality(input);
-                            if (isRTL) {
-                              _cityControllerTextDir.value = TextDirection.rtl;
-                            } else {
-                              _cityControllerTextDir.value = TextDirection.ltr;
-                            }
-                          },
-                          decoration: InputDecoration(
-                            labelText: translation(context).city,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                )),
-            Padding(
-              padding: const EdgeInsets.only(top: 18),
-              child: Directionality(
-                textDirection: TextDirection.ltr,
-                child: CountryListPick(
-                  onChanged: (CountryCode? countryCode) {
-                    _selectLocation(countryCode);
+                  ),
+                ),
+                const SizedBox(height: 8),
+                GestureDetector(
+                  onTap: () {
+                    _selectDate(context);
                   },
-                  initialSelection: _selectedLocation,
-                  appBar: CustomAppBar(
-                    leading: IconButton(
-                      icon: const Icon(Icons.arrow_back),
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                      },
+                  child: AbsorbPointer(
+                    child: TextFormField(
+                      enabled: !_status,
+                      controller: TextEditingController(
+                        text: _selectedDate != null
+                            ? intl.DateFormat('yyyy-MM-dd')
+                                .format(_selectedDate!)
+                            : '',
+                      ),
+                      decoration: InputDecoration(
+                        labelText: translation(context).dateOfBirth,
+                        suffixIcon: const Icon(Icons.calendar_today),
+                      ),
                     ),
-                    title: translation(context).selectCountry,
                   ),
-                  useUiOverlay: true,
-                  theme: CountryTheme(
-                    lastPickText: translation(context).selectCountry,
-                    labelColor: MyColors.primaryColor,
-                    searchText: translation(context).search,
-                    searchHintText: translation(context).searchHint,
-                    alphabetSelectedBackgroundColor: MyColors.primaryColor,
-                    isShowFlag: true,
-                    isShowTitle: true,
-                    isShowCode: false,
-                    isDownIcon: true,
-                    showEnglishName: true,
-                  ),
-                  useSafeArea: true,
                 ),
-              ),
+                Padding(
+                    padding: const EdgeInsets.only(top: 20.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: <Widget>[
+                        Expanded(
+                          flex: 2,
+                          child: ValueListenableBuilder<TextDirection>(
+                            valueListenable: _zipControllerTextDir,
+                            builder: (context, value, child) => TextField(
+                              enabled: !_status,
+                              controller: _zipController,
+                              textDirection: _zipControllerTextDir.value,
+                              onChanged: (input) {
+                                final isRTL =
+                                    intl.Bidi.detectRtlDirectionality(input);
+                                if (isRTL) {
+                                  _zipControllerTextDir.value =
+                                      TextDirection.rtl;
+                                } else {
+                                  _zipControllerTextDir.value =
+                                      TextDirection.ltr;
+                                }
+                              },
+                              decoration: InputDecoration(
+                                labelText: translation(context).zipCode,
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 14),
+                        Expanded(
+                          flex: 2,
+                          child: ValueListenableBuilder<TextDirection>(
+                            valueListenable: _stateControllerTextDir,
+                            builder: (context, value, child) => TextField(
+                              enabled: !_status,
+                              controller: _stateController,
+                              textDirection: _stateControllerTextDir.value,
+                              onChanged: (input) {
+                                final isRTL =
+                                    intl.Bidi.detectRtlDirectionality(input);
+                                if (isRTL) {
+                                  _stateControllerTextDir.value =
+                                      TextDirection.rtl;
+                                } else {
+                                  _stateControllerTextDir.value =
+                                      TextDirection.ltr;
+                                }
+                              },
+                              decoration: InputDecoration(
+                                labelText: translation(context).state,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    )),
+                Padding(
+                    padding: const EdgeInsets.only(top: 25.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: <Widget>[
+                        Expanded(
+                          flex: 2,
+                          child: ValueListenableBuilder<TextDirection>(
+                            valueListenable: _addressControllerTextDir,
+                            builder: (context, value, child) => TextField(
+                              enabled: !_status,
+                              controller: _addressController,
+                              textDirection: _addressControllerTextDir.value,
+                              onChanged: (input) {
+                                final isRTL =
+                                    intl.Bidi.detectRtlDirectionality(input);
+                                if (isRTL) {
+                                  _addressControllerTextDir.value =
+                                      TextDirection.rtl;
+                                } else {
+                                  _addressControllerTextDir.value =
+                                      TextDirection.ltr;
+                                }
+                              },
+                              decoration: InputDecoration(
+                                labelText: translation(context).address,
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 14),
+                        Expanded(
+                          flex: 2,
+                          child: ValueListenableBuilder<TextDirection>(
+                            valueListenable: _cityControllerTextDir,
+                            builder: (context, value, child) => TextField(
+                              enabled: !_status,
+                              controller: _cityController,
+                              textDirection: _cityControllerTextDir.value,
+                              onChanged: (input) {
+                                final isRTL =
+                                    intl.Bidi.detectRtlDirectionality(input);
+                                if (isRTL) {
+                                  _cityControllerTextDir.value =
+                                      TextDirection.rtl;
+                                } else {
+                                  _cityControllerTextDir.value =
+                                      TextDirection.ltr;
+                                }
+                              },
+                              decoration: InputDecoration(
+                                labelText: translation(context).city,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    )),
+                Padding(
+                  padding: const EdgeInsets.only(top: 18),
+                  child: Directionality(
+                    textDirection: TextDirection.ltr,
+                    child: AbsorbPointer(
+                      absorbing: _status,
+                      child: CountryListPick(
+                        onChanged: (CountryCode? countryCode) {
+                          _selectLocation(countryCode);
+                        },
+                        initialSelection: _selectedLocation,
+                        appBar: CustomAppBar(
+                          leading: IconButton(
+                            icon: const Icon(Icons.arrow_back),
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                            },
+                          ),
+                          title: translation(context).selectCountry,
+                        ),
+                        useUiOverlay: true,
+                        theme: CountryTheme(
+                          lastPickText: translation(context).selectCountry,
+                          labelColor: MyColors.primaryColor,
+                          searchText: translation(context).search,
+                          searchHintText: translation(context).searchHint,
+                          alphabetSelectedBackgroundColor:
+                              MyColors.primaryColor,
+                          isShowFlag: true,
+                          isShowTitle: true,
+                          isShowCode: false,
+                          isDownIcon: true,
+                          showEnglishName: true,
+                        ),
+                        useSafeArea: true,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 140),
+              ],
             ),
-            const SizedBox(height: 140),
-          ],
-        ),
-      ),
-      floatingActionButton: !_status ? _getActionButtons() : Container(),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+          ),
+          floatingActionButton: !_status ? _getActionButtons() : Container(),
+          floatingActionButtonLocation:
+              FloatingActionButtonLocation.centerFloat,
+        );
+      },
     );
   }
 
@@ -572,8 +552,20 @@ class _ProfilePageState extends State<ProfilePage> {
           Expanded(
             flex: 2,
             child: ElevatedButton(
-              onPressed: () {
-                _saveData();
+              onPressed: () async {
+                try {
+                  setState(() {
+                    _showLoading = true;
+                  });
+                } catch (e) {
+                  print(e.toString());
+                } finally {
+                  await _saveData();
+                  setState(() {
+                    _status = true;
+                    _showLoading = false;
+                  });
+                }
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: MyColors.primaryColor,
@@ -581,10 +573,18 @@ class _ProfilePageState extends State<ProfilePage> {
                   borderRadius: BorderRadius.circular(20.0),
                 ),
               ),
-              child: Text(
-                translation(context).save,
-                style: TextStyle(color: Colors.white),
-              ),
+              child: _showLoading
+                  ? const SizedBox(
+                      width: 11,
+                      height: 11,
+                      child: CircularProgressIndicator(
+                        color: Colors.white,
+                      ),
+                    )
+                  : Text(
+                      translation(context).save,
+                      style: TextStyle(color: Colors.white),
+                    ),
             ),
           ),
           const SizedBox(width: 14),
@@ -611,21 +611,6 @@ class _ProfilePageState extends State<ProfilePage> {
           ),
         ],
       ),
-    );
-  }
-}
-
-class FullScreenImageView extends StatelessWidget {
-  final String imagePath;
-
-  const FullScreenImageView({required this.imagePath});
-
-  @override
-  Widget build(BuildContext context) {
-    return PhotoView(
-      imageProvider: FileImage(File(imagePath)),
-      minScale: PhotoViewComputedScale.contained * 0.8,
-      maxScale: PhotoViewComputedScale.covered * 2,
     );
   }
 }

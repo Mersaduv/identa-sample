@@ -20,6 +20,7 @@ class _VoiceMessageState extends State<VoiceMessage> {
   Widget build(BuildContext context) {
     final noteProvider = Provider.of<NoteProvider>(context);
     final updatedAudioRecords = noteProvider.updatedAudioRecords;
+    final deviceWidth = MediaQuery.of(context).size.width;
     return SafeArea(
         child: ListView.builder(
       shrinkWrap: true,
@@ -27,55 +28,61 @@ class _VoiceMessageState extends State<VoiceMessage> {
       itemCount: updatedAudioRecords.length,
       itemBuilder: (context, index) {
         final audioRecord = updatedAudioRecords[index];
-        return Directionality(
-          textDirection: TextDirection.ltr,
-          child: Padding(
-            padding: const EdgeInsets.all(10),
-            child: Provider<AudioPlayerLogicInterface>(
-              create: (_) => AudioPlayerLogic(
-                audioPath: audioRecord.audioPath,
-              ),
-              dispose: (_, logic) => logic.onDispose(),
-              child: Row(
-                children: [
-                  AudioPlayerCard(
-                    audioRecord,
-                    key: Key(audioRecord.audioPath),
-                  ),
-                  Container(
-                    margin: const EdgeInsets.only(left: 10),
-                    child: IconButton(
-                      onPressed: () async {
-                        String fileId = Uri.parse(audioRecord.audioPath)
-                            .pathSegments
-                            .last
-                            .replaceAll('.m4a', '');
+        return Container(
+          width: deviceWidth,
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: Padding(
+              padding: const EdgeInsets.all(10),
+              child: Provider<AudioPlayerLogicInterface>(
+                create: (_) => AudioPlayerLogic(
+                  audioPath: audioRecord.audioPath,
+                ),
+                dispose: (_, logic) => logic.onDispose(),
+                child: Row(
+                  children: [
+                    AudioPlayerCard(
+                      audioRecord,
+                      key: Key(audioRecord.audioPath),
+                    ),
+                    Container(
+                      margin: const EdgeInsets.only(left: 10),
+                      child: IconButton(
+                        onPressed: () async {
+                          print("pathaudio ${audioRecord.audioPath}");
+                          String filePath = audioRecord.audioPath;
+                          List<String> parts = filePath.split("/");
+                          String fileName = parts.last;
 
-                        bool? shouldDelete = await ShowCustomDialog.show(
-                          context,
-                          translation(context).deleteVoice,
-                          translation(context).areYouSureDeleteRecored,
-                        );
+                          List<String> fileNameParts = fileName.split(".");
+                          String desiredPart = fileNameParts.first;
+                          bool? shouldDelete = await ShowCustomDialog.show(
+                            context,
+                            translation(context).deleteVoice,
+                            translation(context).areYouSureDeleteRecored,
+                          );
 
-                        if (shouldDelete == true) {
-                          // noteProvider.deleteNoteAudio(widget.note!, fileId);
-                          print(
-                              "pathFile ${audioRecord.audioPath} | ${audioRecord.formattedDate}");
-                          noteProvider.updatedAudioRecords
-                              .removeWhere((f) => f == audioRecord);
+                          if (shouldDelete == true) {
+                            NoteModel? note = widget.note;
 
-                          context.notify =
-                              translation(context).audioRecordDismissed;
-                        }
-                      },
-                      icon: const Icon(
-                        Icons.delete,
-                        color: Color.fromARGB(255, 250, 121, 112),
-                        size: 22,
+                            await noteProvider.deleteNoteAudio(
+                                note, desiredPart, audioRecord);
+
+                            print("pathFile ${audioRecord.audioPath}");
+
+                            context.notify =
+                                translation(context).audioRecordDismissed;
+                          }
+                        },
+                        icon: const Icon(
+                          Icons.delete,
+                          color: Color.fromARGB(255, 250, 121, 112),
+                          size: 22,
+                        ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),

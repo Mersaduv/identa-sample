@@ -40,31 +40,27 @@ class NoteProvider extends ChangeNotifier {
   List<InsightsConversationModel> get insightsconversation =>
       _insightsconversation;
 
-  File? _coverImage;
+  File? _coverImage = null;
 
   File? get coverImage => _coverImage;
 
-  Map<String, dynamic>? _profileData;
+  Map<String, dynamic>? _profileData = null;
 
   Map<String, dynamic>? get profileData => _profileData;
 
-  Future<void> getProfileData() async {
+  void profileDataIsNull() {
+    _profileData = null;
+    _coverImage = null;
     notifyListeners();
+  }
 
-    try {
-      var response = await ServiceApis.sendGetProfileRequest();
+  Future<void> getProfileData() async {
+    var response = await ServiceApis.sendGetProfileRequest();
 
-      if (response.statusCode == HttpStatus.ok) {
-        var decodedResponse = jsonDecode(response.body);
-        _profileData = decodedResponse;
-      } else {
-        print('API request failed with status code ${response.statusCode}');
-      }
-    } catch (error) {
-      print('Error fetching profile data: $error');
-    } finally {
-      notifyListeners();
-    }
+    var decodedResponse = jsonDecode(response.body) ?? [];
+    _profileData = decodedResponse;
+
+    notifyListeners();
   }
 
   setCoverImage(File? newCoverImage) {
@@ -99,6 +95,9 @@ class NoteProvider extends ChangeNotifier {
     if (response.statusCode == 200) {
       print('Profile picture uploaded successfully!');
       notifyListeners();
+
+      // downloadProfilePicture();
+      // notifyListeners();
     } else {
       print(
           'Failed to upload profile picture. Status code: ${response.statusCode}');
@@ -165,12 +164,30 @@ class NoteProvider extends ChangeNotifier {
     });
   }
 
-  Future<void> deleteNoteAudio(NoteModel note, String fileId) async {
-    await ServiceApis.deleteNoteAudio(note.id, fileId);
-    _notes?.removeWhere((n) => n.files[0].fileId == fileId);
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+  Future<void> deleteNoteAudio(
+      NoteModel? note, String fileId, AudioRecord audioRecord) async {
+    if (note == null) {
+      _notes!.removeWhere((e) => e.files.any((file) => file.fileId == fileId));
+      _audioList.removeWhere((f) => f.fileId == fileId);
+      _updatedAudioRecords.removeWhere((f) => f == audioRecord);
+      note!.files.removeWhere((e) => e.fileId == fileId);
       notifyListeners();
-    });
+    }
+    if (note!.files.isNotEmpty) {
+      await ServiceApis.deleteNoteAudio(note.id, fileId);
+      note.files.removeWhere((e) => e.fileId == fileId);
+      _notes!.removeWhere((e) => e.files.any((file) => file.fileId == fileId));
+      _audioList.removeWhere((f) => f.fileId == fileId);
+      _updatedAudioRecords.removeWhere((f) => f == audioRecord);
+      notifyListeners();
+    } else {
+      note.files.removeWhere((e) => e.fileId == fileId);
+      _notes!.removeWhere((e) => e.files.any((file) => file.fileId == fileId));
+      _audioList.removeWhere((f) => f.fileId == fileId);
+      _updatedAudioRecords.removeWhere((f) => f == audioRecord);
+      notifyListeners();
+    }
+    notifyListeners();
   }
 
   Future<void> saveConversation(NoteModel note) async {

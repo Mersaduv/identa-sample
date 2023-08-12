@@ -7,8 +7,8 @@ import 'package:identa/core/models/audio_recorder/audio_files.dart';
 import 'package:identa/core/repositories/note_provider.dart';
 import 'package:identa/services/auth/auth_service.dart';
 import 'package:identa/widgets/dismissible_background.dart';
-import 'package:identa/widgets/loading/cardSkeleton.dart';
 import 'package:identa/modules/taps_page/notes_tap/note_content.dart';
+import 'package:identa/widgets/loading/notes/cardSkeleton.dart';
 import 'package:identa/widgets/show_custom_dialog.dart';
 import 'package:provider/provider.dart';
 import 'package:identa/core/models/model_core/note_model.dart';
@@ -41,7 +41,6 @@ class NotesScreenState extends State<NotesScreen> {
       Future.delayed(const Duration(milliseconds: 100), () {
         noteProvider.setIsLoading(false);
       });
-
       noteProvider.loadNotesConversation();
     });
   }

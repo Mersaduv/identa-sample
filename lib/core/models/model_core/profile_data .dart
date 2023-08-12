@@ -1,28 +1,28 @@
-import 'package:intl/intl.dart' as intl;
+// import 'package:intl/intl.dart' as intl;
 
 class ProfileData {
-  final String firstName;
-  final String lastName;
-  final String email;
-  final String phoneNumber;
-  final DateTime? selectedDate;
-  final String zipCode;
-  final String state;
-  final String address;
-  final String city;
-  final String selectedLocation;
+  String? firstName;
+  String? lastName;
+  String? email;
+  String? phone;
+  String? address;
+  String? city;
+  String? state;
+  String? zip;
+  String? country;
+  String? dateOfBirth;
 
   ProfileData({
-    required this.firstName,
-    required this.lastName,
-    required this.email,
-    required this.phoneNumber,
-    this.selectedDate,
-    required this.zipCode,
-    required this.state,
-    required this.address,
-    required this.city,
-    required this.selectedLocation,
+    this.firstName,
+    this.lastName,
+    this.email,
+    this.phone,
+    this.address,
+    this.city,
+    this.state,
+    this.zip,
+    this.country,
+    this.dateOfBirth,
   });
 
   Map<String, dynamic> toJson() {
@@ -30,15 +30,13 @@ class ProfileData {
       "firstName": firstName,
       "lastName": lastName,
       "email": email,
-      "phone": phoneNumber,
+      "phone": phone,
       "address": address,
       "city": city,
       "state": state,
-      "zip": zipCode,
-      "country": selectedLocation,
-      "dateOfBirth": selectedDate != null
-          ? intl.DateFormat('yyyy-MM-dd').format(selectedDate!)
-          : '',
+      "zip": zip,
+      "country": country,
+      "dateOfBirth": dateOfBirth,
     };
   }
 }

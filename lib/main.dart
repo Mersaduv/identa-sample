@@ -104,6 +104,7 @@ class AppState extends State<App> with SingleTickerProviderStateMixin {
         child: CustomTapAppBar(
           tabController: _tabController,
           openDrawer: () {
+            context.read<NoteProvider>().getProfileData();
             _scaffoldKey.currentState?.openDrawer();
           },
         ),
