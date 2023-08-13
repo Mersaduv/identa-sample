@@ -72,6 +72,7 @@ class ChatScreenState extends State<ChatScreen>
       });
     });
     context.read<NoteProvider>().loadNotesConversation();
+    context.read<NoteProvider>().getProfileData();
   }
 
   void _scrollDown() {

@@ -46,7 +46,7 @@ class _VoiceMessageState extends State<VoiceMessage> {
                       key: Key(audioRecord.audioPath),
                     ),
                     Container(
-                      margin: const EdgeInsets.only(left: 10),
+                      margin: const EdgeInsets.only(left: 12),
                       child: IconButton(
                         onPressed: () async {
                           print("pathaudio ${audioRecord.audioPath}");
@@ -77,8 +77,15 @@ class _VoiceMessageState extends State<VoiceMessage> {
                         icon: const Icon(
                           Icons.delete,
                           color: Color.fromARGB(255, 250, 121, 112),
-                          size: 22,
+                          // size: 18,
                         ),
+                        iconSize: 22,
+                        padding: EdgeInsets.zero,
+                        splashRadius: 20,
+                        constraints: BoxConstraints(),
+                        // تنظیمات مرتبط با سایه
+                        visualDensity: VisualDensity.compact,
+                        hoverColor: Colors.transparent,
                       ),
                     ),
                   ],

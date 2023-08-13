@@ -101,7 +101,7 @@ class SettingsState extends State<Settings> {
               const SizedBox(height: 15), // Add space at the top
               SettingItemWidget(
                 onTapped: () async {
-                  noteProvider.getProfileData();
+                  await noteProvider.getProfileData();
                   noteProvider.downloadProfilePicture();
                   Navigator.push(
                     context,

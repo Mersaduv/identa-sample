@@ -42,6 +42,7 @@ class NotesScreenState extends State<NotesScreen> {
         noteProvider.setIsLoading(false);
       });
       noteProvider.loadNotesConversation();
+      noteProvider.getProfileData();
     });
   }
 

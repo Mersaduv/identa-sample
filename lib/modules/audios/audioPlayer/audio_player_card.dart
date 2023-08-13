@@ -27,7 +27,7 @@ class AudioPlayerCard extends StatelessWidget {
         builder: (_, notifier, __) {
           final audioPlayerState = notifier.value;
           final screenSize = MediaQuery.of(context).size;
-          final containerWidth = screenSize.width * 0.8;
+          final containerWidth = screenSize.width * 0.7;
           return InkWell(
             onTap: () async {
               await audioPlayerState.when<Future<void>>(
@@ -46,7 +46,7 @@ class AudioPlayerCard extends StatelessWidget {
                 mainAxisSize: MainAxisSize.max,
                 children: [
                   Container(
-                    padding: const EdgeInsets.all(3.0),
+                    padding: const EdgeInsets.all(1.0),
                     decoration: BoxDecoration(
                       color: const Color(0xFF2993CF),
                       borderRadius: BorderRadius.circular(25),
@@ -57,7 +57,7 @@ class AudioPlayerCard extends StatelessWidget {
                         pause: () => Icons.play_arrow,
                       ),
                       color: Colors.white,
-                      size: 38,
+                      size: 34,
                     ),
                   ),
                   const SizedBox(width: 15),

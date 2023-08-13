@@ -104,7 +104,7 @@ class AudioRecorderButton extends StatelessWidget {
           return LayoutBuilder(
             builder: (context, constraints) {
               final screenSize = MediaQuery.of(context).size;
-              final containerWidth = screenSize.width * 0.9;
+              final containerWidth = screenSize.width * 0.85;
               return Stack(
                 children: [
                   Directionality(

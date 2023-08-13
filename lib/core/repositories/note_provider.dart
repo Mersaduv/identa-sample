@@ -170,7 +170,6 @@ class NoteProvider extends ChangeNotifier {
       _notes!.removeWhere((e) => e.files.any((file) => file.fileId == fileId));
       _audioList.removeWhere((f) => f.fileId == fileId);
       _updatedAudioRecords.removeWhere((f) => f == audioRecord);
-      note!.files.removeWhere((e) => e.fileId == fileId);
       notifyListeners();
     }
     if (note!.files.isNotEmpty) {

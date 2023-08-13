@@ -42,6 +42,7 @@ class _ProfilePageState extends State<ProfilePage> {
   final TextEditingController _countryController = TextEditingController();
 
   DateTime? _selectedDate;
+  String? _saveSelectDate;
   String? _selectedLocation;
   late NoteProvider noteProvider;
   bool _status = true;
@@ -50,6 +51,12 @@ class _ProfilePageState extends State<ProfilePage> {
   @override
   void initState() {
     super.initState();
+    String formattedDate = "";
+    if (widget.profileData?["dateOfBirth"] != null) {
+      DateTime dob = DateTime.parse(widget.profileData?["dateOfBirth"]);
+      formattedDate = intl.DateFormat('dd/MM/yyyy').format(dob);
+    }
+
     noteProvider = context.read<NoteProvider>();
     noteProvider.getProfileData();
     _firstNameController.text = widget.profileData?['firstName'] ?? "";
@@ -61,14 +68,13 @@ class _ProfilePageState extends State<ProfilePage> {
     _stateController.text = widget.profileData?['state'] ?? "";
     _zipController.text = widget.profileData?['zip'] ?? "";
     _selectedLocation = widget.profileData?['country'] ?? "";
-    if (widget.profileData?["dateOfBirth"] != null) {
-      _selectedDate = intl.DateFormat('yyyy-MM-dd')
-          .parse(widget.profileData?["dateOfBirth"]);
+    if (formattedDate.isNotEmpty) {
+      _selectedDate = intl.DateFormat('dd/MM/yyyy').parse(formattedDate);
+      _saveSelectDate = intl.DateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSSS'Z'")
+          .format(_selectedDate!);
     } else {
       _selectedDate = DateTime.now();
     }
-
-    // _loadSavedData();
   }
 
   Future<void> _pickImageFromGallery() async {
@@ -79,30 +85,12 @@ class _ProfilePageState extends State<ProfilePage> {
 
     await noteProvider.uploadProfilePicture(File(result!.files.single.path!));
     noteProvider.downloadProfilePicture();
-    // _loadSavedData();
   }
-
-  // Future<void> _loadSavedData() async {
-  //   Map<String, dynamic>? profileData = widget.profileData;
-
-  //   if (profileData != null) {
-  //     _firstNameController.text = profileData['firstName'];
-  //     _lastNameController.text = profileData['lastName'];
-  //     _emailController.text = profileData['email'];
-  //     _phoneController.text = profileData['phoneNumber'];
-  //     _addressController.text = profileData['address'];
-  //     _cityController.text = profileData['city'];
-  //     _stateController.text = profileData['state'];
-  //     _zipController.text = profileData['zipCode'];
-  //     _countryController.text = profileData['country'];
-  //   }
-  //   noteProvider.downloadProfilePicture();
-  // }
 
   Future<void> _saveData() async {
     noteProvider.profileData?.clear();
-    String formattedDate =
-        intl.DateFormat('yyyy-MM-ddTHH:mm:ss.SSSSSSSZ').format(_selectedDate!);
+    print("Formatted Date: $_saveSelectDate Second");
+
     ProfileData profileData = ProfileData(
         firstName: _firstNameController.text.isNotEmpty
             ? _firstNameController.text
@@ -118,7 +106,7 @@ class _ProfilePageState extends State<ProfilePage> {
         state: _stateController.text.isNotEmpty ? _stateController.text : null,
         zip: _zipController.text.isNotEmpty ? _zipController.text : null,
         country: _selectedLocation!.isNotEmpty ? _selectedLocation : null,
-        dateOfBirth: formattedDate.isNotEmpty ? null : null);
+        dateOfBirth: _saveSelectDate!.isNotEmpty ? _saveSelectDate : null);
     await ServiceApis.sendPostProfileRequest(profileData);
   }
 
@@ -133,6 +121,13 @@ class _ProfilePageState extends State<ProfilePage> {
     if (picked != null) {
       setState(() {
         _selectedDate = picked;
+
+        // Convert DateTime to the desired format
+        var formattedDate = intl.DateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSSS'Z'")
+            .format(_selectedDate!);
+        _saveSelectDate = formattedDate;
+        print(
+            "Formatted Date: $formattedDate First"); // Display the formatted date
       });
     }
   }

@@ -116,7 +116,7 @@ class NotesContentState extends State<NotesContent>
         id: "0",
         title: _titleController.text.trim(),
         details: _detailsController.text.trim(),
-        date: intl.DateFormat('dd MMM, hh:mm a').format(DateTime.now()),
+        date: intl.DateFormat('dd MMM yyyy, hh:mm a').format(DateTime.now()),
         files: audioFiles,
       ));
       noteProvider.setIsLoading(true);
