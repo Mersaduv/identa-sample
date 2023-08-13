@@ -298,6 +298,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   builder: (context, value, child) => TextField(
                     enabled: !_status,
                     controller: _emailController,
+                    keyboardType: TextInputType.emailAddress,
                     textDirection: _emailControllerTextDir.value,
                     onChanged: (input) {
                       final isRTL = intl.Bidi.detectRtlDirectionality(input);
@@ -318,6 +319,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   builder: (context, value, child) => TextField(
                     enabled: !_status,
                     controller: _phoneController,
+                       keyboardType: TextInputType.number,
                     textDirection: _phoneControllerTextDir.value,
                     onChanged: (input) {
                       final isRTL = intl.Bidi.detectRtlDirectionality(input);
@@ -365,6 +367,7 @@ class _ProfilePageState extends State<ProfilePage> {
                             builder: (context, value, child) => TextField(
                               enabled: !_status,
                               controller: _zipController,
+                                 keyboardType: TextInputType.number,
                               textDirection: _zipControllerTextDir.value,
                               onChanged: (input) {
                                 final isRTL =
