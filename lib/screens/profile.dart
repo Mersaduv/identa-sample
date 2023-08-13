@@ -353,15 +353,6 @@ class _ProfilePageState extends State<ProfilePage> {
                               color:
                                   error ? Colors.red : MyColors.disableButton),
                         ),
-
-                        // border: error
-                        //     ? const OutlineInputBorder(
-                        //         borderSide: BorderSide(color: Colors.red))
-                        //     : const UnderlineInputBorder(),
-                        // errorBorder: const OutlineInputBorder(
-                        //     borderSide: BorderSide(color: Colors.red)),
-                        // focusedErrorBorder: const OutlineInputBorder(
-                        //     borderSide: BorderSide(color: Colors.red)),
                       ),
                     ),
                   ),
