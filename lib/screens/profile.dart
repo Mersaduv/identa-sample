@@ -40,14 +40,14 @@ class _ProfilePageState extends State<ProfilePage> {
   final TextEditingController _stateController = TextEditingController();
   final TextEditingController _zipController = TextEditingController();
   final TextEditingController _countryController = TextEditingController();
-
+  final _form = GlobalKey<FormState>();
   DateTime? _selectedDate;
   String? _saveSelectDate;
   String? _selectedLocation;
   late NoteProvider noteProvider;
   bool _status = true;
   bool _showLoading = false;
-
+  bool error = false;
   @override
   void initState() {
     super.initState();
@@ -88,26 +88,60 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   Future<void> _saveData() async {
-    noteProvider.profileData?.clear();
-    print("Formatted Date: $_saveSelectDate Second");
+    var isValid = (_emailController.text.contains('@')) &&
+        _emailController.text.isNotEmpty;
+    try {
+      if (!isValid) {
+        setState(() {
+          _showLoading = false;
+          error = true;
+        });
+        print("Invalid Your Email");
+      } else {
+        setState(() {
+          _showLoading = true;
+        });
+      }
+    } catch (e) {
+      print(e.toString());
+    } finally {
+      if (!isValid) {
+        setState(() {
+          _showLoading = false;
+          error = true;
+        });
+      } else {
+        noteProvider.profileData?.clear();
+        print("Formatted Date: $_saveSelectDate Second");
 
-    ProfileData profileData = ProfileData(
-        firstName: _firstNameController.text.isNotEmpty
-            ? _firstNameController.text
-            : null,
-        lastName: _lastNameController.text.isNotEmpty
-            ? _lastNameController.text
-            : null,
-        email: _emailController.text.isNotEmpty ? _emailController.text : null,
-        phone: _phoneController.text.isNotEmpty ? _phoneController.text : null,
-        address:
-            _addressController.text.isNotEmpty ? _addressController.text : null,
-        city: _cityController.text.isNotEmpty ? _cityController.text : null,
-        state: _stateController.text.isNotEmpty ? _stateController.text : null,
-        zip: _zipController.text.isNotEmpty ? _zipController.text : null,
-        country: _selectedLocation!.isNotEmpty ? _selectedLocation : null,
-        dateOfBirth: _saveSelectDate!.isNotEmpty ? _saveSelectDate : null);
-    await ServiceApis.sendPostProfileRequest(profileData);
+        ProfileData profileData = ProfileData(
+            firstName: _firstNameController.text.isNotEmpty
+                ? _firstNameController.text
+                : null,
+            lastName: _lastNameController.text.isNotEmpty
+                ? _lastNameController.text
+                : null,
+            email:
+                _emailController.text.isNotEmpty ? _emailController.text : null,
+            phone:
+                _phoneController.text.isNotEmpty ? _phoneController.text : null,
+            address: _addressController.text.isNotEmpty
+                ? _addressController.text
+                : null,
+            city: _cityController.text.isNotEmpty ? _cityController.text : null,
+            state:
+                _stateController.text.isNotEmpty ? _stateController.text : null,
+            zip: _zipController.text.isNotEmpty ? _zipController.text : null,
+            country: _selectedLocation!.isNotEmpty ? _selectedLocation : null,
+            dateOfBirth: _saveSelectDate!.isNotEmpty ? _saveSelectDate : null);
+        await ServiceApis.sendPostProfileRequest(profileData);
+        setState(() {
+          _status = true;
+          _showLoading = false;
+          error = false;
+        });
+      }
+    }
   }
 
   Future<void> _selectDate(BuildContext context) async {
@@ -217,302 +251,321 @@ class _ProfilePageState extends State<ProfilePage> {
             ),
             title: translation(context).profile,
           ),
-          body: SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                ProfileImageWidget(
-                  coverImage: _coverImage,
-                  onPickImage: _pickImageFromGallery,
-                ),
-                Padding(
-                    padding: const EdgeInsets.only(top: 25.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      mainAxisSize: MainAxisSize.max,
-                      children: <Widget>[
-                        Column(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          mainAxisSize: MainAxisSize.min,
-                          children: <Widget>[
-                            Text(
-                              translation(context).personalInformation,
-                              style: const TextStyle(
-                                  fontSize: 18.0, fontWeight: FontWeight.bold),
-                            ),
-                          ],
-                        ),
-                        Column(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          mainAxisSize: MainAxisSize.min,
-                          children: <Widget>[
-                            _status ? _getEditIcon() : Container(),
-                          ],
-                        )
-                      ],
-                    )),
-                const SizedBox(height: 16),
-                ValueListenableBuilder<TextDirection>(
-                  valueListenable: _firstNameControllerTextDir,
-                  builder: (context, value, child) => TextField(
-                    enabled: !_status,
-                    controller: _firstNameController,
-                    textDirection: _firstNameControllerTextDir.value,
-                    onChanged: (input) {
-                      final isRTL = intl.Bidi.detectRtlDirectionality(input);
-                      if (isRTL) {
-                        _firstNameControllerTextDir.value = TextDirection.rtl;
-                      } else {
-                        _firstNameControllerTextDir.value = TextDirection.ltr;
-                      }
-                    },
-                    decoration: InputDecoration(
-                      labelText: translation(context).name,
-                    ),
+          body: Form(
+            key: _form,
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  ProfileImageWidget(
+                    coverImage: _coverImage,
+                    onPickImage: _pickImageFromGallery,
                   ),
-                ),
-                const SizedBox(height: 8),
-                ValueListenableBuilder<TextDirection>(
-                  valueListenable: _lastNameControllerTextDir,
-                  builder: (context, value, child) => TextField(
-                    enabled: !_status,
-                    controller: _lastNameController,
-                    textDirection: _lastNameControllerTextDir.value,
-                    onChanged: (input) {
-                      final isRTL = intl.Bidi.detectRtlDirectionality(input);
-                      if (isRTL) {
-                        _lastNameControllerTextDir.value = TextDirection.rtl;
-                      } else {
-                        _lastNameControllerTextDir.value = TextDirection.ltr;
-                      }
-                    },
-                    decoration: InputDecoration(
-                      labelText: translation(context).lastName,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 8),
-                ValueListenableBuilder<TextDirection>(
-                  valueListenable: _emailControllerTextDir,
-                  builder: (context, value, child) => TextField(
-                    enabled: !_status,
-                    controller: _emailController,
-                    keyboardType: TextInputType.emailAddress,
-                    textDirection: _emailControllerTextDir.value,
-                    onChanged: (input) {
-                      final isRTL = intl.Bidi.detectRtlDirectionality(input);
-                      if (isRTL) {
-                        _emailControllerTextDir.value = TextDirection.rtl;
-                      } else {
-                        _emailControllerTextDir.value = TextDirection.ltr;
-                      }
-                    },
-                    decoration: InputDecoration(
-                      labelText: translation(context).email,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 8),
-                ValueListenableBuilder<TextDirection>(
-                  valueListenable: _phoneControllerTextDir,
-                  builder: (context, value, child) => TextField(
-                    enabled: !_status,
-                    controller: _phoneController,
-                       keyboardType: TextInputType.number,
-                    textDirection: _phoneControllerTextDir.value,
-                    onChanged: (input) {
-                      final isRTL = intl.Bidi.detectRtlDirectionality(input);
-                      if (isRTL) {
-                        _phoneControllerTextDir.value = TextDirection.rtl;
-                      } else {
-                        _phoneControllerTextDir.value = TextDirection.ltr;
-                      }
-                    },
-                    decoration: InputDecoration(
-                      labelText: translation(context).phoneNumber,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 8),
-                GestureDetector(
-                  onTap: () {
-                    _selectDate(context);
-                  },
-                  child: AbsorbPointer(
-                    child: TextFormField(
+                  Padding(
+                      padding: const EdgeInsets.only(top: 25.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        mainAxisSize: MainAxisSize.max,
+                        children: <Widget>[
+                          Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            children: <Widget>[
+                              Text(
+                                translation(context).personalInformation,
+                                style: const TextStyle(
+                                    fontSize: 18.0,
+                                    fontWeight: FontWeight.bold),
+                              ),
+                            ],
+                          ),
+                          Column(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            mainAxisSize: MainAxisSize.min,
+                            children: <Widget>[
+                              _status ? _getEditIcon() : Container(),
+                            ],
+                          )
+                        ],
+                      )),
+                  const SizedBox(height: 16),
+                  ValueListenableBuilder<TextDirection>(
+                    valueListenable: _firstNameControllerTextDir,
+                    builder: (context, value, child) => TextField(
                       enabled: !_status,
-                      controller: TextEditingController(
-                        text: _selectedDate != null
-                            ? intl.DateFormat('yyyy-MM-dd')
-                                .format(_selectedDate!)
-                            : '',
-                      ),
+                      controller: _firstNameController,
+                      textDirection: _firstNameControllerTextDir.value,
+                      onChanged: (input) {
+                        final isRTL = intl.Bidi.detectRtlDirectionality(input);
+                        if (isRTL) {
+                          _firstNameControllerTextDir.value = TextDirection.rtl;
+                        } else {
+                          _firstNameControllerTextDir.value = TextDirection.ltr;
+                        }
+                      },
                       decoration: InputDecoration(
-                        labelText: translation(context).dateOfBirth,
-                        suffixIcon: const Icon(Icons.calendar_today),
+                        labelText: translation(context).name,
                       ),
                     ),
                   ),
-                ),
-                Padding(
-                    padding: const EdgeInsets.only(top: 20.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: <Widget>[
-                        Expanded(
-                          flex: 2,
-                          child: ValueListenableBuilder<TextDirection>(
-                            valueListenable: _zipControllerTextDir,
-                            builder: (context, value, child) => TextField(
-                              enabled: !_status,
-                              controller: _zipController,
-                                 keyboardType: TextInputType.number,
-                              textDirection: _zipControllerTextDir.value,
-                              onChanged: (input) {
-                                final isRTL =
-                                    intl.Bidi.detectRtlDirectionality(input);
-                                if (isRTL) {
-                                  _zipControllerTextDir.value =
-                                      TextDirection.rtl;
-                                } else {
-                                  _zipControllerTextDir.value =
-                                      TextDirection.ltr;
-                                }
-                              },
-                              decoration: InputDecoration(
-                                labelText: translation(context).zipCode,
-                              ),
-                            ),
-                          ),
+                  const SizedBox(height: 8),
+                  ValueListenableBuilder<TextDirection>(
+                    valueListenable: _lastNameControllerTextDir,
+                    builder: (context, value, child) => TextField(
+                      enabled: !_status,
+                      controller: _lastNameController,
+                      textDirection: _lastNameControllerTextDir.value,
+                      onChanged: (input) {
+                        final isRTL = intl.Bidi.detectRtlDirectionality(input);
+                        if (isRTL) {
+                          _lastNameControllerTextDir.value = TextDirection.rtl;
+                        } else {
+                          _lastNameControllerTextDir.value = TextDirection.ltr;
+                        }
+                      },
+                      decoration: InputDecoration(
+                        labelText: translation(context).lastName,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  ValueListenableBuilder<TextDirection>(
+                    valueListenable: _emailControllerTextDir,
+                    builder: (context, value, child) => TextField(
+                      enabled: !_status,
+                      controller: _emailController,
+                      keyboardType: TextInputType.emailAddress,
+                      textDirection: _emailControllerTextDir.value,
+                      onChanged: (input) {
+                        final isRTL = intl.Bidi.detectRtlDirectionality(input);
+
+                        if (isRTL) {
+                          _emailControllerTextDir.value = TextDirection.rtl;
+                        } else {
+                          _emailControllerTextDir.value = TextDirection.ltr;
+                        }
+                      },
+                      decoration: InputDecoration(
+                        labelText: translation(context).email,
+                        focusedBorder: UnderlineInputBorder(
+                          borderSide: BorderSide(
+                              color:
+                                  error ? Colors.red : MyColors.disableButton),
                         ),
-                        const SizedBox(width: 14),
-                        Expanded(
-                          flex: 2,
-                          child: ValueListenableBuilder<TextDirection>(
-                            valueListenable: _stateControllerTextDir,
-                            builder: (context, value, child) => TextField(
-                              enabled: !_status,
-                              controller: _stateController,
-                              textDirection: _stateControllerTextDir.value,
-                              onChanged: (input) {
-                                final isRTL =
-                                    intl.Bidi.detectRtlDirectionality(input);
-                                if (isRTL) {
-                                  _stateControllerTextDir.value =
-                                      TextDirection.rtl;
-                                } else {
-                                  _stateControllerTextDir.value =
-                                      TextDirection.ltr;
-                                }
-                              },
-                              decoration: InputDecoration(
-                                labelText: translation(context).state,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    )),
-                Padding(
-                    padding: const EdgeInsets.only(top: 25.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: <Widget>[
-                        Expanded(
-                          flex: 2,
-                          child: ValueListenableBuilder<TextDirection>(
-                            valueListenable: _addressControllerTextDir,
-                            builder: (context, value, child) => TextField(
-                              enabled: !_status,
-                              controller: _addressController,
-                              textDirection: _addressControllerTextDir.value,
-                              onChanged: (input) {
-                                final isRTL =
-                                    intl.Bidi.detectRtlDirectionality(input);
-                                if (isRTL) {
-                                  _addressControllerTextDir.value =
-                                      TextDirection.rtl;
-                                } else {
-                                  _addressControllerTextDir.value =
-                                      TextDirection.ltr;
-                                }
-                              },
-                              decoration: InputDecoration(
-                                labelText: translation(context).address,
-                              ),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 14),
-                        Expanded(
-                          flex: 2,
-                          child: ValueListenableBuilder<TextDirection>(
-                            valueListenable: _cityControllerTextDir,
-                            builder: (context, value, child) => TextField(
-                              enabled: !_status,
-                              controller: _cityController,
-                              textDirection: _cityControllerTextDir.value,
-                              onChanged: (input) {
-                                final isRTL =
-                                    intl.Bidi.detectRtlDirectionality(input);
-                                if (isRTL) {
-                                  _cityControllerTextDir.value =
-                                      TextDirection.rtl;
-                                } else {
-                                  _cityControllerTextDir.value =
-                                      TextDirection.ltr;
-                                }
-                              },
-                              decoration: InputDecoration(
-                                labelText: translation(context).city,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    )),
-                Padding(
-                  padding: const EdgeInsets.only(top: 18),
-                  child: Directionality(
-                    textDirection: TextDirection.ltr,
+
+                        // border: error
+                        //     ? const OutlineInputBorder(
+                        //         borderSide: BorderSide(color: Colors.red))
+                        //     : const UnderlineInputBorder(),
+                        // errorBorder: const OutlineInputBorder(
+                        //     borderSide: BorderSide(color: Colors.red)),
+                        // focusedErrorBorder: const OutlineInputBorder(
+                        //     borderSide: BorderSide(color: Colors.red)),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  ValueListenableBuilder<TextDirection>(
+                    valueListenable: _phoneControllerTextDir,
+                    builder: (context, value, child) => TextField(
+                      enabled: !_status,
+                      controller: _phoneController,
+                      keyboardType: TextInputType.number,
+                      textDirection: _phoneControllerTextDir.value,
+                      onChanged: (input) {
+                        final isRTL = intl.Bidi.detectRtlDirectionality(input);
+                        if (isRTL) {
+                          _phoneControllerTextDir.value = TextDirection.rtl;
+                        } else {
+                          _phoneControllerTextDir.value = TextDirection.ltr;
+                        }
+                      },
+                      decoration: InputDecoration(
+                        labelText: translation(context).phoneNumber,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  GestureDetector(
+                    onTap: () {
+                      _selectDate(context);
+                    },
                     child: AbsorbPointer(
-                      absorbing: _status,
-                      child: CountryListPick(
-                        onChanged: (CountryCode? countryCode) {
-                          _selectLocation(countryCode);
-                        },
-                        initialSelection: _selectedLocation,
-                        appBar: CustomAppBar(
-                          leading: IconButton(
-                            icon: const Icon(Icons.arrow_back),
-                            onPressed: () {
-                              Navigator.of(context).pop();
-                            },
-                          ),
-                          title: translation(context).selectCountry,
+                      child: TextFormField(
+                        enabled: !_status,
+                        controller: TextEditingController(
+                          text: _selectedDate != null
+                              ? intl.DateFormat('yyyy-MM-dd')
+                                  .format(_selectedDate!)
+                              : '',
                         ),
-                        useUiOverlay: true,
-                        theme: CountryTheme(
-                          lastPickText: translation(context).selectCountry,
-                          labelColor: MyColors.primaryColor,
-                          searchText: translation(context).search,
-                          searchHintText: translation(context).searchHint,
-                          alphabetSelectedBackgroundColor:
-                              MyColors.primaryColor,
-                          isShowFlag: true,
-                          isShowTitle: true,
-                          isShowCode: false,
-                          isDownIcon: true,
-                          showEnglishName: true,
+                        decoration: InputDecoration(
+                          labelText: translation(context).dateOfBirth,
+                          suffixIcon: const Icon(Icons.calendar_today),
                         ),
-                        useSafeArea: true,
                       ),
                     ),
                   ),
-                ),
-                const SizedBox(height: 140),
-              ],
+                  Padding(
+                      padding: const EdgeInsets.only(top: 20.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: <Widget>[
+                          Expanded(
+                            flex: 2,
+                            child: ValueListenableBuilder<TextDirection>(
+                              valueListenable: _zipControllerTextDir,
+                              builder: (context, value, child) => TextField(
+                                enabled: !_status,
+                                controller: _zipController,
+                                keyboardType: TextInputType.number,
+                                textDirection: _zipControllerTextDir.value,
+                                onChanged: (input) {
+                                  final isRTL =
+                                      intl.Bidi.detectRtlDirectionality(input);
+                                  if (isRTL) {
+                                    _zipControllerTextDir.value =
+                                        TextDirection.rtl;
+                                  } else {
+                                    _zipControllerTextDir.value =
+                                        TextDirection.ltr;
+                                  }
+                                },
+                                decoration: InputDecoration(
+                                  labelText: translation(context).zipCode,
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 14),
+                          Expanded(
+                            flex: 2,
+                            child: ValueListenableBuilder<TextDirection>(
+                              valueListenable: _stateControllerTextDir,
+                              builder: (context, value, child) => TextField(
+                                enabled: !_status,
+                                controller: _stateController,
+                                textDirection: _stateControllerTextDir.value,
+                                onChanged: (input) {
+                                  final isRTL =
+                                      intl.Bidi.detectRtlDirectionality(input);
+                                  if (isRTL) {
+                                    _stateControllerTextDir.value =
+                                        TextDirection.rtl;
+                                  } else {
+                                    _stateControllerTextDir.value =
+                                        TextDirection.ltr;
+                                  }
+                                },
+                                decoration: InputDecoration(
+                                  labelText: translation(context).state,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      )),
+                  Padding(
+                      padding: const EdgeInsets.only(top: 25.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: <Widget>[
+                          Expanded(
+                            flex: 2,
+                            child: ValueListenableBuilder<TextDirection>(
+                              valueListenable: _addressControllerTextDir,
+                              builder: (context, value, child) => TextField(
+                                enabled: !_status,
+                                controller: _addressController,
+                                textDirection: _addressControllerTextDir.value,
+                                onChanged: (input) {
+                                  final isRTL =
+                                      intl.Bidi.detectRtlDirectionality(input);
+                                  if (isRTL) {
+                                    _addressControllerTextDir.value =
+                                        TextDirection.rtl;
+                                  } else {
+                                    _addressControllerTextDir.value =
+                                        TextDirection.ltr;
+                                  }
+                                },
+                                decoration: InputDecoration(
+                                  labelText: translation(context).address,
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 14),
+                          Expanded(
+                            flex: 2,
+                            child: ValueListenableBuilder<TextDirection>(
+                              valueListenable: _cityControllerTextDir,
+                              builder: (context, value, child) => TextField(
+                                enabled: !_status,
+                                controller: _cityController,
+                                textDirection: _cityControllerTextDir.value,
+                                onChanged: (input) {
+                                  final isRTL =
+                                      intl.Bidi.detectRtlDirectionality(input);
+                                  if (isRTL) {
+                                    _cityControllerTextDir.value =
+                                        TextDirection.rtl;
+                                  } else {
+                                    _cityControllerTextDir.value =
+                                        TextDirection.ltr;
+                                  }
+                                },
+                                decoration: InputDecoration(
+                                  labelText: translation(context).city,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      )),
+                  Padding(
+                    padding: const EdgeInsets.only(top: 18),
+                    child: Directionality(
+                      textDirection: TextDirection.ltr,
+                      child: AbsorbPointer(
+                        absorbing: _status,
+                        child: CountryListPick(
+                          onChanged: (CountryCode? countryCode) {
+                            _selectLocation(countryCode);
+                          },
+                          initialSelection: _selectedLocation,
+                          appBar: CustomAppBar(
+                            leading: IconButton(
+                              icon: const Icon(Icons.arrow_back),
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                              },
+                            ),
+                            title: translation(context).selectCountry,
+                          ),
+                          useUiOverlay: true,
+                          theme: CountryTheme(
+                            lastPickText: translation(context).selectCountry,
+                            labelColor: MyColors.primaryColor,
+                            searchText: translation(context).search,
+                            searchHintText: translation(context).searchHint,
+                            alphabetSelectedBackgroundColor:
+                                MyColors.primaryColor,
+                            isShowFlag: true,
+                            isShowTitle: true,
+                            isShowCode: false,
+                            isDownIcon: true,
+                            showEnglishName: true,
+                          ),
+                          useSafeArea: true,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 140),
+                ],
+              ),
             ),
           ),
           floatingActionButton: !_status ? _getActionButtons() : Container(),
@@ -551,19 +604,7 @@ class _ProfilePageState extends State<ProfilePage> {
             flex: 2,
             child: ElevatedButton(
               onPressed: () async {
-                try {
-                  setState(() {
-                    _showLoading = true;
-                  });
-                } catch (e) {
-                  print(e.toString());
-                } finally {
-                  await _saveData();
-                  setState(() {
-                    _status = true;
-                    _showLoading = false;
-                  });
-                }
+                await _saveData();
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: MyColors.primaryColor,
@@ -581,7 +622,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     )
                   : Text(
                       translation(context).save,
-                      style: TextStyle(color: Colors.white),
+                      style: const TextStyle(color: Colors.white),
                     ),
             ),
           ),
@@ -603,7 +644,7 @@ class _ProfilePageState extends State<ProfilePage> {
               ),
               child: Text(
                 translation(context).cancel,
-                style: TextStyle(color: Colors.white),
+                style: const TextStyle(color: Colors.white),
               ),
             ),
           ),
