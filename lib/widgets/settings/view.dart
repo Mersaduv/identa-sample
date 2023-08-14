@@ -22,10 +22,17 @@ class Settings extends StatefulWidget {
 class SettingsState extends State<Settings> {
   final AuthService _authService = AuthService();
   late NoteProvider noteProvider;
+  bool isLoggedIn = false;
 
   @override
   void initState() {
     super.initState();
+    var future = _authService.signInWithAutoCodeExchange();
+    future.then((result) {
+      setState(() {
+        isLoggedIn = result;
+      });
+    });
     noteProvider = context.read<NoteProvider>();
     noteProvider.getProfileData();
     noteProvider.downloadProfilePicture();
@@ -131,14 +138,16 @@ class SettingsState extends State<Settings> {
 
               // Fill remaining space
               SettingItemWidget(
-                onPressed: () async {
+                onTapped: () async {
                   try {
                     await _authService.signOut();
                   } catch (e) {
                     print(e.toString()); // print the error message to console
                   }
                 },
-                onTapped: () {},
+                onPressed: () {
+                  return null;
+                },
                 title: translation(context).logout,
                 isInRed: true,
                 prefixIcon: Icons.exit_to_app_rounded,
