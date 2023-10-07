@@ -263,20 +263,6 @@ class ServiceApis {
       }
       return response;
     }
-    // final response = await client.post(
-    //   Uri.parse('${ServiceConfig.baseURL}/insights/profile'),
-    //   body: body,
-    //   headers: {
-    //     'Authorization': await _authService.getAuthHeader(),
-    //     'Content-type': 'application/json; charset=UTF-8',
-    //   },
-    // );
-
-    // if (response.statusCode != 200) {
-    //   print('Request failed with status: ${response.statusCode}');
-    // }
-
-    // return response;
   }
 
   static Future<http.Response> sendGetProfileRequest() async {
